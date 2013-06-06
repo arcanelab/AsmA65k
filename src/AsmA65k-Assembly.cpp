@@ -135,7 +135,7 @@ void AsmA65k::assembleInstruction(string mnemonic, const string modifier, const 
 
 // ============================================================================
 
-void AsmA65k::handleOperand_IndirectRegisterPlusConstant(const string operand, InstructionWord instructionWord)
+void AsmA65k::handleOperand_IndirectRegisterPlusConstant(const string operand, InstructionWord instructionWord) // INC.w [r0 + 1234]
 {
     // extract the two parts
     static const regex rx_matchOperands(R"((.*)\s*\+\s*(.*))");
@@ -150,6 +150,7 @@ void AsmA65k::handleOperand_IndirectRegisterPlusConstant(const string operand, I
     // fill in rest of the instruction word
     instructionWord.addressingMode = AM_INDEXED1;
     instructionWord.registerConfiguration = RC_NOREGISTER;
+    addInstructionWord(instructionWord);
     // add constant after i.w.
     try { addData(OS_32BIT, convertStringToInteger(constantStr)); }
     catch(...) { throwException_InvalidNumberFormat(); }
@@ -167,14 +168,14 @@ void AsmA65k::handleOperand_IndirectRegisterPlusLabel(const string operand, Inst
 
     // put them into their respective strings
     string registerStr = operandsMatch[1].str(); // "r0"
-    string constantStr = operandsMatch[2].str(); // "1234"
+    string labelStr = operandsMatch[2].str(); // "1234"
 
     // fill in rest of the instruction word
     instructionWord.addressingMode = AM_INDEXED1;
     instructionWord.registerConfiguration = RC_NOREGISTER;
+    addInstructionWord(instructionWord);
     // add constant after i.w.
-    try { addData(OS_32BIT, convertStringToInteger(constantStr)); }
-    catch(...) { throwException_InvalidNumberFormat(); }
+    addData(OS_32BIT, resolveLabel(labelStr));
 }
 
 // ============================================================================
