@@ -96,7 +96,9 @@ void AsmA65k::assembleInstruction(string mnemonic, const string modifier, const 
             
         case OT_INDIRECT_REGISTER_PLUS_LABEL:                // INC.b [r0 + label]
             handleOperand_IndirectRegisterPlusLabel(removeSquaredBrackets(operand), instructionWord);
+            break;
         case OT_INDIRECT_REGISTER_PLUS_CONSTANT:             // INC [r0 + 10]
+            handleOperand_IndirectRegisterPlusConstant(removeSquaredBrackets(operand), instructionWord);
             break;
         case OT_INDIRECT_LABEL_PLUS_REGISTER:                // INC [label + r0]
         case OT_INDIRECT_CONSTANT_PLUS_REGISTER:             // INC [$1000 + r0]
@@ -133,7 +135,29 @@ void AsmA65k::assembleInstruction(string mnemonic, const string modifier, const 
 
 // ============================================================================
 
-void AsmA65k::handleOperand_IndirectRegisterPlusLabel(string operand, InstructionWord instructionWord)
+void AsmA65k::handleOperand_IndirectRegisterPlusConstant(const string operand, InstructionWord instructionWord)
+{
+    // extract the two parts
+    static const regex rx_matchOperands(R"((.*)\s*\+\s*(.*))");
+    smatch operandsMatch;
+    if(regex_match(operand, operandsMatch, rx_matchOperands) == false)
+        throwException_InvalidOperands();
+    
+    // put them into their respective strings
+    string registerStr = operandsMatch[1].str(); // "r0"
+    string constantStr = operandsMatch[2].str(); // "1234"
+    
+    // fill in rest of the instruction word
+    instructionWord.addressingMode = AM_INDEXED1;
+    instructionWord.registerConfiguration = RC_NOREGISTER;
+    // add constant after i.w.
+    try { addData(OS_32BIT, convertStringToInteger(constantStr)); }
+    catch(...) { throwException_InvalidNumberFormat(); }
+}
+
+// ============================================================================
+
+void AsmA65k::handleOperand_IndirectRegisterPlusLabel(const string operand, InstructionWord instructionWord) // INC.w [r0 + label]
 {
     // extract the two parts
     static const regex rx_matchOperands(R"((.*)\s*\+\s*(.*))");
