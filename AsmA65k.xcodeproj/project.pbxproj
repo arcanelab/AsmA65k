@@ -27,6 +27,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		F0553A5D17600BFA004A0855 /* test.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = test.s; sourceTree = "<group>"; };
 		F0746854176007B1004D6052 /* AsmA65k */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = AsmA65k; sourceTree = BUILT_PRODUCTS_DIR; };
 		F0746861176007F9004D6052 /* Asm65k.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Asm65k.cpp; path = src/Asm65k.cpp; sourceTree = "<group>"; };
 		F0746862176007F9004D6052 /* Asm65k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Asm65k.h; path = src/Asm65k.h; sourceTree = "<group>"; };
@@ -35,7 +36,6 @@
 		F0746865176007F9004D6052 /* AsmA65k-Misc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "AsmA65k-Misc.cpp"; path = "src/AsmA65k-Misc.cpp"; sourceTree = "<group>"; };
 		F0746866176007F9004D6052 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = "<group>"; };
 		F0746867176007F9004D6052 /* Segment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Segment.h; path = src/Segment.h; sourceTree = "<group>"; };
-		F0746868176007F9004D6052 /* test.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; name = test.s; path = src/test.s; sourceTree = "<group>"; };
 		F0746869176007F9004D6052 /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = types.h; path = src/types.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -76,8 +76,8 @@
 				F0746865176007F9004D6052 /* AsmA65k-Misc.cpp */,
 				F0746866176007F9004D6052 /* main.cpp */,
 				F0746867176007F9004D6052 /* Segment.h */,
-				F0746868176007F9004D6052 /* test.s */,
 				F0746869176007F9004D6052 /* types.h */,
+				F0553A5D17600BFA004A0855 /* test.s */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
