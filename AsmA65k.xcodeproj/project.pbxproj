@@ -12,7 +12,6 @@
 		F074686C176007F9004D6052 /* AsmA65k-Directives.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F0746864176007F9004D6052 /* AsmA65k-Directives.cpp */; };
 		F074686D176007F9004D6052 /* AsmA65k-Misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F0746865176007F9004D6052 /* AsmA65k-Misc.cpp */; };
 		F074686E176007F9004D6052 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F0746866176007F9004D6052 /* main.cpp */; };
-		F074686F176007F9004D6052 /* test.s in Sources */ = {isa = PBXBuildFile; fileRef = F0746868176007F9004D6052 /* test.s */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -139,7 +138,6 @@
 				F074686C176007F9004D6052 /* AsmA65k-Directives.cpp in Sources */,
 				F074686D176007F9004D6052 /* AsmA65k-Misc.cpp in Sources */,
 				F074686E176007F9004D6052 /* main.cpp in Sources */,
-				F074686F176007F9004D6052 /* test.s in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -236,6 +234,7 @@
 				F074685F176007B1004D6052 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
