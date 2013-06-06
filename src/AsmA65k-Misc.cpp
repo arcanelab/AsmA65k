@@ -172,4 +172,20 @@ string AsmA65k::removeSquaredBrackets(string operand)
     return result[1].str();
 }
 
+// ============================================================================
 
+AsmA65k::StringPair AsmA65k::splitOperand(const string operand)
+{
+    // extract the two parts
+    static const regex rx_matchOperands(R"((.*)\s*\+\s*(.*))");
+    smatch operandsMatch;
+    if(regex_match(operand, operandsMatch, rx_matchOperands) == false)
+        throwException_InvalidOperands();
+    
+    StringPair sp;
+    // put them into their respective strings
+    sp.left = operandsMatch[1].str(); // "r0"
+    sp.right = operandsMatch[2].str(); // "1234"
+
+    return sp;
+}

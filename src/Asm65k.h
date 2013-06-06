@@ -155,6 +155,12 @@ private:
         byte instructionCode: 6;
     };
     
+    struct StringPair
+    {
+        string left;
+        string right;
+    };
+    
     // variables
     std::vector<Segment> segments;          // the machine code & data get compiled into this
     map<string, OpcodeAttribute> opcodes;   // contains info about each instruction, indexed by their names
@@ -183,6 +189,7 @@ private:
     void handleOperand_IndirectConstant(dword constant, InstructionWord instructionWord);
     void handleOperand_IndirectRegisterPlusLabel(const string operand, InstructionWord instructionWord);
     void handleOperand_IndirectRegisterPlusConstant(const string operand, InstructionWord instructionWord);
+    void handleOperand_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord);
 
     // AsmA65k-Directives.cpp
     bool processDirectives(const string line);  // the main method for processing & handling the directives
@@ -204,6 +211,7 @@ private:
     void throwException_InvalidRegister();
     void throwException_InvalidOperands();
     string removeSquaredBrackets(string operand);
+    StringPair splitOperand(const string operand);
 };
 
 #endif /* defined(__AsmA65k__AsmA65k__) */

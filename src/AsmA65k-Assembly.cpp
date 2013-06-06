@@ -101,6 +101,8 @@ void AsmA65k::assembleInstruction(string mnemonic, const string modifier, const 
             handleOperand_IndirectRegisterPlusConstant(removeSquaredBrackets(operand), instructionWord);
             break;
         case OT_INDIRECT_LABEL_PLUS_REGISTER:                // INC [label + r0]
+            handleOperand_IndirectLabelPlusRegister(removeSquaredBrackets(operand), instructionWord);
+            break;
         case OT_INDIRECT_CONSTANT_PLUS_REGISTER:             // INC [$1000 + r0]
             break;
         case OT_REGISTER__LABEL:                             // MOV r0, label
@@ -135,47 +137,42 @@ void AsmA65k::assembleInstruction(string mnemonic, const string modifier, const 
 
 // ============================================================================
 
+void AsmA65k::handleOperand_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord)
+{
+    
+}
+
+// ============================================================================
+
 void AsmA65k::handleOperand_IndirectRegisterPlusConstant(const string operand, InstructionWord instructionWord) // INC.w [r0 + 1234]
 {
-    // extract the two parts
-    static const regex rx_matchOperands(R"((.*)\s*\+\s*(.*))");
-    smatch operandsMatch;
-    if(regex_match(operand, operandsMatch, rx_matchOperands) == false)
-        throwException_InvalidOperands();
-    
-    // put them into their respective strings
-    string registerStr = operandsMatch[1].str(); // "r0"
-    string constantStr = operandsMatch[2].str(); // "1234"
+    StringPair sp = splitOperand(operand);
     
     // fill in rest of the instruction word
     instructionWord.addressingMode = AM_INDEXED1;
-    instructionWord.registerConfiguration = RC_NOREGISTER;
+    instructionWord.registerConfiguration = RC_REGISTER;
+    addRegisterConfigurationByte(sp.left);
     addInstructionWord(instructionWord);
     // add constant after i.w.
-    try { addData(OS_32BIT, convertStringToInteger(constantStr)); }
+    try { addData(OS_32BIT, convertStringToInteger(sp.right)); }
     catch(...) { throwException_InvalidNumberFormat(); }
+    PC += 7;
 }
 
 // ============================================================================
 
 void AsmA65k::handleOperand_IndirectRegisterPlusLabel(const string operand, InstructionWord instructionWord) // INC.w [r0 + label]
 {
-    // extract the two parts
-    static const regex rx_matchOperands(R"((.*)\s*\+\s*(.*))");
-    smatch operandsMatch;
-    if(regex_match(operand, operandsMatch, rx_matchOperands) == false)
-        throwException_InvalidOperands();
-
-    // put them into their respective strings
-    string registerStr = operandsMatch[1].str(); // "r0"
-    string labelStr = operandsMatch[2].str(); // "1234"
+    StringPair sp = splitOperand(operand);
 
     // fill in rest of the instruction word
     instructionWord.addressingMode = AM_INDEXED1;
-    instructionWord.registerConfiguration = RC_NOREGISTER;
-    addInstructionWord(instructionWord);
+    instructionWord.registerConfiguration = RC_REGISTER;
+    addInstructionWord(instructionWord); // 2 byte
+    addRegisterConfigurationByte(sp.left); // 1 byte
     // add constant after i.w.
-    addData(OS_32BIT, resolveLabel(labelStr));
+    addData(OS_32BIT, resolveLabel(sp.right)); // 4 bytes
+    PC += 7;
 }
 
 // ============================================================================
