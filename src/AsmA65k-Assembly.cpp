@@ -151,8 +151,8 @@ void AsmA65k::handleOperand_IndirectRegisterPlusConstant(const string operand, I
     // fill in rest of the instruction word
     instructionWord.addressingMode = AM_INDEXED1;
     instructionWord.registerConfiguration = RC_REGISTER;
-    addRegisterConfigurationByte(sp.left);
     addInstructionWord(instructionWord);
+    addRegisterConfigurationByte(sp.left);
     // add constant after i.w.
     try { addData(OS_32BIT, convertStringToInteger(sp.right)); }
     catch(...) { throwException_InvalidNumberFormat(); }
