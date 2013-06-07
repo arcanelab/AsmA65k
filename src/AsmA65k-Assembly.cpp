@@ -69,21 +69,17 @@ void AsmA65k::assembleInstruction(string mnemonic, const string modifier, const 
             addInstructionWord(instructionWord);
             PC += 2;
             break;
-            
         case OT_REGISTER:                                    // INC r0
             handleOperand_Register(operand, instructionWord);
             break;
-            
         case OT_LABEL:                                       // INC label
             effectiveAddress = resolveLabel(operand);        // NOTE: break omitted on purpose!
         case OT_CONSTANT:                                    // BNE 40 or INC $f000
             handleOperand_Constant(operand, instructionWord, effectiveAddress);
             break;
-            
         case OT_INDIRECT_REGISTER:                           // INC [r0]
             handleOperand_IndirectRegister(operand, instructionWord);
             break;
-
         case OT_INDIRECT_LABEL:                              // INC [label]
             effectiveAddress = resolveLabel(removeSquaredBrackets(operand));
             handleOperand_IndirectConstant(effectiveAddress, instructionWord);
@@ -93,7 +89,6 @@ void AsmA65k::assembleInstruction(string mnemonic, const string modifier, const 
             catch (...) { throwException_InvalidNumberFormat(); }
             handleOperand_IndirectConstant(effectiveAddress, instructionWord);
             break;
-            
         case OT_INDIRECT_REGISTER_PLUS_LABEL:                // INC.b [r0 + label]
             handleOperand_IndirectRegisterPlusLabel(removeSquaredBrackets(operand), instructionWord);
             break;
@@ -179,19 +174,6 @@ void AsmA65k::handleOperand_Register_Label(const string operand, InstructionWord
     addRegisterConfigurationByte(sp.left);
     addData((OpcodeSize)instructionWord.opcodeSize, resolveLabel(sp.right));
     PC += 3;
-    switch(instructionWord.opcodeSize)
-    {
-        case OS_32BIT:
-            PC += 4;
-            break;
-        case OS_16BIT:
-            PC += 2;
-            break;
-        case OS_8BIT:
-            PC++;
-        default:
-            break;
-    }
 }
 
 // ============================================================================
@@ -351,27 +333,14 @@ void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instr
         addInstructionWord(instructionWord); // add finished instruction word
         
         // depending on the size modifier, add effective address as operand
-        if(instructionWord.opcodeSize == OS_32BIT) // no size modifier -> 32 bit
+        addData((OpcodeSize)instructionWord.opcodeSize, effectiveAddress);
+
+        // TODO: write a method that decides if an opcode size specifier is valid for a given instruction.
+        if(instructionWord.opcodeSize == OS_NONE)
         {
-            segments.back().addDword(effectiveAddress);
-            PC += 6;
-            return;
+            AsmError error(actLineNumber, actLine, "Invalid size specifier");
+            throw error;
         }
-        if(instructionWord.opcodeSize == OS_16BIT)
-        {
-            segments.back().addWord(effectiveAddress);
-            return;
-            PC += 4;
-        }
-        if(instructionWord.opcodeSize == OS_8BIT)
-        {
-            segments.back().addByte(effectiveAddress);
-            PC += 3;
-            return;
-        }
-        
-        AsmError error(actLineNumber, actLine, "Invalid size specifier");
-        throw error;
     }
 }
 
