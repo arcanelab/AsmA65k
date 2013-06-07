@@ -146,6 +146,8 @@ void AsmA65k::handleOperand_IndirectLabelPlusRegister(string operand, Instructio
     instructionWord.registerConfiguration = RC_REGISTER;
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.right);
+    addData(OS_32BIT, resolveLabel(sp.left));
+    PC += 7;
 }
 
 // ============================================================================
@@ -185,7 +187,7 @@ void AsmA65k::handleOperand_IndirectRegisterPlusLabel(string operand, Instructio
 
 // ============================================================================
 
-void AsmA65k::handleOperand_IndirectConstant(dword constant, InstructionWord instructionWord)
+void AsmA65k::handleOperand_IndirectConstant(dword constant, InstructionWord instructionWord) // INC.w [$ffff]
 {
     instructionWord.addressingMode = AM_ABSOLUTE1;
     instructionWord.registerConfiguration = RC_NOREGISTER;
@@ -249,24 +251,6 @@ void AsmA65k::addRegisterConfigurationByte(string registerString)
         throwException_InvalidRegister();
     
     segments.back().addByte(registerIndex);    
-}
-
-// ============================================================================
-
-dword AsmA65k::resolveLabel(const string label)
-{
-    dword effectiveAddress = 0;
-    
-    if(labels.find(label) == labels.end())
-    {
-        unresolvedLabels[label].push_back(PC+2);
-    }
-    else
-    {
-        effectiveAddress = labels[label];
-    }
-    
-    return effectiveAddress;
 }
 
 // ============================================================================
@@ -411,6 +395,24 @@ void AsmA65k::addData(OpcodeSize size, dword data)
             log("Internal error");
             throw;
     }
+}
+
+// ============================================================================
+
+dword AsmA65k::resolveLabel(const string label)
+{
+    dword effectiveAddress = 0;
+    
+    if(labels.find(label) == labels.end())
+    {
+        unresolvedLabels[label].push_back(PC+2);
+    }
+    else
+    {
+        effectiveAddress = labels[label];
+    }
+    
+    return effectiveAddress;
 }
 
 // ============================================================================
