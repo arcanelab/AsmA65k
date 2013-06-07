@@ -104,6 +104,7 @@ void AsmA65k::assembleInstruction(string mnemonic, const string modifier, const 
             handleOperand_IndirectLabelPlusRegister(removeSquaredBrackets(operand), instructionWord);
             break;
         case OT_INDIRECT_CONSTANT_PLUS_REGISTER:             // INC [$1000 + r0]
+            //handleOperand_ConstantPlusRegister(
             break;
         case OT_REGISTER__LABEL:                             // MOV r0, label
         case OT_REGISTER__CONSTANT:                          // MOV r0, 1234
@@ -137,9 +138,8 @@ void AsmA65k::assembleInstruction(string mnemonic, const string modifier, const 
 
 // ============================================================================
 
-void AsmA65k::handleOperand_IndirectLabelPlusRegister(string operand, InstructionWord instructionWord) // INC.b [label + r0]
+void AsmA65k::handleOperand_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord) // INC.b [label + r0]
 {
-    operand = removeSquaredBrackets(operand);    
     StringPair sp = splitStringByPlusSign(operand);
     
     instructionWord.addressingMode = AM_INDEXED1;
@@ -152,9 +152,8 @@ void AsmA65k::handleOperand_IndirectLabelPlusRegister(string operand, Instructio
 
 // ============================================================================
 
-void AsmA65k::handleOperand_IndirectRegisterPlusConstant(string operand, InstructionWord instructionWord) // INC.w [r0 + 1234]
+void AsmA65k::handleOperand_IndirectRegisterPlusConstant(const string operand, InstructionWord instructionWord) // INC.w [r0 + 1234]
 {
-    operand = removeSquaredBrackets(operand);
     StringPair sp = splitStringByPlusSign(operand);
     
     // fill in rest of the instruction word
@@ -170,9 +169,8 @@ void AsmA65k::handleOperand_IndirectRegisterPlusConstant(string operand, Instruc
 
 // ============================================================================
 
-void AsmA65k::handleOperand_IndirectRegisterPlusLabel(string operand, InstructionWord instructionWord) // INC.w [r0 + label]
+void AsmA65k::handleOperand_IndirectRegisterPlusLabel(const string operand, InstructionWord instructionWord) // INC.w [r0 + label]
 {
-    operand = removeSquaredBrackets(operand);
     StringPair sp = splitStringByPlusSign(operand);
 
     // fill in rest of the instruction word
