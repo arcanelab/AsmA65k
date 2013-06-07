@@ -110,6 +110,7 @@ void AsmA65k::assembleInstruction(string mnemonic, const string modifier, const 
             handleOperand_Register_Label(operand, instructionWord);
             break;
         case OT_REGISTER__CONSTANT:                          // MOV r0, 1234
+            handleOperand_Register_Constant(operand, instructionWord);
             break;
         case OT_REGISTER__REGISTER:                          // MOV r0, r1
             break;
@@ -140,6 +141,34 @@ void AsmA65k::assembleInstruction(string mnemonic, const string modifier, const 
 
 // ============================================================================
 
+void AsmA65k::handleOperand_Register_Constant(const string operand, InstructionWord instructionWord) // MOV.b r0, 1234
+{
+    StringPair sp = splitStringByComma(operand);
+    
+    instructionWord.addressingMode = AM_IMMEDIATE;
+    instructionWord.registerConfiguration = RC_REGISTER;
+    addInstructionWord(instructionWord);
+    addRegisterConfigurationByte(sp.left);
+    try { addData((OpcodeSize)instructionWord.opcodeSize, convertStringToInteger(sp.right)); }
+    catch(...) { throwException_InvalidNumberFormat(); }
+    PC += 3;
+    switch(instructionWord.opcodeSize)
+    {
+        case OS_32BIT:
+            PC += 4;
+            break;
+        case OS_16BIT:
+            PC += 2;
+            break;
+        case OS_8BIT:
+            PC++;
+        default:
+            break;
+    }
+}
+
+// ============================================================================
+
 void AsmA65k::handleOperand_Register_Label(const string operand, InstructionWord instructionWord) // MOV.b r0, label
 {
     StringPair sp = splitStringByComma(operand);
@@ -148,7 +177,21 @@ void AsmA65k::handleOperand_Register_Label(const string operand, InstructionWord
     instructionWord.registerConfiguration = RC_REGISTER;
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.left);
-    addData(OS_32BIT, resolveLabel(sp.right));
+    addData((OpcodeSize)instructionWord.opcodeSize, resolveLabel(sp.right));
+    PC += 3;
+    switch(instructionWord.opcodeSize)
+    {
+        case OS_32BIT:
+            PC += 4;
+            break;
+        case OS_16BIT:
+            PC += 2;
+            break;
+        case OS_8BIT:
+            PC++;
+        default:
+            break;
+    }
 }
 
 // ============================================================================
