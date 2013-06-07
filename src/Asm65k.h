@@ -186,10 +186,11 @@ private:
     void handleOperand_Register(const string operand, InstructionWord instructionWord);
     void handleOperand_Constant(const string operand, InstructionWord instructionWord, const dword effectiveAddress);
     void handleOperand_IndirectRegister(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectConstant(dword constant, InstructionWord instructionWord);
-    void handleOperand_IndirectRegisterPlusLabel(string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectRegisterPlusConstant(string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectLabelPlusRegister(string operand, InstructionWord instructionWord);
+    void handleOperand_IndirectConstant(const dword constant, InstructionWord instructionWord);
+    void handleOperand_IndirectRegisterPlusLabel(const string operand, InstructionWord instructionWord);
+    void handleOperand_IndirectRegisterPlusConstant(const string operand, InstructionWord instructionWord);
+    void handleOperand_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord);
+    void handleOperand_IndirectConstantPlusRegister(const string operand, InstructionWord instructionWord);
 
     // AsmA65k-Directives.cpp
     bool processDirectives(const string line);  // the main method for processing & handling the directives

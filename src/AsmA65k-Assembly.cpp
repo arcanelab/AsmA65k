@@ -104,7 +104,7 @@ void AsmA65k::assembleInstruction(string mnemonic, const string modifier, const 
             handleOperand_IndirectLabelPlusRegister(removeSquaredBrackets(operand), instructionWord);
             break;
         case OT_INDIRECT_CONSTANT_PLUS_REGISTER:             // INC [$1000 + r0]
-            //handleOperand_ConstantPlusRegister(
+            handleOperand_IndirectConstantPlusRegister(removeSquaredBrackets(operand), instructionWord);
             break;
         case OT_REGISTER__LABEL:                             // MOV r0, label
         case OT_REGISTER__CONSTANT:                          // MOV r0, 1234
@@ -138,16 +138,37 @@ void AsmA65k::assembleInstruction(string mnemonic, const string modifier, const 
 
 // ============================================================================
 
+void AsmA65k::handleOperand_IndirectConstantPlusRegister(const string operand, InstructionWord instructionWord) // INC.b [1233 + r0]
+{
+    StringPair sp = splitStringByPlusSign(operand);
+    string newOperand = sp.right + "+" + sp.left;
+    handleOperand_IndirectRegisterPlusConstant(newOperand, instructionWord);
+/*
+    instructionWord.addressingMode = AM_INDEXED1;
+    instructionWord.registerConfiguration = RC_REGISTER;
+    addInstructionWord(instructionWord);
+    addRegisterConfigurationByte(sp.right);
+    try { addData(OS_32BIT, convertStringToInteger(sp.left)); }
+    catch(...) { throwException_InvalidNumberFormat(); }
+    PC += 7;
+ */
+}
+
+// ============================================================================
+
 void AsmA65k::handleOperand_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord) // INC.b [label + r0]
 {
     StringPair sp = splitStringByPlusSign(operand);
-    
+    string reversedOperands = sp.right + "+" + sp.left;
+    handleOperand_IndirectRegisterPlusLabel(reversedOperands, instructionWord);
+/*
     instructionWord.addressingMode = AM_INDEXED1;
     instructionWord.registerConfiguration = RC_REGISTER;
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.right);
     addData(OS_32BIT, resolveLabel(sp.left));
     PC += 7;
+*/
 }
 
 // ============================================================================
@@ -185,7 +206,7 @@ void AsmA65k::handleOperand_IndirectRegisterPlusLabel(const string operand, Inst
 
 // ============================================================================
 
-void AsmA65k::handleOperand_IndirectConstant(dword constant, InstructionWord instructionWord) // INC.w [$ffff]
+void AsmA65k::handleOperand_IndirectConstant(const dword constant, InstructionWord instructionWord) // INC.w [$ffff]
 {
     instructionWord.addressingMode = AM_ABSOLUTE1;
     instructionWord.registerConfiguration = RC_NOREGISTER;
