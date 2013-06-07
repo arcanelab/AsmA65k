@@ -191,6 +191,7 @@ private:
     void handleOperand_IndirectRegisterPlusConstant(const string operand, InstructionWord instructionWord);
     void handleOperand_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord);
     void handleOperand_IndirectConstantPlusRegister(const string operand, InstructionWord instructionWord);
+    void handleOperand_Register_Label(const string operand, InstructionWord instructionWord);
 
     // AsmA65k-Directives.cpp
     bool processDirectives(const string line);  // the main method for processing & handling the directives
@@ -213,6 +214,7 @@ private:
     void throwException_InvalidOperands();
     string removeSquaredBrackets(string operand);
     StringPair splitStringByPlusSign(const string operand);
+    StringPair splitStringByComma(const string operand);
 };
 
 #endif /* defined(__AsmA65k__AsmA65k__) */
