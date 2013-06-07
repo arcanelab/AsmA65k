@@ -143,15 +143,6 @@ void AsmA65k::handleOperand_IndirectConstantPlusRegister(const string operand, I
     StringPair sp = splitStringByPlusSign(operand);
     string newOperand = sp.right + "+" + sp.left;
     handleOperand_IndirectRegisterPlusConstant(newOperand, instructionWord);
-/*
-    instructionWord.addressingMode = AM_INDEXED1;
-    instructionWord.registerConfiguration = RC_REGISTER;
-    addInstructionWord(instructionWord);
-    addRegisterConfigurationByte(sp.right);
-    try { addData(OS_32BIT, convertStringToInteger(sp.left)); }
-    catch(...) { throwException_InvalidNumberFormat(); }
-    PC += 7;
- */
 }
 
 // ============================================================================
@@ -161,14 +152,6 @@ void AsmA65k::handleOperand_IndirectLabelPlusRegister(const string operand, Inst
     StringPair sp = splitStringByPlusSign(operand);
     string reversedOperands = sp.right + "+" + sp.left;
     handleOperand_IndirectRegisterPlusLabel(reversedOperands, instructionWord);
-/*
-    instructionWord.addressingMode = AM_INDEXED1;
-    instructionWord.registerConfiguration = RC_REGISTER;
-    addInstructionWord(instructionWord);
-    addRegisterConfigurationByte(sp.right);
-    addData(OS_32BIT, resolveLabel(sp.left));
-    PC += 7;
-*/
 }
 
 // ============================================================================
