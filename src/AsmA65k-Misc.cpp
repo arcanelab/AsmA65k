@@ -161,7 +161,7 @@ void AsmA65k::throwException_InvalidOperands()
 
 string AsmA65k::removeSquaredBrackets(string operand)
 {
-    const static regex rx_removeSquareBrackets(R"(\[\s*(.)\s*\])");
+    const static regex rx_removeSquareBrackets(R"(\[\s*(.*)\s*\])");
     smatch result;
     if(regex_match(operand, result, rx_removeSquareBrackets) == false)
     {
