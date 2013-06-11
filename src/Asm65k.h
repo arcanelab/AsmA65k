@@ -11,7 +11,7 @@
 #ifndef __AsmA65k__AsmA65k__
 #define __AsmA65k__AsmA65k__
 
-#define log(fmt, ...) printf(("[%d] %s(): " fmt), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define log(fmt, ...) printf(("[%s: %d] %s(): " fmt), __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
 
 #include "Segment.h"
 #include <iostream>
@@ -193,7 +193,8 @@ private:
     void handleOperand_IndirectConstantPlusRegister(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_Label(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_Constant(const string operand, InstructionWord instructionWord);
-
+    void handleOperand_register_Register(const string operand, InstructionWord instructionWord);
+    
     // AsmA65k-Directives.cpp
     bool processDirectives(const string line);  // the main method for processing & handling the directives
     int detectDirective(const string line);     // detects if there's a directive on the given line
@@ -209,7 +210,7 @@ private:
     void throwException_InvalidNumberFormat(); // throws an exception
     void checkIntegerRange(uint64_t result); // checks if the 64 bit value can be fit into 32 bits (that's the max. allowed)
     bool isCommentLine(const string line);          // check if a line if made of entirely out of a comment
-    void throwSyntaxError(const string line);       // throws an exception
+    void throwException_SyntaxError(const string line);       // throws an exception
     dword resolveLabel(const string label);
     void throwException_InvalidRegister();
     void throwException_InvalidOperands();

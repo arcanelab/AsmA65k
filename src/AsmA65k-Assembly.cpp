@@ -28,7 +28,7 @@ void AsmA65k::processAsmLine(string line)
     const static regex rx_matchInstructionAndOperands(R"(\s*([a-z]{3,4})\.?([bw]?)\s*(.*))", regex_constants::icase);
     smatch asmMatches;
     if(regex_match(line, asmMatches, rx_matchInstructionAndOperands) == false)
-        throwSyntaxError(line);
+        throwException_SyntaxError(line);
     
     const string mnemonic = asmMatches[1].str();
     const string modifier = asmMatches[2].str();
@@ -108,6 +108,7 @@ void AsmA65k::assembleInstruction(string mnemonic, const string modifier, const 
             handleOperand_Register_Constant(operand, instructionWord);
             break;
         case OT_REGISTER__REGISTER:                          // MOV r0, r1
+            handleOperand_register_Register(operand, instructionWord);
             break;
         case OT_REGISTER__INDIRECT_REGISTER:                 // MOV r0, [r1]
             break;
@@ -132,6 +133,16 @@ void AsmA65k::assembleInstruction(string mnemonic, const string modifier, const 
         case OT_REGISTER__INDIRECT_CONSTANT:
             break;
     }
+}
+
+// ============================================================================
+
+void AsmA65k::handleOperand_register_Register(const string operand, InstructionWord instructionWord) // MOV.b r0, r1
+{
+    StringPair sp = splitStringByComma(operand);
+    
+    instructionWord.addressingMode = AM_REGISTER2;
+//    instructionWord.registerConfiguration =
 }
 
 // ============================================================================

@@ -111,7 +111,7 @@ void AsmA65k::throwException_InvalidNumberFormat()
 
 // ============================================================================
 
-void AsmA65k::throwSyntaxError(const string line)
+void AsmA65k::throwException_SyntaxError(const string line)
 {
     AsmError error(actLineNumber, line, "Syntax error");
     throw error;
