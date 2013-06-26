@@ -108,7 +108,7 @@ void AsmA65k::assembleInstruction(string mnemonic, const string modifier, const 
             handleOperand_Register_Constant(operand, instructionWord);
             break;
         case OT_REGISTER__REGISTER:                          // MOV r0, r1
-            handleOperand_register_Register(operand, instructionWord);
+            handleOperand_Register_Register(operand, instructionWord);
             break;
         case OT_REGISTER__INDIRECT_REGISTER:                 // MOV r0, [r1]
             break;
