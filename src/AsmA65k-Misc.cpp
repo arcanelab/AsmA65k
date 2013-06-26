@@ -207,3 +207,13 @@ AsmA65k::StringPair AsmA65k::splitStringByComma(const string operand)
     
     return sp;
 }
+
+// ============================================================================
+
+bool AsmA65k::isRegisterSpecial(const string registerString)
+{
+    if(registerString == "pc" || registerString == "sp")
+        return true;
+    else
+        return false;
+}

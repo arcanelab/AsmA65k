@@ -137,7 +137,7 @@ void AsmA65k::assembleInstruction(string mnemonic, const string modifier, const 
 
 // ============================================================================
 
-void AsmA65k::handleOperand_register_Register(const string operand, InstructionWord instructionWord) // MOV.b r0, r1
+void AsmA65k::handleOperand_Register_Register(const string operand, InstructionWord instructionWord) // MOV.b r0, r1
 {
     StringPair sp = splitStringByComma(operand);
     
