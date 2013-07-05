@@ -217,3 +217,23 @@ bool AsmA65k::isRegisterSpecial(const string registerString)
     else
         return false;
 }
+
+// ============================================================================
+
+AsmA65k::RegisterType AsmA65k::detectRegisterType(string registerStr)
+{
+    if(registerStr == "pc")
+        return REG_PC;
+    if(registerStr == "sp")
+        return REG_SP;
+    
+    static const regex rx_detectRegisterIndex(R"(r([0-9]{1,2}))");
+    smatch registerIndexMatch;
+    if(regex_match(registerStr, registerIndexMatch, rx_detectRegisterIndex) == false)
+        throwException_InvalidRegister();
+    unsigned registerIndex = atoi(registerIndexMatch.str().c_str());
+    if(registerIndex > 15)
+        throwException_InvalidRegister();
+    
+    return (RegisterType)registerIndex;
+}

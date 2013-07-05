@@ -161,6 +161,12 @@ private:
         string right;
     };
     
+    enum RegisterType
+    {
+        REG_R0, REG_R1, REG_R2, REG_R3, REG_R4, REG_R5, REG_R6, REG_R7, REG_R8,
+        REG_R9, REG_R10, REG_R11, REG_R12, REG_R13, REG_R14, REG_R15, REG_SP, REG_PC
+    };
+    
     // variables
     std::vector<Segment> segments;          // the machine code & data get compiled into this
     map<string, OpcodeAttribute> opcodes;   // contains info about each instruction, indexed by their names
@@ -176,7 +182,7 @@ private:
     
     // AsmA65k-Assembly.cpp
     void processAsmLine(string line);     // prepares and assembles the line. see also assembleInstruction()
-    void assembleInstruction(string mnemonic, const string modifier, const string operand); // does the actual assembly -> machine code translation
+    void assembleInstruction(const string mnemonic, const string modifier, const string operand); // does the actual assembly -> machine code translation
     string detectAndRemoveLabel(string line);
     void addInstructionWord(InstructionWord instructionWord);
     byte setOpcodeSize(const string modifierCharacter); // takes the modifier character (eg.: mov.b -> 'b') and returns its numerical value
@@ -218,6 +224,7 @@ private:
     StringPair splitStringByPlusSign(const string operand);
     StringPair splitStringByComma(const string operand);
     bool isRegisterSpecial(const string registerString);
+    RegisterType detectRegisterType(string registerStr);
 };
 
 #endif /* defined(__AsmA65k__AsmA65k__) */

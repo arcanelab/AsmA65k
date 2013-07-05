@@ -30,8 +30,8 @@ void AsmA65k::processAsmLine(string line)
     if(regex_match(line, asmMatches, rx_matchInstructionAndOperands) == false)
         throwException_SyntaxError(line);
     
-    const string mnemonic = asmMatches[1].str();
-    const string modifier = asmMatches[2].str();
+    string mnemonic = asmMatches[1].str();
+    string modifier = asmMatches[2].str();
     string operand  = asmMatches[3].str();
     
     // remove comment from operand
@@ -40,16 +40,18 @@ void AsmA65k::processAsmLine(string line)
     if(regex_match(operand, cleanOperand, rx_detectComment))
         operand = cleanOperand[1].str();
     
+    std::transform(mnemonic.begin(), mnemonic.end(), mnemonic.begin(), ::tolower);
+    std::transform(modifier.begin(), modifier.end(), modifier.begin(), ::tolower);
+    std::transform(operand.begin(), operand.end(), operand.begin(), ::tolower);
     assembleInstruction(mnemonic, modifier, operand);
 }
 
 // ============================================================================
 
-void AsmA65k::assembleInstruction(string mnemonic, const string modifier, const string operand)
+void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, const string operand)
 {
-    std::transform(mnemonic.begin(), mnemonic.end(), mnemonic.begin(), ::tolower);
     
-    //    printf("assembleInstruction(): instr. = '%s',\t\t.b/w = '%1s',\t\t\toperands = '%s'\n", mnemonic.c_str(), modifier.c_str(), operand.c_str());
+    //printf("assembleInstruction(): instr. = '%s',\t\t.b/w = '%1s',\t\t\toperands = '%s'\n", mnemonic.c_str(), modifier.c_str(), operand.c_str());
     //printf("OT_NONE: %d\nOT_REGISTER: %d\nOT_LABEL: %d\nOT_CONSTANT: %d\n\n", OT_NONE, OT_REGISTER, OT_LABEL, OT_CONSTANT);
     //printf("assembleInstruction(): operandType = %d\n", detectOperandType(operand));
     
@@ -142,6 +144,17 @@ void AsmA65k::handleOperand_Register_Register(const string operand, InstructionW
     StringPair sp = splitStringByComma(operand);
     
     instructionWord.addressingMode = AM_REGISTER2;
+    RegisterType regLeft = detectRegisterType(sp.left);
+    RegisterType regRight = detectRegisterType(sp.right);
+    if((regLeft == REG_PC || regLeft == REG_SP) && (regRight == REG_PC || regRight == REG_SP))
+    {
+        AsmError error(actLineNumber, actLine, "Invalid combination of registers");
+        throw error;
+    }
+    if(regLeft == REG_PC || regLeft == REG_SP)
+    {
+        instructionWord.registerConfiguration = RC_SPECIAL_GENERAL;
+    }
 //    instructionWord.registerConfiguration =
 }
 
@@ -262,7 +275,7 @@ void AsmA65k::handleOperand_Register(const string operand, InstructionWord instr
 }
 
 // ============================================================================
-
+/*
 void AsmA65k::addRegisterConfigurationByte(string registerString)
 {
     // check for valid register specifiction in operand
@@ -304,6 +317,34 @@ void AsmA65k::addRegisterConfigurationByte(string registerString)
         throwException_InvalidRegister();
     
     segments.back().addByte(registerIndex);    
+}
+*/
+// ============================================================================
+
+void AsmA65k::addRegisterConfigurationByte(string registerString)
+{
+    // check for valid register specifiction in operand
+    RegisterType registerIndex = detectRegisterType(registerString);
+    
+    log("register = %s\n", registerString.c_str());
+    
+    // check for special registers
+    if(registerIndex == REG_PC)
+    {
+        segments.back().addByte(REG_PC); // code for PC
+        return;
+    }
+    if(registerIndex == REG_SP)
+    {
+        segments.back().addByte(REG_SP); // code for SP
+        return;
+    }
+    
+    // asserting correct range for index
+    if(registerIndex < 0 || registerIndex > 15)
+        throwException_InvalidRegister();
+    
+    segments.back().addByte(registerIndex);
 }
 
 // ============================================================================
