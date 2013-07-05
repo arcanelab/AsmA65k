@@ -275,51 +275,6 @@ void AsmA65k::handleOperand_Register(const string operand, InstructionWord instr
 }
 
 // ============================================================================
-/*
-void AsmA65k::addRegisterConfigurationByte(string registerString)
-{
-    // check for valid register specifiction in operand
-    const static regex rx_matchRegister(R"((r[0-9]{1,2})|PC|SP)", regex_constants::icase);
-    if(regex_match(registerString, rx_matchRegister) == false)
-        throwException_InvalidRegister();
-
-    log("register = %s\n", registerString.c_str());
-    
-    // check for special registers
-    std::transform(registerString.begin(), registerString.end(), registerString.begin(), ::tolower);
-    if(registerString == "pc")
-    {
-        segments.back().addByte(0x10); // code for PC
-        return;
-    }
-    if(registerString == "sp")
-    {
-        segments.back().addByte(0x11); // code for SP
-        return;
-    }
-
-    // extract the register index
-    const static regex rx_extractRegisterIndex(R"(r([0-9]{1,2}))", regex_constants::icase);
-    smatch registerIndexMatch;
-    if(regex_match(registerString, registerIndexMatch, rx_extractRegisterIndex) == false)
-    {
-        log("Internal error\n");
-        AsmError error(actLineNumber, actLine, "Internal error");
-        throw error;
-    }
-    // a general register is specified. convert the index string to integer
-    byte registerIndex;
-    try { registerIndex = convertStringToInteger(registerIndexMatch[1].str()); }
-    catch(...) { throwException_InvalidNumberFormat(); }
-    
-    // asserting correct range for index
-    if(registerIndex < 0 || registerIndex > 15)
-        throwException_InvalidRegister();
-    
-    segments.back().addByte(registerIndex);    
-}
-*/
-// ============================================================================
 
 void AsmA65k::addRegisterConfigurationByte(string registerString)
 {

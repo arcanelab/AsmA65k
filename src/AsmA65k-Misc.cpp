@@ -212,7 +212,7 @@ AsmA65k::StringPair AsmA65k::splitStringByComma(const string operand)
 
 bool AsmA65k::isRegisterSpecial(const string registerString)
 {
-    if(registerString == "pc" || registerString == "sp")
+    if(registerString == "pc" || registerString == "sp") // TODO: verify that the input string is in lower case
         return true;
     else
         return false;
@@ -220,9 +220,9 @@ bool AsmA65k::isRegisterSpecial(const string registerString)
 
 // ============================================================================
 
-AsmA65k::RegisterType AsmA65k::detectRegisterType(string registerStr)
+AsmA65k::RegisterType AsmA65k::detectRegisterType(const string registerStr)
 {
-    if(registerStr == "pc")
+    if(registerStr == "pc") // TODO: verify that the input string is in lower case
         return REG_PC;
     if(registerStr == "sp")
         return REG_SP;

@@ -224,7 +224,7 @@ private:
     StringPair splitStringByPlusSign(const string operand);
     StringPair splitStringByComma(const string operand);
     bool isRegisterSpecial(const string registerString);
-    RegisterType detectRegisterType(string registerStr);
+    RegisterType detectRegisterType(const string registerStr);
 };
 
 #endif /* defined(__AsmA65k__AsmA65k__) */
