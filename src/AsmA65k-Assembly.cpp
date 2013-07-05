@@ -329,14 +329,9 @@ void AsmA65k::addRegisterConfigurationByte(string registerString)
     log("register = %s\n", registerString.c_str());
     
     // check for special registers
-    if(registerIndex == REG_PC)
+    if(registerIndex == REG_PC || registerIndex == REG_SP)
     {
-        segments.back().addByte(REG_PC); // code for PC
-        return;
-    }
-    if(registerIndex == REG_SP)
-    {
-        segments.back().addByte(REG_SP); // code for SP
+        segments.back().addByte(registerIndex); // code for PC or SP
         return;
     }
     
