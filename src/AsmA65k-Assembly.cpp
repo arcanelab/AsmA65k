@@ -19,7 +19,7 @@ using namespace std;
 
 void AsmA65k::processAsmLine(string line)
 {
-    line = detectAndRemoveLabel(line);
+    line = detectAndRemoveLabelDefinition(line);
     if (line.size() == 0)
         return;
     
@@ -311,7 +311,7 @@ void AsmA65k::handleOperand_Register(const string operand, InstructionWord instr
 
 void AsmA65k::addRegisterConfigurationByte(string registerString)
 {
-    // check for valid register specifiction in operand
+    // check for valid register specification in operand
     RegisterType registerIndex = detectRegisterType(registerString);
     
     log("register = %s\n", registerString.c_str());
@@ -399,7 +399,7 @@ void AsmA65k::handleOperand_IndirectRegister(const string operand, InstructionWo
 
 // ============================================================================
 
-string AsmA65k::detectAndRemoveLabel(string line)
+string AsmA65k::detectAndRemoveLabelDefinition(string line)
 {
     const static regex rx_detectLabel(R"(^(\s*[a-z][a-z_0-9]*:\s*)(.*))", regex_constants::icase);
     // check is there's a label definition at the beginning of the line
