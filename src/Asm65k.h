@@ -192,6 +192,7 @@ private:
     OperandTypes detectOperandType(const string operandStr); // given the operand string, detects its type. see enum OperandType
     void addRegisterConfigurationByte(string registerString);
     void addData(const OpcodeSize size, const dword data);
+    void addData(const string sizeSpecifier, const dword data);
     void handleOperand_Register(const string operand, InstructionWord instructionWord);
     void handleOperand_Constant(const string operand, InstructionWord instructionWord, const dword effectiveAddress);
     void handleOperand_IndirectRegister(const string operand, InstructionWord instructionWord);
@@ -207,7 +208,7 @@ private:
     void handleDoubleRegisters(StringPair sp, InstructionWord instructionWord);
     void handleOperand_Register_IndirectConstantPlusRegister(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord);
-    
+
     // AsmA65k-Directives.cpp
     bool processDirectives(const string line);  // the main method for processing & handling the directives
     int detectDirective(const string line);     // detects if there's a directive on the given line

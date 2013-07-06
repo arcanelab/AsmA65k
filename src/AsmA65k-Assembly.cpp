@@ -151,7 +151,6 @@ void AsmA65k::handleOperand_Register_IndirectConstantPlusRegister(const string o
     
     instructionWord.addressingMode = AM_INDEXED_SRC;
     handleDoubleRegisters(StringPair(sp.left, indexedOperandPair.right), instructionWord);
-    
 }
 
 // ============================================================================
@@ -190,7 +189,7 @@ void AsmA65k::handleDoubleRegisters(StringPair sp, InstructionWord instructionWo
         throwException_InternalError();
     
     registerSelector = ((regLeft & 15) << 4) | (regRight & 15);
-    addData(OS_16BIT, *(dword *)&instructionWord);
+    addInstructionWord(instructionWord);
     addData(OS_8BIT, registerSelector);
 }
 
@@ -350,7 +349,8 @@ void AsmA65k::addRegisterConfigurationByte(string registerString)
     if(registerIndex < 0 || registerIndex > 15)
         throwException_InvalidRegister();
     
-    segments.back().addByte(registerIndex);
+    addData(OS_8BIT, registerIndex);
+//    segments.back().addByte(registerIndex);
 }
 
 // ============================================================================
@@ -482,6 +482,28 @@ void AsmA65k::addData(const OpcodeSize size, const dword data)
             log("Internal error");
             throw;
     }
+}
+// ============================================================================
+
+void AsmA65k::addData(const string sizeSpecifier, const dword data)
+{
+    if(sizeSpecifier == "b")
+    {
+        addData(OS_8BIT, data);
+        return;
+    }
+    if(sizeSpecifier == "w")
+    {
+        addData(OS_16BIT, data);
+        return;
+    }
+    if(sizeSpecifier == "")
+    {
+        addData(OS_32BIT, data);
+        return;
+    }
+    
+    throw AsmError(actLineNumber, actLine, "Invalid size specifier");
 }
 
 // ============================================================================
