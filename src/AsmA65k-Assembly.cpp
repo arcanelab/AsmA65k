@@ -151,11 +151,26 @@ void AsmA65k::handleOperand_Register_Register(const string operand, InstructionW
         AsmError error(actLineNumber, actLine, "Invalid combination of registers");
         throw error;
     }
-    if(regLeft == REG_PC || regLeft == REG_SP)
-    {
+    
+    byte registerSelector = 0;
+    
+    instructionWord.registerConfiguration = RC_NOREGISTER; // to verify if this would be changed after the following conditions
+    
+    if(regLeft == REG_PC || regLeft == REG_SP) // MOV PC, r4
         instructionWord.registerConfiguration = RC_SPECIAL_GENERAL;
-    }
-//    instructionWord.registerConfiguration =
+
+    if(regRight == REG_PC || regRight == REG_SP) // MOV r4, PC
+        instructionWord.registerConfiguration = RC_GENERAL_SPECIAL;
+
+    if((regLeft != REG_PC) && (regLeft != REG_SP) && (regRight != REG_PC) && (regRight != REG_SP))
+        instructionWord.registerConfiguration = RC_2_GENERAL_REGISTERS;
+
+    if(instructionWord.registerConfiguration == RC_NOREGISTER) // check if any of the prev. conditions were met
+        throwException_InternalError();
+    
+    registerSelector = ((regLeft & 15) << 4) | (regRight & 15);
+    addData(OS_16BIT, *(dword *)&instructionWord);
+    addData(OS_8BIT, registerSelector);
 }
 
 // ============================================================================
@@ -406,7 +421,7 @@ void AsmA65k::addInstructionWord(InstructionWord instructionWord)
 
 // ============================================================================
 
-void AsmA65k::addData(OpcodeSize size, dword data)
+void AsmA65k::addData(const OpcodeSize size, const dword data)
 {
     switch(size)
     {

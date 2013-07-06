@@ -188,7 +188,7 @@ private:
     byte setOpcodeSize(const string modifierCharacter); // takes the modifier character (eg.: mov.b -> 'b') and returns its numerical value
     OperandTypes detectOperandType(const string operandStr); // given the operand string, detects its type. see enum OperandType
     void addRegisterConfigurationByte(string registerString);
-    void addData(OpcodeSize size, dword data);
+    void addData(const OpcodeSize size, const dword data);
     void handleOperand_Register(const string operand, InstructionWord instructionWord);
     void handleOperand_Constant(const string operand, InstructionWord instructionWord, const dword effectiveAddress);
     void handleOperand_IndirectRegister(const string operand, InstructionWord instructionWord);
@@ -220,6 +220,7 @@ private:
     dword resolveLabel(const string label);
     void throwException_InvalidRegister();
     void throwException_InvalidOperands();
+    void throwException_InternalError();
     string removeSquaredBrackets(string operand);
     StringPair splitStringByPlusSign(const string operand);
     StringPair splitStringByComma(const string operand);

@@ -103,6 +103,14 @@ void AsmA65k::throwException_ValueOutOfRange()
 
 // ============================================================================
 
+void AsmA65k::throwException_InternalError()
+{
+    AsmError error(actLineNumber, actLine, "Internal Error");
+    throw error;
+}
+
+// ============================================================================
+
 void AsmA65k::throwException_InvalidNumberFormat()
 {
     AsmError error(actLineNumber, actLine, "Invalid number format");
