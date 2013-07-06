@@ -115,10 +115,11 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
         case OT_REGISTER__INDIRECT_REGISTER:                 // MOV r0, [r1]
             handleOperand_Register_IndirectRegister(operand, instructionWord);
             break;
+        case OT_REGISTER__INDIRECT_CONSTANT_PLUS_REGISTER:   // MOV r0, [$f000 + r1]
+            handleOperand_Register_IndirectConstantPlusRegister(operand, instructionWord);
+            break;
         case OT_REGISTER__INDIRECT_LABEL_PLUS_REGISTER:      // MOV r0, [label + r1]
             handleOperand_Register_IndirectLabelPlusRegister(operand, instructionWord);
-            break;
-        case OT_REGISTER__INDIRECT_CONSTANT_PLUS_REGISTER:   // MOV r0, [$f000 + r1]
             break;
         case OT_REGISTER__INDIRECT_REGISTER_PLUS_LABEL:      // MOV r0, [r1 + label]
         case OT_REGISTER__INDIRECT_REGISTER_PLUS_CONSTANT:   // MOV r0, [r1 + 10]
@@ -138,6 +139,19 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
         case OT_REGISTER__INDIRECT_CONSTANT:
             break;
     }
+}
+
+// ============================================================================
+
+void AsmA65k::handleOperand_Register_IndirectConstantPlusRegister(const string operand, InstructionWord instructionWord)// MOV r0, [$f000 + r1]
+{
+    StringPair sp = splitStringByComma(operand);
+    sp.right = removeSquaredBrackets(sp.right);
+    StringPair indexedOperandPair = splitStringByPlusSign(sp.right);
+    
+    instructionWord.addressingMode = AM_INDEXED_SRC;
+    handleDoubleRegisters(StringPair(sp.left, indexedOperandPair.right), instructionWord);
+    
 }
 
 // ============================================================================
