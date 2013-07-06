@@ -554,8 +554,6 @@ AsmA65k::OperandTypes AsmA65k::detectOperandType(const string operandStr)
             return OT_INDIRECT_CONSTANT;
         if(regex_match(operandStr, rx_indirectRegister))
             return OT_INDIRECT_REGISTER;
-        if(regex_match(operandStr, rx_indirectLabel))
-            return OT_INDIRECT_LABEL;
         if(regex_match(operandStr, rx_indirectRegisterPlusConst))
             return OT_INDIRECT_REGISTER_PLUS_CONSTANT;
         if(regex_match(operandStr, rx_indirectConstPlusRegister))
@@ -566,6 +564,8 @@ AsmA65k::OperandTypes AsmA65k::detectOperandType(const string operandStr)
             return OT_INDIRECT_LABEL_PLUS_REGISTER;
         if(regex_match(operandStr, rx_label))
             return OT_LABEL;
+        if(regex_match(operandStr, rx_indirectLabel))
+            return OT_INDIRECT_LABEL;
     }
 
     throwException_InvalidOperands();
