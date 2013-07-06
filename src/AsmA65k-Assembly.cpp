@@ -116,6 +116,8 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
             handleOperand_Register_IndirectRegister(operand, instructionWord);
             break;
         case OT_REGISTER__INDIRECT_LABEL_PLUS_REGISTER:      // MOV r0, [label + r1]
+            handleOperand_Register_IndirectLabelPlusRegister(operand, instructionWord);
+            break;
         case OT_REGISTER__INDIRECT_CONSTANT_PLUS_REGISTER:   // MOV r0, [$f000 + r1]
             break;
         case OT_REGISTER__INDIRECT_REGISTER_PLUS_LABEL:      // MOV r0, [r1 + label]
@@ -136,6 +138,13 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
         case OT_REGISTER__INDIRECT_CONSTANT:
             break;
     }
+}
+
+// ============================================================================
+
+void AsmA65k::handleOperand_Register_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord)
+{
+    
 }
 
 // ============================================================================
