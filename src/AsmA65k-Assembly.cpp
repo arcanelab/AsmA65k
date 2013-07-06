@@ -140,21 +140,8 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
 
 // ============================================================================
 
-void AsmA65k::handleOperand_Register_IndirectRegister(const string operand, InstructionWord instructionWord)
+void AsmA65k::handleDoubleRegisters(StringPair sp, InstructionWord instructionWord)
 {
-    StringPair sp = splitStringByComma(operand);
-    sp.right = removeSquaredBrackets(sp.right);
-    
-    log("left = %s, right = %s\n", sp.left.c_str(), sp.right.c_str());
-}
-
-// ============================================================================
-
-void AsmA65k::handleOperand_Register_Register(const string operand, InstructionWord instructionWord) // MOV.b r0, r1
-{
-    StringPair sp = splitStringByComma(operand);
-    
-    instructionWord.addressingMode = AM_REGISTER2;
     RegisterType regLeft = detectRegisterType(sp.left);
     RegisterType regRight = detectRegisterType(sp.right);
     if((regLeft == REG_PC || regLeft == REG_SP) && (regRight == REG_PC || regRight == REG_SP))
@@ -169,19 +156,39 @@ void AsmA65k::handleOperand_Register_Register(const string operand, InstructionW
     
     if(regLeft == REG_PC || regLeft == REG_SP) // MOV PC, r4
         instructionWord.registerConfiguration = RC_SPECIAL_GENERAL;
-
+    
     if(regRight == REG_PC || regRight == REG_SP) // MOV r4, PC
         instructionWord.registerConfiguration = RC_GENERAL_SPECIAL;
-
+    
     if((regLeft != REG_PC) && (regLeft != REG_SP) && (regRight != REG_PC) && (regRight != REG_SP))
         instructionWord.registerConfiguration = RC_2_GENERAL_REGISTERS;
-
+    
     if(instructionWord.registerConfiguration == RC_NOREGISTER) // check if any of the prev. conditions were met
         throwException_InternalError();
     
     registerSelector = ((regLeft & 15) << 4) | (regRight & 15);
     addData(OS_16BIT, *(dword *)&instructionWord);
     addData(OS_8BIT, registerSelector);
+}
+
+// ============================================================================
+
+void AsmA65k::handleOperand_Register_IndirectRegister(const string operand, InstructionWord instructionWord) // mov r0, [r1]
+{
+    StringPair sp = splitStringByComma(operand);
+    sp.right = removeSquaredBrackets(sp.right);
+
+    instructionWord.addressingMode = AM_REGISTER_INDIRECT_SRC;
+    handleDoubleRegisters(sp, instructionWord);
+}
+
+// ============================================================================
+
+void AsmA65k::handleOperand_Register_Register(const string operand, InstructionWord instructionWord) // MOV.b r0, r1
+{
+    instructionWord.addressingMode = AM_REGISTER2;
+    StringPair sp = splitStringByComma(operand);
+    handleDoubleRegisters(sp, instructionWord);
 }
 
 // ============================================================================
