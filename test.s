@@ -7,6 +7,7 @@
 .pc = $100 ;fds
 
 start:
+        mov     r0, [r1]
         inc     [r0]
         dec     r9
         dec     pc

@@ -113,6 +113,7 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
             handleOperand_Register_Register(operand, instructionWord);
             break;
         case OT_REGISTER__INDIRECT_REGISTER:                 // MOV r0, [r1]
+            handleOperand_Register_IndirectRegister(operand, instructionWord);
             break;
         case OT_REGISTER__INDIRECT_LABEL_PLUS_REGISTER:      // MOV r0, [label + r1]
         case OT_REGISTER__INDIRECT_CONSTANT_PLUS_REGISTER:   // MOV r0, [$f000 + r1]
@@ -135,6 +136,16 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
         case OT_REGISTER__INDIRECT_CONSTANT:
             break;
     }
+}
+
+// ============================================================================
+
+void AsmA65k::handleOperand_Register_IndirectRegister(const string operand, InstructionWord instructionWord)
+{
+    StringPair sp = splitStringByComma(operand);
+    sp.right = removeSquaredBrackets(sp.right);
+    
+    log("left = %s, right = %s\n", sp.left.c_str(), sp.right.c_str());
 }
 
 // ============================================================================
@@ -493,10 +504,6 @@ AsmA65k::OperandTypes AsmA65k::detectOperandType(const string operandStr)
             return OT_REGISTER__REGISTER;
         if(regex_match(left, rx_register) && regex_match(right, rx_constant))
             return OT_REGISTER__CONSTANT;
-        if(regex_match(left, rx_register) && regex_match(right, rx_label))
-            return OT_REGISTER__LABEL;
-        if(regex_match(left, rx_register) && regex_match(right, rx_indirectLabel))
-            return OT_REGISTER__INDIRECT_LABEL;
         if(regex_match(left, rx_register) && regex_match(right, rx_indirectConstant))
             return OT_REGISTER__INDIRECT_CONSTANT;
         if(regex_match(left, rx_indirectRegister) && regex_match(right, rx_register))
@@ -523,6 +530,10 @@ AsmA65k::OperandTypes AsmA65k::detectOperandType(const string operandStr)
             return OT_REGISTER__INDIRECT_CONSTANT_PLUS_REGISTER;
         if(regex_match(left, rx_register) && regex_match(right, rx_indirectLabelPlusRegister))
             return OT_REGISTER__INDIRECT_LABEL_PLUS_REGISTER;
+        if(regex_match(left, rx_register) && regex_match(right, rx_label))
+            return OT_REGISTER__LABEL;
+        if(regex_match(left, rx_register) && regex_match(right, rx_indirectLabel))
+            return OT_REGISTER__INDIRECT_LABEL;
     }
     else // single operand
     {
