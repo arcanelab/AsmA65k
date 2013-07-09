@@ -39,6 +39,7 @@
 		F0746866176007F9004D6052 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = "<group>"; };
 		F0746867176007F9004D6052 /* Segment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Segment.h; path = src/Segment.h; sourceTree = "<group>"; };
 		F0746869176007F9004D6052 /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = types.h; path = src/types.h; sourceTree = "<group>"; };
+		F0EF72F0178C54F7005DF3D4 /* TODO */ = {isa = PBXFileReference; lastKnownFileType = text; name = TODO; path = src/TODO; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,6 +81,7 @@
 				F0746867176007F9004D6052 /* Segment.h */,
 				F0746869176007F9004D6052 /* types.h */,
 				F0553A5D17600BFA004A0855 /* test.s */,
+				F0EF72F0178C54F7005DF3D4 /* TODO */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
