@@ -210,30 +210,30 @@ private:
     void handleOperand_Register_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord);
 
     // AsmA65k-Directives.cpp
-    bool processDirectives(const string line);  // the main method for processing & handling the directives
-    int detectDirective(const string line);     // detects if there's a directive on the given line
+    bool processDirectives(const string line);              // the main method for processing & handling the directives
+    int detectDirective(const string line);                 // detects if there's a directive on the given line
     void handleDirective_Text(const string line, const int directiveType); // handles .text "asdf" directives
     void handleDirective_ByteWordDword(const string line, const int directiveType); // handles data entry directives
-    void handleDirective_SetPC(const string line); // handles .pc = xxx directives
-    void handleDirective_Define(const string line); // handles the .define directive
+    void handleDirective_SetPC(const string line);          // handles .pc = xxx directives
+    void handleDirective_Define(const string line);         // handles the .define directive
 
     // AsmA65k-Misc.cpp
-    int convertStringToInteger(const string valueStr); // as the name implies, converts a std::string into an int
-    int findChar(string text, char c);                 // seraches for the given character and returns its index or -1
-    void throwException_ValueOutOfRange();  // throws an exception
-    void throwException_InvalidNumberFormat(); // throws an exception
-    void checkIntegerRange(uint64_t result); // checks if the 64 bit value can be fit into 32 bits (that's the max. allowed)
-    bool isCommentLine(const string line);          // check if a line if made of entirely out of a comment
-    void throwException_SyntaxError(const string line);       // throws an exception
-    dword resolveLabel(const string label);
-    void throwException_InvalidRegister();
-    void throwException_InvalidOperands();
-    void throwException_InternalError();
-    string removeSquaredBrackets(string operand);
-    StringPair splitStringByPlusSign(const string operand);
-    StringPair splitStringByComma(const string operand);
-    bool isRegisterSpecial(const string registerString);
-    RegisterType detectRegisterType(const string registerStr);
+    int convertStringToInteger(const string valueStr);      // as the name implies, converts a std::string into an int
+    int findChar(string text, char c);                      // searches for the given character and returns its index or -1
+    void throwException_ValueOutOfRange();                  // throws an exception
+    void throwException_InvalidNumberFormat();              // throws an exception
+    void checkIntegerRange(uint64_t result);                // checks if the 64 bit value can be fit into 32 bits (that's the max. allowed)
+    bool isCommentLine(const string line);                  // check if a line is made of entirely out of a comment
+    void throwException_SyntaxError(const string line);     // throws an exception
+    dword resolveLabel(const string label);                 // returns the address associated with a label
+    void throwException_InvalidRegister();                  // throws an exception
+    void throwException_InvalidOperands();                  // throws an exception
+    void throwException_InternalError();                    // throws an exception
+    string removeSquaredBrackets(string operand);           // removes the enclosing squared bracked from a string
+    StringPair splitStringByPlusSign(const string operand); // splits a string into a StringPair separated by a '+' character
+    StringPair splitStringByComma(const string operand);    // splits a string into a StringPair separated by a ',' character
+    bool isRegisterSpecial(const string registerString);    // checks if a register is NOT a general register (r0-r15)
+    RegisterType detectRegisterType(const string registerStr); // converts the string into a RegisterType
 };
 
 #endif /* defined(__AsmA65k__AsmA65k__) */

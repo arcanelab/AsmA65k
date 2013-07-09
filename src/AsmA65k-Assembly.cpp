@@ -189,6 +189,8 @@ void AsmA65k::handleDoubleRegisters(StringPair sp, InstructionWord instructionWo
         throwException_InternalError();
     
     registerSelector = ((regLeft & 15) << 4) | (regRight & 15);
+    
+    
     addInstructionWord(instructionWord);
     addData(OS_8BIT, registerSelector);
 }
