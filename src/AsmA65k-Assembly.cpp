@@ -50,7 +50,6 @@ void AsmA65k::processAsmLine(string line)
 
 void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, const string operand)
 {
-    
     //printf("assembleInstruction(): instr. = '%s',\t\t.b/w = '%1s',\t\t\toperands = '%s'\n", mnemonic.c_str(), modifier.c_str(), operand.c_str());
     //printf("OT_NONE: %d\nOT_REGISTER: %d\nOT_LABEL: %d\nOT_CONSTANT: %d\n\n", OT_NONE, OT_REGISTER, OT_LABEL, OT_CONSTANT);
     //printf("assembleInstruction(): operandType = %d\n", detectOperandType(operand));
@@ -62,7 +61,7 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
     
     dword effectiveAddress = 0;
     OperandTypes operandType = detectOperandType(operand);
-    log("operandType = %d\n", operandType);
+    //log("operandType = %d\n", operandType);
     switch (operandType)
     {
         case OT_NONE:                                        // SEI
@@ -150,14 +149,26 @@ void AsmA65k::handleOperand_Register_IndirectConstantPlusRegister(const string o
     StringPair indexedOperandPair = splitStringByPlusSign(sp.right);
     
     instructionWord.addressingMode = AM_INDEXED_SRC;
-    handleDoubleRegisters(StringPair(sp.left, indexedOperandPair.right), instructionWord);
+    handleDoubleRegisters(StringPair(sp.left, indexedOperandPair.right), instructionWord); // T1, T2, T3
+    addData(OS_32BIT, convertStringToInteger(indexedOperandPair.left)); // T4
 }
 
 // ============================================================================
 
-void AsmA65k::handleOperand_Register_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord)
+void AsmA65k::handleOperand_Register_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord) // MOV r0, [csoki + r1]
 {
+    StringPair sp = splitStringByComma(operand);
+    sp.right = removeSquaredBrackets(sp.right);
+    StringPair indexedOperandPair = splitStringByPlusSign(sp.right);
     
+    instructionWord.addressingMode = AM_INDEXED_SRC;
+    dword address = resolveLabel(indexedOperandPair.left);
+
+    stringstream ss;
+    ss << address;
+    string addressStr(ss.str());
+    
+    log("kutya: %s\n", ss.str().c_str());
 }
 
 // ============================================================================
@@ -338,7 +349,7 @@ void AsmA65k::addRegisterConfigurationByte(string registerString)
     // check for valid register specification in operand
     RegisterType registerIndex = detectRegisterType(registerString);
     
-    log("register = %s\n", registerString.c_str());
+    //log("register = %s\n", registerString.c_str());
     
     // check for special registers
     if(registerIndex == REG_PC || registerIndex == REG_SP)
@@ -552,7 +563,7 @@ AsmA65k::OperandTypes AsmA65k::detectOperandType(const string operandStr)
         string left = match[1];
         string right = match[2];
         
-        log("double operands detected. left = '%s', right = '%s'\n", left.c_str(), right.c_str());
+        //log("double operands detected. left = '%s', right = '%s'\n", left.c_str(), right.c_str());
         
         if(regex_match(left, rx_register) && regex_match(right, rx_register))
             return OT_REGISTER__REGISTER;
