@@ -43,6 +43,8 @@ int main(int argc, const char * argv[])
         return 1;
     }
 
+    // dump machine code
+    /*
     for(int i = 0; i < segments->size(); i++)
     {
         Segment actSegment = (*segments)[i];
@@ -51,6 +53,6 @@ int main(int argc, const char * argv[])
         
         cout << endl;
     }
-
+    */
     return 0;
 }

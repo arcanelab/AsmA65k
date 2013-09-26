@@ -157,6 +157,8 @@ void AsmA65k::handleOperand_Register_IndirectConstantPlusRegister(const string o
 
 void AsmA65k::handleOperand_Register_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord) // MOV r0, [csoki + r1]
 {
+    static const regex rx_indirectLabelPlusRegister(R"((r[0-9]{1,2})|(PC|SP))\s*,\s*\[\s*([a-z][a-z_0-9]*)\s*\+\s*(r[0-9]{1,2})|(PC|SP))");
+    // TODO: what about extracting these values with a regexp? Or is this solution faster?
     StringPair sp = splitStringByComma(operand);
     sp.right = removeSquaredBrackets(sp.right);
     StringPair indexedOperandPair = splitStringByPlusSign(sp.right);
@@ -164,11 +166,14 @@ void AsmA65k::handleOperand_Register_IndirectLabelPlusRegister(const string oper
     instructionWord.addressingMode = AM_INDEXED_SRC;
     dword address = resolveLabel(indexedOperandPair.left);
 
+    log("label = %s, address = %d\n", indexedOperandPair.left.c_str(), address);
+/*
     stringstream ss;
     ss << address;
     string addressStr(ss.str());
     
     log("kutya: %s\n", ss.str().c_str());
+ */
 }
 
 // ============================================================================
@@ -523,6 +528,7 @@ void AsmA65k::addData(const string sizeSpecifier, const dword data)
 
 dword AsmA65k::resolveLabel(const string label)
 {
+    log("resolveLabel: '%s'\n", label.c_str());
     dword effectiveAddress = 0;
     
     if(labels.find(label) == labels.end())
