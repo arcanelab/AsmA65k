@@ -202,7 +202,7 @@ void AsmA65k::handleDirective_ByteWordDword(const string line, const int directi
                 break;
                 
             case DIRECTIVE_DWORD:
-                if(value < 0 || value > 4294967295)
+                if(value < 0)
                     throwException_ValueOutOfRange();
                 
                 segments.back().addDword(value);  // store data as dword
