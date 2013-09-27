@@ -157,7 +157,7 @@ void AsmA65k::handleOperand_Register_IndirectConstantPlusRegister(const string o
 
 void AsmA65k::handleOperand_Register_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord) // MOV r0, [csoki + r1]
 {
-    static const regex rx_indirectLabelPlusRegister(R"((r[0-9]{1,2})|(PC|SP))\s*,\s*\[\s*([a-z][a-z_0-9]*)\s*\+\s*(r[0-9]{1,2})|(PC|SP))");
+    static const regex rx_indirectLabelPlusRegister(R"((r[0-9]{1,2})|(PC|SP))\s*,\s*\[\s*([a-z][a-z_0-9]*)\s*\+\s*(r[0-9]{1,2})|(PC|SP))", regex_constants::icase);
     // TODO: what about extracting these values with a regexp? Or is this solution faster?
     StringPair sp = splitStringByComma(operand);
     sp.right = removeSquaredBrackets(sp.right);
@@ -549,14 +549,14 @@ AsmA65k::OperandTypes AsmA65k::detectOperandType(const string operandStr)
 {
     const static regex_constants::syntax_option_type icase = regex_constants::icase;
     const static regex rx_matchDoubleOperands       (R"((.*)\s*,\s*(.*))", icase);
-    const static regex rx_constant                  (R"([$%]?[0-9a-f]+)", icase);                                          // 64
+    const static regex rx_constant                  (R"([$%]?[0-9a-f]+)", icase);                                       // 64
     const static regex rx_label                     (R"([a-z][a-z_0-9]*)", icase);                                      // names
-    const static regex rx_register                  (R"((r[0-9]{1,2})|(PC|SP))", icase);                                  // r0
+    const static regex rx_register                  (R"((r[0-9]{1,2})|(PC|SP))", icase);                                // r0
     const static regex rx_indirectConstant          (R"(\[\s*[$%]?[0-9a-f]+\s*\])", icase);                             // [$5000]
     const static regex rx_indirectLabel             (R"(\[[a-z][a-z_0-9]*\])", icase);                                  // [names]
-    const static regex rx_indirectRegister          (R"(\[\s*((r[0-9])|(PC|SP))\s*\])", icase);                        // [r0]
+    const static regex rx_indirectRegister          (R"(\[\s*((r[0-9])|(PC|SP))\s*\])", icase);                         // [r0]
     const static regex rx_indirectRegisterPlusConst (R"(\[\s*((r[0-9])|(PC|SP))\s*\+\s*[$%]?[0-9]+\s*\])", icase);      // [r0 + $1000]
-    const static regex rx_indirectConstPlusRegister (R"(\[\s*[$%]?[0-9a-f]+\s*\+\s*((r[0-9]{1,2})|(pc))\s*\])", icase);      // [$1000 + r0]
+    const static regex rx_indirectConstPlusRegister (R"(\[\s*[$%]?[0-9a-f]+\s*\+\s*((r[0-9]{1,2})|(pc))\s*\])", icase); // [$1000 + r0]
     const static regex rx_indirectRegisterPlusLabel (R"(\[\s*((r[0-9])|(PC|SP))\s*\+\s*[a-z][a-z_0-9]*\s*\])", icase);  // [r0 + names]
     const static regex rx_indirectLabelPlusRegister (R"(\[\s*[a-z][a-z_0-9]*\s*\+\s*((r[0-9])|(PC|SP))\s*\])", icase);  // [names + r0]
     

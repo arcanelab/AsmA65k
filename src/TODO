@@ -1,3 +1,5 @@
+- Verify that each regex is case insensitive
+
 During assembly of a line, the following steps must be done:
 
 T0. Compose InstructionWord:
