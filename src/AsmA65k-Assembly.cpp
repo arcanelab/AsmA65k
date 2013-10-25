@@ -165,9 +165,8 @@ void AsmA65k::handleOperand_Register_IndirectLabelPlusRegister(const string oper
 
     instructionWord.addressingMode = AM_INDEXED_SRC;
     
-    dword address = resolveLabel(match[2]);
     handleDoubleRegisters(StringPair(match[1], match[3]), instructionWord);
-    addData(OS_32BIT, address);
+    addData(OS_32BIT, resolveLabel(match[2]));
 }
 
 // ============================================================================
