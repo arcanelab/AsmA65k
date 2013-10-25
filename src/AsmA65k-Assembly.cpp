@@ -124,6 +124,7 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
             handleOperand_Register_IndirectRegisterPlusLabel(operand, instructionWord);
             break;
         case OT_REGISTER__INDIRECT_REGISTER_PLUS_CONSTANT:   // MOV r0, [r1 + 10]
+            handleOperand_Register_IndirectRegisterPlusConstant(operand, instructionWord);
             break;
         case OT_INDIRECT_REGISTER__REGISTER:                 // MOV [r0], r1
             break;
@@ -143,8 +144,21 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
 }
 
 // ============================================================================
+// TODO: this and the next methods are 99% the same, you should refactor them
+void AsmA65k::handleOperand_Register_IndirectRegisterPlusConstant(const string operand, InstructionWord instructionWord) // MOV r0, [r1 + 10]
+{
+    StringPair sp = splitStringByComma(operand);
+    sp.right = removeSquaredBrackets(sp.right);
+    StringPair indexedOperandPair = splitStringByPlusSign(sp.right);
+    
+    instructionWord.addressingMode = AM_INDEXED_SRC;
+    handleDoubleRegisters(StringPair(sp.left, indexedOperandPair.left), instructionWord); // T1, T2, T3
+    addData(OS_32BIT, convertStringToInteger(indexedOperandPair.right)); // T4
+}
 
-void AsmA65k::handleOperand_Register_IndirectConstantPlusRegister(const string operand, InstructionWord instructionWord)// MOV r0, [$f000 + r1]
+// ============================================================================
+
+void AsmA65k::handleOperand_Register_IndirectConstantPlusRegister(const string operand, InstructionWord instructionWord) // MOV r0, [$f000 + r1]
 {
     StringPair sp = splitStringByComma(operand);
     sp.right = removeSquaredBrackets(sp.right);
