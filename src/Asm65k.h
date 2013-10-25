@@ -208,6 +208,7 @@ private:
     void handleDoubleRegisters(StringPair sp, InstructionWord instructionWord);
     void handleOperand_Register_IndirectConstantPlusRegister(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord);
+    void handleOperand_Register_IndirectRegisterPlusLabel(const string operand, InstructionWord instructionWord);
 
     // AsmA65k-Directives.cpp
     bool processDirectives(const string line);              // the main method for processing & handling the directives
