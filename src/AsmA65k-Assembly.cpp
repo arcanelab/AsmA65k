@@ -156,7 +156,7 @@ void AsmA65k::handleOperand_Register_IndirectConstantPlusRegister(const string o
 }
 
 // ============================================================================
-// TODO: this, and the next methods are 99% the same, you should refactor them
+// TODO: this and the next methods are 99% the same, you should refactor them
 void AsmA65k::handleOperand_Register_IndirectRegisterPlusLabel(const string operand, InstructionWord instructionWord) // MOV r0, [r1 + label]
 {
     static const regex rx_indirectLabelPlusRegister(R"((r[0-9]{1,2}|PC|SP)\s*,\s*\[\s*([a-z][a-z_0-9]*)\s*\+\s*(r[0-9]{1,2}|PC|SP)\s*\])", regex_constants::icase);
