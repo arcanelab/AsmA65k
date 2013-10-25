@@ -214,7 +214,8 @@ private:
     void handleOperand_IndirectRegisterPlusLabel_Register(const string operand, InstructionWord instructionWord);
     void handleOperand_IndirectRegisterPlusConstant_Register(const string operand, InstructionWord instructionWord);
     void handleOperand_IndirectLabelPlusRegister_Register(const string operand, InstructionWord instructionWord);
-    
+    void handleOperand_IndirectConstantPlusRegister_Register(const string operand, InstructionWord instructionWord);
+
     // AsmA65k-Directives.cpp
     bool processDirectives(const string line);              // the main method for processing & handling the directives
     int detectDirective(const string line);                 // detects if there's a directive on the given line
