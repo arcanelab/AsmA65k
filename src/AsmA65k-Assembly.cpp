@@ -163,22 +163,11 @@ void AsmA65k::handleOperand_Register_IndirectLabelPlusRegister(const string oper
     if(regex_match(operand, match, rx_indirectLabelPlusRegister) == false)
         throwException_InvalidOperands();
 
-//    for(int i=1; i<4; i++)
-//        log("match[%d] = '%s'\n", i, match[i].str().c_str());
-
     instructionWord.addressingMode = AM_INDEXED_SRC;
     
     dword address = resolveLabel(match[2]);
-//    log("label = %s, address = %d\n", match[2].str().c_str(), address);
     handleDoubleRegisters(StringPair(match[1], match[3]), instructionWord);
     addData(OS_32BIT, address);
-/*
-    stringstream ss;
-    ss << address;
-    string addressStr(ss.str());
-    
-    log("kutya: %s\n", ss.str().c_str());
- */
 }
 
 // ============================================================================
