@@ -130,6 +130,7 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
             handleOperand_IndirectRegister_Register(operand, instructionWord);
             break;
         case OT_INDIRECT_REGISTER_PLUS_LABEL__REGISTER:      // MOV [r0 + label], r1
+            handleOperand_IndirectRegisterPlusLabel_Register(operand, instructionWord);
         case OT_INDIRECT_REGISTER_PLUS_CONSTANT__REGISTER:   // MOV [r0 + 10], r1
             break;
         case OT_INDIRECT_LABEL_PLUS_REGISTER__REGISTER:      // MOV [label + r0], r1
@@ -142,6 +143,23 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
         case OT_REGISTER__INDIRECT_CONSTANT:
             break;
     }
+}
+
+// ============================================================================
+
+void AsmA65k::handleOperand_IndirectRegisterPlusLabel_Register(const string operand, InstructionWord instructionWord) // MOV [r0 + label], r1
+{
+//    static const regex rx_indirectLabelPlusRegister(R"(\[\s*([a-z][a-z_0-9]*)\s*\+\s*(r[0-9]{1,2}|PC|SP)\s*\]\s*,\s*(r[0-9]{1,2}|PC|SP))", regex_constants::icase);
+    static const regex rx_indirectLabelPlusRegister(R"(\[\s*(r[0-9]{1,2}|PC|SP)\s*\+\s*([a-z][a-z_0-9]*)\s*\]\s*,\s*(r[0-9]{1,2}|PC|SP))", regex_constants::icase);
+    smatch match;
+    
+    if(regex_match(operand, match, rx_indirectLabelPlusRegister) == false)
+        throwException_InvalidOperands();
+    
+    instructionWord.addressingMode = AM_INDEXED_DEST;
+    
+    handleDoubleRegisters(StringPair(match[1], match[3]), instructionWord);
+    addData(OS_32BIT, resolveLabel(match[2]));
 }
 
 // ============================================================================
@@ -182,7 +200,7 @@ void AsmA65k::handleOperand_Register_IndirectConstantPlusRegister(const string o
 // TODO: this and the next methods are 99% the same, you should refactor them
 void AsmA65k::handleOperand_Register_IndirectRegisterPlusLabel(const string operand, InstructionWord instructionWord) // MOV r0, [r1 + label]
 {
-    static const regex rx_indirectLabelPlusRegister(R"((r[0-9]{1,2}|PC|SP)\s*,\s*\[\s*([a-z][a-z_0-9]*)\s*\+\s*(r[0-9]{1,2}|PC|SP)\s*\])", regex_constants::icase);
+    static const regex rx_indirectLabelPlusRegister(R"((r[0-9]{1,2}|PC|SP)\s*,\s*\[\s*(r[0-9]{1,2}|PC|SP)\s*\+\s*([a-z][a-z_0-9]*)\s*\])", regex_constants::icase);
     smatch match;
     
     if(regex_match(operand, match, rx_indirectLabelPlusRegister) == false)
