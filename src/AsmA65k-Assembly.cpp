@@ -127,6 +127,7 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
             handleOperand_Register_IndirectRegisterPlusConstant(operand, instructionWord);
             break;
         case OT_INDIRECT_REGISTER__REGISTER:                 // MOV [r0], r1
+            handleOperand_IndirectRegister_Register(operand, instructionWord);
             break;
         case OT_INDIRECT_REGISTER_PLUS_LABEL__REGISTER:      // MOV [r0 + label], r1
         case OT_INDIRECT_REGISTER_PLUS_CONSTANT__REGISTER:   // MOV [r0 + 10], r1
@@ -141,6 +142,14 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
         case OT_REGISTER__INDIRECT_CONSTANT:
             break;
     }
+}
+
+// ============================================================================
+
+void AsmA65k::handleOperand_IndirectRegister_Register(const string operand, InstructionWord instructionWord) // MOV [r0], r1
+{
+    StringPair sp = splitStringByComma(operand);
+    handleDoubleRegisters(StringPair(removeSquaredBrackets(sp.left), sp.right), instructionWord);
 }
 
 // ============================================================================
