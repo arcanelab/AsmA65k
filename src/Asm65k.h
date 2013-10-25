@@ -213,6 +213,7 @@ private:
     void handleOperand_IndirectRegister_Register(const string operand, InstructionWord instructionWord);
     void handleOperand_IndirectRegisterPlusLabel_Register(const string operand, InstructionWord instructionWord);
     void handleOperand_IndirectRegisterPlusConstant_Register(const string operand, InstructionWord instructionWord);
+    void handleOperand_IndirectLabelPlusRegister_Register(const string operand, InstructionWord instructionWord);
     
     // AsmA65k-Directives.cpp
     bool processDirectives(const string line);              // the main method for processing & handling the directives

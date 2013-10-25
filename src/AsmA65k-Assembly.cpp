@@ -136,6 +136,8 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
             handleOperand_IndirectRegisterPlusConstant_Register(operand, instructionWord);
             break;
         case OT_INDIRECT_LABEL_PLUS_REGISTER__REGISTER:      // MOV [label + r0], r1
+            handleOperand_IndirectLabelPlusRegister_Register(operand, instructionWord);
+            break;
         case OT_INDIRECT_CONSTANT_PLUS_REGISTER__REGISTER:   // MOV [1234 + r0], r1
             break;
         case OT_INDIRECT_LABEL__REGISTER:
@@ -145,6 +147,22 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
         case OT_REGISTER__INDIRECT_CONSTANT:
             break;
     }
+}
+
+// ============================================================================
+
+void AsmA65k::handleOperand_IndirectLabelPlusRegister_Register(const string operand, InstructionWord instructionWord) // MOV [label + r0], r1
+{
+    static const regex rx_indirectLabelPlusRegister(R"(\[\s*([a-z][a-z_0-9]*)\s*\+\s*(r[0-9]{1,2}|PC|SP)\s*\]\s*,\s*(r[0-9]{1,2}|PC|SP))", regex_constants::icase);
+    smatch match;
+    
+    if(regex_match(operand, match, rx_indirectLabelPlusRegister) == false)
+        throwException_InvalidOperands();
+    
+    instructionWord.addressingMode = AM_INDEXED_DEST;
+    
+    handleDoubleRegisters(StringPair(match[2], match[3]), instructionWord);
+    addData(OS_32BIT, resolveLabel(match[1]));
 }
 
 // ============================================================================
