@@ -157,16 +157,21 @@ void AsmA65k::handleOperand_Register_IndirectConstantPlusRegister(const string o
 
 void AsmA65k::handleOperand_Register_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord) // MOV r0, [csoki + r1]
 {
-    static const regex rx_indirectLabelPlusRegister(R"((r[0-9]{1,2})|(PC|SP))\s*,\s*\[\s*([a-z][a-z_0-9]*)\s*\+\s*(r[0-9]{1,2})|(PC|SP))", regex_constants::icase);
-    // TODO: what about extracting these values with a regexp? Or is this solution faster?
-    StringPair sp = splitStringByComma(operand);
-    sp.right = removeSquaredBrackets(sp.right);
-    StringPair indexedOperandPair = splitStringByPlusSign(sp.right);
+    static const regex rx_indirectLabelPlusRegister(R"((r[0-9]{1,2}|PC|SP)\s*,\s*\[\s*([a-z][a-z_0-9]*)\s*\+\s*(r[0-9]{1,2}|PC|SP)\s*\])", regex_constants::icase);
+    smatch match;
     
-    instructionWord.addressingMode = AM_INDEXED_SRC;
-    dword address = resolveLabel(indexedOperandPair.left);
+    if(regex_match(operand, match, rx_indirectLabelPlusRegister) == false)
+        throwException_InvalidOperands();
 
-    log("label = %s, address = %d\n", indexedOperandPair.left.c_str(), address);
+//    for(int i=1; i<4; i++)
+//        log("match[%d] = '%s'\n", i, match[i].str().c_str());
+
+    instructionWord.addressingMode = AM_INDEXED_SRC;
+    
+    dword address = resolveLabel(match[2]);
+//    log("label = %s, address = %d\n", match[2].str().c_str(), address);
+    handleDoubleRegisters(StringPair(match[1], match[3]), instructionWord);
+    addData(OS_32BIT, address);
 /*
     stringstream ss;
     ss << address;
@@ -205,7 +210,6 @@ void AsmA65k::handleDoubleRegisters(StringPair sp, InstructionWord instructionWo
         throwException_InternalError();
     
     registerSelector = ((regLeft & 15) << 4) | (regRight & 15);
-    
     
     addInstructionWord(instructionWord);
     addData(OS_8BIT, registerSelector);

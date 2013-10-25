@@ -22,6 +22,7 @@ loop:   mov     [$1000+r7], r6
         bra     loop
         mov     r1, adatok
         add     r2, [nev + r9]  ; here's a comment, too
+        add     pc, [nev + sp]  ; here's a comment, too
         add     [adatok], r4
         add     [adatok + r3], r4
         rts
