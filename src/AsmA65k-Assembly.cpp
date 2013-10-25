@@ -132,6 +132,7 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
         case OT_INDIRECT_REGISTER_PLUS_LABEL__REGISTER:      // MOV [r0 + label], r1
             handleOperand_IndirectRegisterPlusLabel_Register(operand, instructionWord);
         case OT_INDIRECT_REGISTER_PLUS_CONSTANT__REGISTER:   // MOV [r0 + 10], r1
+            handleOperand_IndirectRegisterPlusConstant_Register(operand, instructionWord);
             break;
         case OT_INDIRECT_LABEL_PLUS_REGISTER__REGISTER:      // MOV [label + r0], r1
         case OT_INDIRECT_CONSTANT_PLUS_REGISTER__REGISTER:   // MOV [1234 + r0], r1
@@ -147,9 +148,22 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
 
 // ============================================================================
 
+void AsmA65k::handleOperand_IndirectRegisterPlusConstant_Register(const string operand, InstructionWord instructionWord) // MOV [r0 + 10], r1
+{
+    StringPair sp = splitStringByComma(operand);
+    sp.left = removeSquaredBrackets(sp.left);
+    StringPair indexedOperandPair = splitStringByPlusSign(sp.left);
+
+    handleDoubleRegisters(StringPair(indexedOperandPair.left, sp.right), instructionWord);
+    
+    instructionWord.addressingMode = AM_INDEXED_DEST;
+    addData(OS_32BIT, convertStringToInteger(indexedOperandPair.right));
+}
+
+// ============================================================================
+
 void AsmA65k::handleOperand_IndirectRegisterPlusLabel_Register(const string operand, InstructionWord instructionWord) // MOV [r0 + label], r1
 {
-//    static const regex rx_indirectLabelPlusRegister(R"(\[\s*([a-z][a-z_0-9]*)\s*\+\s*(r[0-9]{1,2}|PC|SP)\s*\]\s*,\s*(r[0-9]{1,2}|PC|SP))", regex_constants::icase);
     static const regex rx_indirectLabelPlusRegister(R"(\[\s*(r[0-9]{1,2}|PC|SP)\s*\+\s*([a-z][a-z_0-9]*)\s*\]\s*,\s*(r[0-9]{1,2}|PC|SP))", regex_constants::icase);
     smatch match;
     
@@ -178,8 +192,9 @@ void AsmA65k::handleOperand_Register_IndirectRegisterPlusConstant(const string o
     sp.right = removeSquaredBrackets(sp.right);
     StringPair indexedOperandPair = splitStringByPlusSign(sp.right);
     
-    instructionWord.addressingMode = AM_INDEXED_SRC;
     handleDoubleRegisters(StringPair(sp.left, indexedOperandPair.left), instructionWord); // T1, T2, T3
+
+    instructionWord.addressingMode = AM_INDEXED_SRC;
     addData(OS_32BIT, convertStringToInteger(indexedOperandPair.right)); // T4
 }
 
