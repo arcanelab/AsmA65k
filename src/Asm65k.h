@@ -134,10 +134,11 @@ private:
     
     enum OpcodeSize
     {
-        OS_32BIT,
-        OS_16BIT,
-        OS_8BIT,
-        OS_NONE
+        OS_NONE,        // 000
+        OS_32BIT,       // 001
+        OS_16BIT,       // 010
+        OS_8BIT,        // 011
+        OS_DIVSIGN      // 100
     };
     
     struct OpcodeAttribute
@@ -219,6 +220,7 @@ private:
     void handleOperand_IndirectConstant_Register(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_IndirectLabel(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_IndirectConstant(const string operand, InstructionWord instructionWord);
+    void checkIfSizeSpecifierIsAllowed(const string mnemonic, const OpcodeSize opcodeSize);
 
     // AsmA65k-Directives.cpp
     bool processDirectives(const string line);              // the main method for processing & handling the directives

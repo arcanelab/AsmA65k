@@ -56,9 +56,13 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
     
     InstructionWord instructionWord;
     
+    //log("modifier = '%s'\n", modifier.c_str());
+    
     instructionWord.opcodeSize = getOpcodeSize(modifier);
     instructionWord.instructionCode = opcodes[mnemonic].instructionCode;
     
+    checkIfSizeSpecifierIsAllowed(mnemonic, (OpcodeSize)instructionWord.opcodeSize);
+
     dword effectiveAddress = 0;
     OperandTypes operandType = detectOperandType(operand);
     //log("operandType = %d\n", operandType);
@@ -152,6 +156,17 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
         case OT_REGISTER__INDIRECT_CONSTANT:                // MOV r0, [$4434]
             handleOperand_Register_IndirectConstant(operand, instructionWord);
             break;
+    }
+}
+
+// ============================================================================
+
+void AsmA65k::checkIfSizeSpecifierIsAllowed(const string mnemonic, const OpcodeSize opcodeSize)
+{
+    if((opcodes[mnemonic].isSizeSpecifierAllowed == false) && (opcodeSize != OS_NONE))
+    {
+        AsmError error(AsmError(actLineNumber, actLine, "Size specifier is not allowed for this instruction"));
+        throw error;
     }
 }
 
@@ -586,10 +601,10 @@ byte AsmA65k::getOpcodeSize(const string modifierCharacter)
     if(modifierCharacter == "w")
         return OS_16BIT;
     if(modifierCharacter == "")
-        return OS_32BIT;
+        return OS_NONE;
     
     if(modifierCharacter == "u" || modifierCharacter == "s")
-        return OS_NONE;
+        return OS_DIVSIGN;
     
     AsmError error(actLineNumber, actLine);
     error.errorMessage = "Invalid size specifier";
@@ -625,10 +640,12 @@ void AsmA65k::addData(const OpcodeSize size, const dword data)
             PC++;
             break;
         case OS_NONE:
+        case OS_DIVSIGN:
             log("Internal error");
             throw;
     }
 }
+
 // ============================================================================
 
 void AsmA65k::addData(const string sizeSpecifier, const dword data)
