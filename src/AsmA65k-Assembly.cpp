@@ -68,7 +68,6 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
             instructionWord.addressingMode = AM_NONE;
             instructionWord.registerConfiguration = RC_NOREGISTER;
             addInstructionWord(instructionWord);
-            PC += 2;
             break;
         case OT_REGISTER:                                    // INC r0
             handleOperand_Register(operand, instructionWord);

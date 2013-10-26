@@ -1,5 +1,6 @@
 BUGS:
 - no verification that operand matches size specifier interval
+- invalid opcodes are accepted
 
 ============================================================
 - Verify that each regex is case insensitive
