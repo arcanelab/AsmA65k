@@ -142,16 +142,34 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
             handleOperand_IndirectConstantPlusRegister_Register(operand, instructionWord);
             break;
         case OT_INDIRECT_LABEL__REGISTER:                   // MOV [kacsa], r0
-            handleOperand_IndirectConstantPlusRegister_Register(operand, instructionWord);
+            handleOperand_IndirectLabel_Register(operand, instructionWord);
             break;
         case OT_INDIRECT_CONSTANT__REGISTER:                // MOV [$6660], r0
             handleOperand_IndirectConstant_Register(operand, instructionWord);
             break;
         case OT_REGISTER__INDIRECT_LABEL:                   // MOV r0, [kacsa]
+            handleOperand_Register_IndirectLabel(operand, instructionWord);
+            break;
         case OT_REGISTER__INDIRECT_CONSTANT:                // MOV r0, [$4434]
             break;
     }
 }
+
+// ============================================================================
+
+void AsmA65k::handleOperand_Register_IndirectLabel(const string operand, InstructionWord instructionWord) // MOV r0, [kacsa]
+{
+    StringPair sp = splitStringByComma(operand);
+    sp.right = removeSquaredBrackets(sp.right);
+    
+    instructionWord.addressingMode = AM_ABSOLUTE_SRC;
+    instructionWord.registerConfiguration = RC_REGISTER;
+    addRegisterConfigurationByte(sp.left); // 1 byte
+    addData(OS_32BIT, resolveLabel(sp.right)); // 4 bytes
+    PC += 5;
+}
+
+// ============================================================================
 
 void AsmA65k::handleOperand_IndirectConstant_Register(const string operand, InstructionWord instructionWord) // MOV [$6660], r0
 {
@@ -167,7 +185,7 @@ void AsmA65k::handleOperand_IndirectConstant_Register(const string operand, Inst
 
 // ============================================================================
 
-void AsmA65k::handleOperand_IndirectConstantPlusRegister_Register(const string operand, InstructionWord instructionWord) // MOV [kacsa], r0
+void AsmA65k::handleOperand_IndirectLabel_Register(const string operand, InstructionWord instructionWord) // MOV [kacsa], r0
 {
     StringPair sp = splitStringByComma(operand);
     sp.left = removeSquaredBrackets(sp.left);
