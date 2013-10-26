@@ -165,8 +165,9 @@ void AsmA65k::handleOperand_Register_IndirectConstant(const string operand, Inst
     
     instructionWord.addressingMode = AM_ABSOLUTE_SRC;
     instructionWord.registerConfiguration = RC_REGISTER;
+    addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.left);
-    PC += 5;
+    addData(OS_32BIT, convertStringToInteger(sp.right));
 }
 
 // ============================================================================
@@ -178,9 +179,9 @@ void AsmA65k::handleOperand_Register_IndirectLabel(const string operand, Instruc
     
     instructionWord.addressingMode = AM_ABSOLUTE_SRC;
     instructionWord.registerConfiguration = RC_REGISTER;
-    addRegisterConfigurationByte(sp.left); // 1 byte
-    addData(OS_32BIT, resolveLabel(sp.right)); // 4 bytes
-    PC += 5;
+    addInstructionWord(instructionWord);
+    addRegisterConfigurationByte(sp.left);
+    addData(OS_32BIT, resolveLabel(sp.right));
 }
 
 // ============================================================================
@@ -192,9 +193,9 @@ void AsmA65k::handleOperand_IndirectConstant_Register(const string operand, Inst
     
     instructionWord.addressingMode = AM_ABSOLUTE_DEST;
     instructionWord.registerConfiguration = RC_REGISTER;
-    addRegisterConfigurationByte(sp.right); // 1 byte
-    addData(OS_32BIT, convertStringToInteger(sp.left)); // 4 bytes
-    PC += 5;
+    addInstructionWord(instructionWord);
+    addRegisterConfigurationByte(sp.right);
+    addData(OS_32BIT, convertStringToInteger(sp.left));
 }
 
 // ============================================================================
@@ -206,9 +207,9 @@ void AsmA65k::handleOperand_IndirectLabel_Register(const string operand, Instruc
     
     instructionWord.addressingMode = AM_ABSOLUTE_DEST;
     instructionWord.registerConfiguration = RC_REGISTER;
-    addRegisterConfigurationByte(sp.right); // 1 byte
-    addData(OS_32BIT, resolveLabel(sp.left)); // 4 bytes
-    PC += 5;
+    addInstructionWord(instructionWord);
+    addRegisterConfigurationByte(sp.right);
+    addData(OS_32BIT, resolveLabel(sp.left));
 }
 
 // ============================================================================
@@ -219,9 +220,8 @@ void AsmA65k::handleOperand_IndirectConstantPlusRegister_Register(const string o
     sp.left = removeSquaredBrackets(sp.left);
     StringPair indexedOperandPair = splitStringByPlusSign(sp.left);
     
+    instructionWord.addressingMode = AM_INDEXED_DEST; // this must precede the handleDoubleRegisters() method!
     handleDoubleRegisters(StringPair(indexedOperandPair.right, sp.right), instructionWord);
-    
-    instructionWord.addressingMode = AM_INDEXED_DEST;
     addData(OS_32BIT, convertStringToInteger(indexedOperandPair.left));
 }
 
@@ -236,7 +236,6 @@ void AsmA65k::handleOperand_IndirectLabelPlusRegister_Register(const string oper
         throwException_InvalidOperands();
     
     instructionWord.addressingMode = AM_INDEXED_DEST;
-    
     handleDoubleRegisters(StringPair(match[2], match[3]), instructionWord);
     addData(OS_32BIT, resolveLabel(match[1]));
 }
@@ -249,9 +248,8 @@ void AsmA65k::handleOperand_IndirectRegisterPlusConstant_Register(const string o
     sp.left = removeSquaredBrackets(sp.left);
     StringPair indexedOperandPair = splitStringByPlusSign(sp.left);
 
-    handleDoubleRegisters(StringPair(indexedOperandPair.left, sp.right), instructionWord);
-    
     instructionWord.addressingMode = AM_INDEXED_DEST;
+    handleDoubleRegisters(StringPair(indexedOperandPair.left, sp.right), instructionWord);
     addData(OS_32BIT, convertStringToInteger(indexedOperandPair.right));
 }
 
@@ -266,7 +264,6 @@ void AsmA65k::handleOperand_IndirectRegisterPlusLabel_Register(const string oper
         throwException_InvalidOperands();
     
     instructionWord.addressingMode = AM_INDEXED_DEST;
-    
     handleDoubleRegisters(StringPair(match[1], match[3]), instructionWord);
     addData(OS_32BIT, resolveLabel(match[2]));
 }
@@ -276,6 +273,7 @@ void AsmA65k::handleOperand_IndirectRegisterPlusLabel_Register(const string oper
 void AsmA65k::handleOperand_IndirectRegister_Register(const string operand, InstructionWord instructionWord) // MOV [r0], r1
 {
     StringPair sp = splitStringByComma(operand);
+    instructionWord.addressingMode = AM_REGISTER_INDIRECT_DEST;
     handleDoubleRegisters(StringPair(removeSquaredBrackets(sp.left), sp.right), instructionWord);
 }
 
@@ -287,9 +285,8 @@ void AsmA65k::handleOperand_Register_IndirectRegisterPlusConstant(const string o
     sp.right = removeSquaredBrackets(sp.right);
     StringPair indexedOperandPair = splitStringByPlusSign(sp.right);
     
-    handleDoubleRegisters(StringPair(sp.left, indexedOperandPair.left), instructionWord); // T1, T2, T3
-
     instructionWord.addressingMode = AM_INDEXED_SRC;
+    handleDoubleRegisters(StringPair(sp.left, indexedOperandPair.left), instructionWord); // T1, T2, T3
     addData(OS_32BIT, convertStringToInteger(indexedOperandPair.right)); // T4
 }
 
@@ -317,7 +314,6 @@ void AsmA65k::handleOperand_Register_IndirectRegisterPlusLabel(const string oper
         throwException_InvalidOperands();
     
     instructionWord.addressingMode = AM_INDEXED_SRC;
-    
     handleDoubleRegisters(StringPair(match[1], match[2]), instructionWord);
     addData(OS_32BIT, resolveLabel(match[3]));
 }
@@ -333,7 +329,6 @@ void AsmA65k::handleOperand_Register_IndirectLabelPlusRegister(const string oper
         throwException_InvalidOperands();
 
     instructionWord.addressingMode = AM_INDEXED_SRC;
-    
     handleDoubleRegisters(StringPair(match[1], match[3]), instructionWord);
     addData(OS_32BIT, resolveLabel(match[2]));
 }
@@ -368,8 +363,8 @@ void AsmA65k::handleDoubleRegisters(StringPair sp, InstructionWord instructionWo
     
     registerSelector = ((regLeft & 15) << 4) | (regRight & 15);
     
-    addInstructionWord(instructionWord);
-    addData(OS_8BIT, registerSelector);
+    addInstructionWord(instructionWord); // 2 bytes
+    addData(OS_8BIT, registerSelector); // 1 byte
 }
 
 // ============================================================================
@@ -387,8 +382,9 @@ void AsmA65k::handleOperand_Register_IndirectRegister(const string operand, Inst
 
 void AsmA65k::handleOperand_Register_Register(const string operand, InstructionWord instructionWord) // MOV.b r0, r1
 {
-    instructionWord.addressingMode = AM_REGISTER2;
     StringPair sp = splitStringByComma(operand);
+
+    instructionWord.addressingMode = AM_REGISTER2;
     handleDoubleRegisters(sp, instructionWord);
 }
 
@@ -404,20 +400,6 @@ void AsmA65k::handleOperand_Register_Constant(const string operand, InstructionW
     addRegisterConfigurationByte(sp.left);
     try { addData((OpcodeSize)instructionWord.opcodeSize, convertStringToInteger(sp.right)); }
     catch(...) { throwException_InvalidNumberFormat(); }
-    PC += 3;
-    switch(instructionWord.opcodeSize)
-    {
-        case OS_32BIT:
-            PC += 4;
-            break;
-        case OS_16BIT:
-            PC += 2;
-            break;
-        case OS_8BIT:
-            PC++;
-        default:
-            break;
-    }
 }
 
 // ============================================================================
@@ -431,7 +413,6 @@ void AsmA65k::handleOperand_Register_Label(const string operand, InstructionWord
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.left);
     addData((OpcodeSize)instructionWord.opcodeSize, resolveLabel(sp.right));
-    PC += 3;
 }
 
 // ============================================================================
@@ -466,7 +447,6 @@ void AsmA65k::handleOperand_IndirectRegisterPlusConstant(const string operand, I
     // add constant after i.w.
     try { addData(OS_32BIT, convertStringToInteger(sp.right)); }
     catch(...) { throwException_InvalidNumberFormat(); }
-    PC += 7;
 }
 
 // ============================================================================
@@ -483,7 +463,6 @@ void AsmA65k::handleOperand_IndirectRegisterPlusLabel(const string operand, Inst
     addRegisterConfigurationByte(sp.left); // 1 byte
     // add constant after RCB
     addData(OS_32BIT, resolveLabel(sp.right)); // 4 bytes
-    PC += 7;
 }
 
 // ============================================================================
@@ -493,7 +472,6 @@ void AsmA65k::handleOperand_IndirectConstant(const dword constant, InstructionWo
     instructionWord.addressingMode = AM_ABSOLUTE1;
     instructionWord.registerConfiguration = RC_NOREGISTER;
     addInstructionWord(instructionWord);
-    PC += 2;
     addData(OS_32BIT, constant);
 }
 
@@ -506,7 +484,6 @@ void AsmA65k::handleOperand_Register(const string operand, InstructionWord instr
     instructionWord.registerConfiguration = RC_REGISTER;
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(operand);
-    PC += 3;
 }
 
 // ============================================================================
@@ -589,7 +566,6 @@ void AsmA65k::handleOperand_IndirectRegister(const string operand, InstructionWo
     instructionWord.registerConfiguration = RC_REGISTER;
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(registerMatch[1]);
-    PC += 3;
 }
 
 // ============================================================================
@@ -630,6 +606,7 @@ byte AsmA65k::setOpcodeSize(const string modifierCharacter)
 void AsmA65k::addInstructionWord(InstructionWord instructionWord)
 {
     segments.back().addWord(*(word *)&instructionWord);
+    PC += 2;
 }
 
 // ============================================================================
