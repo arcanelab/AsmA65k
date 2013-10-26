@@ -151,8 +151,22 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
             handleOperand_Register_IndirectLabel(operand, instructionWord);
             break;
         case OT_REGISTER__INDIRECT_CONSTANT:                // MOV r0, [$4434]
+            handleOperand_Register_IndirectConstant(operand, instructionWord);
             break;
     }
+}
+
+// ============================================================================
+
+void AsmA65k::handleOperand_Register_IndirectConstant(const string operand, InstructionWord instructionWord) // MOV r0, [$4434]
+{
+    StringPair sp = splitStringByComma(operand);
+    sp.right = removeSquaredBrackets(sp.right);
+    
+    instructionWord.addressingMode = AM_ABSOLUTE_SRC;
+    instructionWord.registerConfiguration = RC_REGISTER;
+    addRegisterConfigurationByte(sp.left);
+    PC += 5;
 }
 
 // ============================================================================
@@ -504,8 +518,8 @@ void AsmA65k::addRegisterConfigurationByte(string registerString)
     
     //log("register = %s\n", registerString.c_str());
     
-    // asserting correct range for index
-    if(registerIndex < REG_R0 || registerIndex > (REG_LAST-1))
+    // asserting correct range for register
+    if(registerIndex < REG_R0 || registerIndex >= REG_LAST)
         throwException_InvalidRegister();
     
     addData(OS_8BIT, registerIndex);
