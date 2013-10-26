@@ -486,13 +486,6 @@ void AsmA65k::addRegisterConfigurationByte(string registerString)
     
     //log("register = %s\n", registerString.c_str());
     
-    // check for special registers
-    if(registerIndex == REG_PC || registerIndex == REG_SP)
-    {
-        addData(OS_8BIT, registerIndex); // code for PC or SP
-        return;
-    }
-    
     // asserting correct range for index
     if(registerIndex < REG_R0 || registerIndex > (REG_LAST-1))
         throwException_InvalidRegister();
