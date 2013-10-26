@@ -167,7 +167,7 @@ private:
     enum RegisterType
     {
         REG_R0, REG_R1, REG_R2, REG_R3, REG_R4, REG_R5, REG_R6, REG_R7, REG_R8,
-        REG_R9, REG_R10, REG_R11, REG_R12, REG_R13, REG_R14, REG_R15, REG_SP, REG_PC
+        REG_R9, REG_R10, REG_R11, REG_R12, REG_R13, REG_R14, REG_R15, REG_SP, REG_PC, REG_LAST
     };
     
     // variables
@@ -215,6 +215,8 @@ private:
     void handleOperand_IndirectRegisterPlusConstant_Register(const string operand, InstructionWord instructionWord);
     void handleOperand_IndirectLabelPlusRegister_Register(const string operand, InstructionWord instructionWord);
     void handleOperand_IndirectConstantPlusRegister_Register(const string operand, InstructionWord instructionWord);
+    void handleOperand_IndirectConstantPlusRegister_Register(const string operand, InstructionWord instructionWord);
+    void handleOperand_IndirectConstant_Register(const string operand, InstructionWord instructionWord);
 
     // AsmA65k-Directives.cpp
     bool processDirectives(const string line);              // the main method for processing & handling the directives
