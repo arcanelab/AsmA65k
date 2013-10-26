@@ -1,3 +1,3 @@
 .pc = 0
 
-mov.b pc, $64
+mov.b r7, $64

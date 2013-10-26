@@ -243,7 +243,6 @@ private:
     string removeSquaredBrackets(string operand);           // removes the enclosing squared bracked from a string
     StringPair splitStringByPlusSign(const string operand); // splits a string into a StringPair separated by a '+' character
     StringPair splitStringByComma(const string operand);    // splits a string into a StringPair separated by a ',' character
-    bool isRegisterSpecial(const string registerString);    // checks if a register is NOT a general register (r0-r15)
     RegisterType detectRegisterType(const string registerStr); // converts the string into a RegisterType
 };
 
