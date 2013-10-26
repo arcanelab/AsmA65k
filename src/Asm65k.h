@@ -188,7 +188,7 @@ private:
     void assembleInstruction(const string mnemonic, const string modifier, const string operand); // does the actual assembly -> machine code translation
     string detectAndRemoveLabelDefinition(string line);
     void addInstructionWord(InstructionWord instructionWord);
-    byte setOpcodeSize(const string modifierCharacter); // takes the modifier character (eg.: mov.b -> 'b') and returns its numerical value
+    byte getOpcodeSize(const string modifierCharacter); // takes the modifier character (eg.: mov.b -> 'b') and returns its numerical value
     OperandTypes detectOperandType(const string operandStr); // given the operand string, detects its type. see enum OperandType
     void addRegisterConfigurationByte(string registerString);
     void addData(const OpcodeSize size, const dword data);

@@ -56,7 +56,7 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
     
     InstructionWord instructionWord;
     
-    instructionWord.opcodeSize = setOpcodeSize(modifier);
+    instructionWord.opcodeSize = getOpcodeSize(modifier);
     instructionWord.instructionCode = opcodes[mnemonic].instructionCode;
     
     dword effectiveAddress = 0;
@@ -579,7 +579,7 @@ string AsmA65k::detectAndRemoveLabelDefinition(string line)
 
 // ============================================================================
 
-byte AsmA65k::setOpcodeSize(const string modifierCharacter)
+byte AsmA65k::getOpcodeSize(const string modifierCharacter)
 {
     if(modifierCharacter == "b")
         return OS_8BIT;
