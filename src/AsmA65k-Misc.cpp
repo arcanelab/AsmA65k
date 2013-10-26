@@ -239,8 +239,16 @@ AsmA65k::RegisterType AsmA65k::detectRegisterType(const string registerStr)
     smatch registerIndexMatch;
     if(regex_match(registerStr, registerIndexMatch, rx_detectRegisterIndex) == false)
         throwException_InvalidRegister();
-    unsigned registerIndex = atoi(registerIndexMatch.str().c_str());
-    if(registerIndex > 15)
+
+    int registerIndex;
+    
+    try {
+        registerIndex = std::stoi(registerIndexMatch[1].str());
+    } catch (...) {
+        throwException_InvalidRegister();
+    }
+    
+    if(registerIndex < REG_R0 || registerIndex > REG_R15)
         throwException_InvalidRegister();
     
     return (RegisterType)registerIndex;

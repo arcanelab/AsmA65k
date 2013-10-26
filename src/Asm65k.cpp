@@ -34,11 +34,11 @@ std::vector<Segment>* AsmA65k::assemble(stringstream &source)
             processAsmLine(actLine);
         actLineNumber++;
     }
-    
+/*
     log("----- labels -----\n");
     for(auto label : labels)
         log("'%-8s' = $%.8X\n", label.first.c_str(), label.second);
-    
+*/    
     return &segments;
 }
 

@@ -1,3 +1,7 @@
+BUGS:
+- no verification that operand matches size specifier interval
+
+============================================================
 - Verify that each regex is case insensitive
 
 During assembly of a line, the following steps must be done:

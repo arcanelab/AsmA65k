@@ -44,15 +44,22 @@ int main(int argc, const char * argv[])
     }
 
     // dump machine code
-    /*
+    
     for(int i = 0; i < segments->size(); i++)
     {
         Segment actSegment = (*segments)[i];
-        for(int j = 0; j < actSegment.data.size(); j++)
-            printf("%.8X %.2X\n", actSegment.address+j, actSegment.data[j]);
         
-        cout << endl;
+        printf("$%.8X:\n", actSegment.address);
+        
+        for(int j = 0; j < actSegment.data.size(); j++)
+        {
+            printf("%.2X ", actSegment.data[j]);
+//            printf("%.8X %.2X  ", actSegment.address+j, actSegment.data[j]);
+            if(!((j+1)%16))
+                printf("\n");
+        }
     }
-    */
+    printf("\n");
+    
     return 0;
 }

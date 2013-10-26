@@ -493,11 +493,9 @@ void AsmA65k::addRegisterConfigurationByte(string registerString)
     // check for valid register specification in operand
     RegisterType registerIndex = detectRegisterType(registerString);
     
-    //log("register = %s\n", registerString.c_str());
+    log("register = %s, registerIndex = %d\n", registerString.c_str(), registerIndex);
     
     // asserting correct range for register
-    if(registerIndex < REG_R0 || registerIndex >= REG_LAST)
-        throwException_InvalidRegister();
     
     addData(OS_8BIT, registerIndex);
 }
