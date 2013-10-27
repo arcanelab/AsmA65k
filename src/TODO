@@ -1,5 +1,5 @@
 BUGS:
-- no verification that operand matches size specifier interval
+- no verification whether an opcode is legal for the given instruction
 - invalid opcodes are accepted
 
 ============================================================

@@ -94,7 +94,8 @@ private:
     enum AddressingModes
     {
         AM_NONE,
-        AM_IMMEDIATE,               // Rx, 55
+        AM_REG_IMMEDIATE,           // Rx, 55
+        AM_CONST_IMMEDIATE,         // 555 (for PUSH)
         AM_REGISTER1,               // Rx
         AM_REGISTER2,               // Rx, Ry
         AM_ABSOLUTE1,               // [$f000]
@@ -107,7 +108,8 @@ private:
         AM_INDEXED_SRC,             // Rx, [Ry + 432]
         AM_INDEXED_DEST,            // [Rx + 432], Ry
         AM_RELATIVE,                // 44              -- only branching instr.
-        AM_DIRECT                   // $4244           -- only jmp/jsr
+        AM_DIRECT,                  // $4244           -- only jmp/jsr
+        AM_AMBIGOUS                 // used in getAddressingModeFromOperand() when encountering OS_CONSTANT, which can be either AM_IMMEDIATE or AM_RELATIVE or AM_DIRECT
     };
     
     enum RegisterConfigurations
@@ -168,7 +170,8 @@ private:
     enum RegisterType
     {
         REG_R0, REG_R1, REG_R2, REG_R3, REG_R4, REG_R5, REG_R6, REG_R7, REG_R8,
-        REG_R9, REG_R10, REG_R11, REG_R12, REG_R13, REG_R14, REG_R15, REG_SP, REG_PC, REG_LAST
+        REG_R9, REG_R10, REG_R11, REG_R12, REG_R13, REG_R14, REG_R15, REG_SP, REG_PC,
+        REG_LAST
     };
     
     // variables
@@ -187,13 +190,18 @@ private:
     // AsmA65k-Assembly.cpp
     void processAsmLine(string line);     // prepares and assembles the line. see also assembleInstruction()
     void assembleInstruction(const string mnemonic, const string modifier, const string operand); // does the actual assembly -> machine code translation
+
     string detectAndRemoveLabelDefinition(string line);
-    void addInstructionWord(InstructionWord instructionWord);
     byte getOpcodeSize(const string modifierCharacter); // takes the modifier character (eg.: mov.b -> 'b') and returns its numerical value
     OperandTypes detectOperandType(const string operandStr); // given the operand string, detects its type. see enum OperandType
+    AddressingModes getAddressingModeFromOperand(const OperandTypes operandType);
+
+    void addInstructionWord(InstructionWord instructionWord);
     void addRegisterConfigurationByte(string registerString);
+
     void addData(const OpcodeSize size, const dword data);
     void addData(const string sizeSpecifier, const dword data);
+
     void handleOperand_Register(const string operand, InstructionWord instructionWord);
     void handleOperand_Constant(const string operand, InstructionWord instructionWord, const dword effectiveAddress);
     void handleOperand_IndirectRegister(const string operand, InstructionWord instructionWord);
@@ -206,7 +214,6 @@ private:
     void handleOperand_Register_Constant(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_Register(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_IndirectRegister(const string operand, InstructionWord instructionWord);
-    void handleDoubleRegisters(StringPair sp, InstructionWord instructionWord);
     void handleOperand_Register_IndirectConstantPlusRegister(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_IndirectRegisterPlusLabel(const string operand, InstructionWord instructionWord);
@@ -220,8 +227,11 @@ private:
     void handleOperand_IndirectConstant_Register(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_IndirectLabel(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_IndirectConstant(const string operand, InstructionWord instructionWord);
-    void checkIfSizeSpecifierIsAllowed(const string mnemonic, const OpcodeSize opcodeSize);
 
+    void handleDoubleRegisters(StringPair sp, InstructionWord instructionWord);
+    void checkIfSizeSpecifierIsAllowed(const string mnemonic, const OpcodeSize opcodeSize);
+    void checkIfAddressingModeIsLegalForThisInstruction(const string mnemonic, const OperandTypes operandType);
+    
     // AsmA65k-Directives.cpp
     bool processDirectives(const string line);              // the main method for processing & handling the directives
     int detectDirective(const string line);                 // detects if there's a directive on the given line

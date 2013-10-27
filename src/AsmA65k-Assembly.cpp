@@ -65,6 +65,8 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
 
     dword effectiveAddress = 0;
     OperandTypes operandType = detectOperandType(operand);
+    checkIfAddressingModeIsLegalForThisInstruction(mnemonic, operandType);
+    
     //log("operandType = %d\n", operandType);
     switch (operandType)
     {
@@ -156,6 +158,88 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
         case OT_REGISTER__INDIRECT_CONSTANT:                // MOV r0, [$4434]
             handleOperand_Register_IndirectConstant(operand, instructionWord);
             break;
+    }
+}
+
+AsmA65k::AddressingModes AsmA65k::getAddressingModeFromOperand(const OperandTypes operandType)
+{
+    switch (operandType)
+    {
+        case OT_NONE:                                        // SEI
+            return AM_NONE;
+        
+        case OT_REGISTER:                                    // INC r0
+            return AM_REGISTER1;
+        
+        case OT_LABEL:                                       // INC label
+        case OT_CONSTANT:                                    // BNE 40 or INC $f000
+            return AM_AMBIGOUS;
+/*
+            return AM_RELATIVE;
+            return AM_DIRECT;
+            return AM_CONST_IMMEDIATE;
+ */
+        break;
+
+        case OT_INDIRECT_REGISTER:                           // INC [r0]
+            return AM_REGISTER1;
+        
+        case OT_INDIRECT_LABEL:                              // INC [label]
+        case OT_INDIRECT_CONSTANT:                           // INC.w [$ffff]
+            return AM_REGISTER_INDIRECT1;
+        
+        case OT_INDIRECT_REGISTER_PLUS_LABEL:                // INC.b [r0 + label]
+        case OT_INDIRECT_REGISTER_PLUS_CONSTANT:             // INC [r0 + 10]
+        case OT_INDIRECT_LABEL_PLUS_REGISTER:                // INC [label + r0]
+        case OT_INDIRECT_CONSTANT_PLUS_REGISTER:             // INC [$1000 + r0]
+            return AM_INDEXED1;
+        
+        case OT_REGISTER__LABEL:                             // MOV r0, label
+        case OT_REGISTER__CONSTANT:                          // MOV r0, 1234
+            return AM_REG_IMMEDIATE;
+        
+        case OT_REGISTER__REGISTER:                          // MOV r0, r1
+            return AM_REGISTER2;
+
+        case OT_REGISTER__INDIRECT_REGISTER:                 // MOV r0, [r1]
+            return AM_REGISTER_INDIRECT_SRC;
+
+        case OT_REGISTER__INDIRECT_CONSTANT_PLUS_REGISTER:   // MOV r0, [$f000 + r1]
+        case OT_REGISTER__INDIRECT_LABEL_PLUS_REGISTER:      // MOV r0, [label + r1]
+        case OT_REGISTER__INDIRECT_REGISTER_PLUS_LABEL:      // MOV r0, [r1 + label]
+        case OT_REGISTER__INDIRECT_REGISTER_PLUS_CONSTANT:   // MOV r0, [r1 + 10]
+            return AM_INDEXED_SRC;
+
+        case OT_INDIRECT_REGISTER__REGISTER:                 // MOV [r0], r1
+            return AM_REGISTER_INDIRECT_DEST;
+        
+        case OT_INDIRECT_REGISTER_PLUS_LABEL__REGISTER:      // MOV [r0 + label], r1
+        case OT_INDIRECT_REGISTER_PLUS_CONSTANT__REGISTER:   // MOV [r0 + 10], r1
+        case OT_INDIRECT_LABEL_PLUS_REGISTER__REGISTER:      // MOV [label + r0], r1
+        case OT_INDIRECT_CONSTANT_PLUS_REGISTER__REGISTER:   // MOV [1234 + r0], r1
+            return AM_INDEXED_DEST;
+
+        case OT_INDIRECT_LABEL__REGISTER:                   // MOV [kacsa], r0
+        case OT_INDIRECT_CONSTANT__REGISTER:                // MOV [$6660], r0
+            return AM_ABSOLUTE_DEST;
+        
+        case OT_REGISTER__INDIRECT_LABEL:                   // MOV r0, [kacsa]
+        case OT_REGISTER__INDIRECT_CONSTANT:                // MOV r0, [$4434]
+            return AM_ABSOLUTE_SRC;
+        default:
+            throwException_InvalidOperands();
+    }
+    
+    return AM_NONE; // should never get here
+}
+
+void AsmA65k::checkIfAddressingModeIsLegalForThisInstruction(const string mnemonic, const OperandTypes operandType)
+{
+    AddressingModes addressingMode = getAddressingModeFromOperand(operandType);
+    if( std::find(opcodes[mnemonic].addressingModesAllowed.begin(), opcodes[mnemonic].addressingModesAllowed.end(), addressingMode)!=opcodes[mnemonic].addressingModesAllowed.end() )
+    {
+        AsmError error(actLineNumber, actLine, "Invalid addressing mode for given instruction");
+        throw error;
     }
 }
 

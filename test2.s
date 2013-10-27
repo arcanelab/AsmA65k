@@ -1,5 +1,3 @@
 .pc = 0
 
-sec
-cli
-ret
+mov r0, r0
