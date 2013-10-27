@@ -30,6 +30,7 @@ void AsmA65k::processAsmLine(string line)
     if(regex_match(line, asmMatches, rx_matchInstructionAndOperands) == false)
         throwException_SyntaxError(line);
     
+    // assign matches to individual variables
     string mnemonic = asmMatches[1].str();
     string modifier = asmMatches[2].str();
     string operand  = asmMatches[3].str();
@@ -40,9 +41,11 @@ void AsmA65k::processAsmLine(string line)
     if(regex_match(operand, cleanOperand, rx_detectComment))
         operand = cleanOperand[1].str();
     
+    // convert strings to lower case
     std::transform(mnemonic.begin(), mnemonic.end(), mnemonic.begin(), ::tolower);
     std::transform(modifier.begin(), modifier.end(), modifier.begin(), ::tolower);
     std::transform(operand.begin(), operand.end(), operand.begin(), ::tolower);
+    
     assembleInstruction(mnemonic, modifier, operand);
 }
 
@@ -230,15 +233,20 @@ AsmA65k::AddressingModes AsmA65k::getAddressingModeFromOperand(const OperandType
             throwException_InvalidOperands();
     }
     
+    log("Internal error\n");
+    throw;
+    
     return AM_NONE; // should never get here
 }
 
 void AsmA65k::checkIfAddressingModeIsLegalForThisInstruction(const string mnemonic, const OperandTypes operandType)
 {
     AddressingModes addressingMode = getAddressingModeFromOperand(operandType);
-    if( std::find(opcodes[mnemonic].addressingModesAllowed.begin(), opcodes[mnemonic].addressingModesAllowed.end(), addressingMode)!=opcodes[mnemonic].addressingModesAllowed.end() )
+    if( std::find(opcodes[mnemonic].addressingModesAllowed.begin(),
+                  opcodes[mnemonic].addressingModesAllowed.end(), addressingMode)
+                  == opcodes[mnemonic].addressingModesAllowed.end() )
     {
-        AsmError error(actLineNumber, actLine, "Invalid addressing mode for given instruction");
+        AsmError error(actLineNumber, actLine, "Invalid addressing mode");
         throw error;
     }
 }

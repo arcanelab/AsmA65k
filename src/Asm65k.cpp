@@ -86,7 +86,7 @@ void AsmA65k::initializeOpcodetable()
     oa.addressingModesAllowed = { AM_CONST_IMMEDIATE, AM_REGISTER1, AM_REGISTER_INDIRECT1, AM_ABSOLUTE1, AM_INDEXED1 };
     oa.instructionCode = I_PSH; opcodes["psh"] = oa;
 
-    oa.addressingModesAllowed = { AM_REG_IMMEDIATE,             // Rx, const
+    oa.addressingModesAllowed = { AM_REG_IMMEDIATE,         // Rx, const
                                   AM_REGISTER2,             // Rx, Ry
                                   AM_ABSOLUTE_SRC,          // Rx, [$1234]
                                   AM_ABSOLUTE_DEST,         // [$1234], Rx
