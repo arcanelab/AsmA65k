@@ -492,7 +492,7 @@ void AsmA65k::handleOperand_Register_Constant(const string operand, InstructionW
 {
     StringPair sp = splitStringByComma(operand);
     
-    instructionWord.addressingMode = AM_IMMEDIATE;
+    instructionWord.addressingMode = AM_REG_IMMEDIATE;
     instructionWord.registerConfiguration = RC_REGISTER;
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.left);
@@ -506,7 +506,7 @@ void AsmA65k::handleOperand_Register_Label(const string operand, InstructionWord
 {
     StringPair sp = splitStringByComma(operand);
     
-    instructionWord.addressingMode = AM_IMMEDIATE;
+    instructionWord.addressingMode = AM_REG_IMMEDIATE;
     instructionWord.registerConfiguration = RC_REGISTER;
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.left);
@@ -614,7 +614,7 @@ void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instr
         segments.back().addByte((diff & 0xff00) >> 8);
     }
     else // non-branching instruction, eg.: DEC.w $ff32
-    {
+    {   // TODO: should I maybe convert this to a switch statement?
         // absolute?
         if (in == I_CLR || in == I_PSH || in == I_POP || in == I_INC || in == I_DEC )
         {
@@ -624,10 +624,15 @@ void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instr
         {
             if (in == I_JMP || in == I_JSR)
                 instructionWord.addressingMode = AM_DIRECT;
-            else // neither -> error
+            else
             {
-                AsmError error(actLineNumber, actLine, "Invalid addressing mode");
-                throw error;
+                if (in == I_PSH)
+                    instructionWord.addressingMode = AM_CONST_IMMEDIATE;
+                else // neither -> error
+                {
+                    AsmError error(actLineNumber, actLine, "Invalid addressing mode");
+                    throw error;
+                }
             }
         }
         
