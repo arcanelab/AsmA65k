@@ -67,6 +67,7 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
     checkIfSizeSpecifierIsAllowed(mnemonic, (OpcodeSize)instructionWord.opcodeSize);
 
     dword effectiveAddress = 0;
+    
     OperandTypes operandType = detectOperandType(operand);
     checkIfAddressingModeIsLegalForThisInstruction(mnemonic, operandType);
     
@@ -242,6 +243,12 @@ AsmA65k::AddressingModes AsmA65k::getAddressingModeFromOperand(const OperandType
 void AsmA65k::checkIfAddressingModeIsLegalForThisInstruction(const string mnemonic, const OperandTypes operandType)
 {
     AddressingModes addressingMode = getAddressingModeFromOperand(operandType);
+    
+    if(addressingMode == AM_AMBIGOUS)
+    {
+        
+    }
+    
     if( std::find(opcodes[mnemonic].addressingModesAllowed.begin(),
                   opcodes[mnemonic].addressingModesAllowed.end(), addressingMode)
                   == opcodes[mnemonic].addressingModesAllowed.end() )
@@ -736,7 +743,6 @@ void AsmA65k::addData(const OpcodeSize size, const dword data)
             segments.back().addByte(data);
             PC++;
             break;
-        case OS_NONE:
         case OS_DIVSIGN:
             log("Internal error");
             throw;
