@@ -136,11 +136,11 @@ private:
     
     enum OpcodeSize
     {
-        OS_NONE,        // 000
-        OS_32BIT,       // 001
-        OS_16BIT,       // 010
-        OS_8BIT,        // 011
-        OS_DIVSIGN      // 100
+        OS_NONE    = 0,
+        OS_32BIT   = 0,
+        OS_16BIT   = 1,
+        OS_8BIT    = 2,
+        OS_DIVSIGN = 3
     };
     
     struct OpcodeAttribute
