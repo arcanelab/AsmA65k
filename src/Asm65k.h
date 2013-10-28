@@ -227,12 +227,13 @@ private:
     void handleOperand_IndirectConstant_Register(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_IndirectLabel(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_IndirectConstant(const string operand, InstructionWord instructionWord);
-
     void handleDoubleRegisters(StringPair sp, InstructionWord instructionWord);
+
     void checkIfSizeSpecifierIsAllowed(const string mnemonic, const OpcodeSize opcodeSize);
     void checkIfAddressingModeIsLegalForThisInstruction(const string mnemonic, const OperandTypes operandType);
     bool findAddressingMode(const string mnemonic, AddressingModes am);
-    OpcodeSize getOpcodeSizeFromInteger(int32_t value);
+    OpcodeSize getOpcodeSizeFromSignedInteger(int32_t value);
+    OpcodeSize getOpcodeSizeFromUnsigedInteger(dword value);
     void verifyRangeForConstant(const string constant, OpcodeSize opcodeSize);
     
     // AsmA65k-Directives.cpp

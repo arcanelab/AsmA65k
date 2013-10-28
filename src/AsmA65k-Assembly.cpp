@@ -507,7 +507,7 @@ void AsmA65k::handleOperand_Register_Constant(const string operand, InstructionW
     instructionWord.registerConfiguration = RC_REGISTER;
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.left);
-    verifyRangeForConstant(operand, (OpcodeSize)instructionWord.opcodeSize);
+    verifyRangeForConstant(sp.right, (OpcodeSize)instructionWord.opcodeSize);
     addData((OpcodeSize)instructionWord.opcodeSize, convertStringToInteger(sp.right));
 }
 
@@ -521,7 +521,7 @@ void AsmA65k::handleOperand_Register_Label(const string operand, InstructionWord
     instructionWord.registerConfiguration = RC_REGISTER;
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.left);
-    verifyRangeForConstant(operand, (OpcodeSize)instructionWord.opcodeSize);
+    verifyRangeForConstant(sp.right, (OpcodeSize)instructionWord.opcodeSize);
     addData((OpcodeSize)instructionWord.opcodeSize, resolveLabel(sp.right));
 }
 
@@ -607,7 +607,7 @@ void AsmA65k::addRegisterConfigurationByte(string registerString)
 
 // ============================================================================
 
-AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromInteger(int32_t value)
+AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromSignedInteger(int32_t value)
 {
     if(value >= -128 && value <= 127)
         return OS_8BIT;
@@ -619,9 +619,22 @@ AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromInteger(int32_t value)
 
 // ============================================================================
 
+AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromUnsigedInteger(dword value)
+{
+    if(value <= 0xff)
+        return OS_8BIT;
+    
+    if(value <= 0xffff)
+        return OS_16BIT;
+    
+    return OS_32BIT;
+}
+
+// ============================================================================
+
 void AsmA65k::verifyRangeForConstant(const string constant, OpcodeSize opcodeSize)
 {
-    if(getOpcodeSizeFromInteger(convertStringToInteger(constant)) < opcodeSize)
+    if(getOpcodeSizeFromUnsigedInteger(convertStringToInteger(constant)) < opcodeSize)
     {
         AsmError error(actLineNumber, actLine, "Value out of range");
         throw error;
@@ -641,7 +654,7 @@ void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instr
 
         int32_t diff = effectiveAddress - PC;
         
-        instructionWord.opcodeSize = getOpcodeSizeFromInteger(diff);
+        instructionWord.opcodeSize = getOpcodeSizeFromSignedInteger(diff);
         addInstructionWord(instructionWord);
         addData((OpcodeSize)instructionWord.opcodeSize, diff);
     }
