@@ -88,8 +88,7 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
             handleOperand_IndirectConstant(effectiveAddress, instructionWord);
             break;
         case OT_INDIRECT_CONSTANT:                           // INC.w [$ffff]
-            try { effectiveAddress = convertStringToInteger(removeSquaredBrackets(operand)); }
-            catch (...) { throwException_InvalidNumberFormat(); }
+            effectiveAddress = convertStringToInteger(removeSquaredBrackets(operand));
             handleOperand_IndirectConstant(effectiveAddress, instructionWord);
             break;
         case OT_INDIRECT_REGISTER_PLUS_LABEL:                // INC.b [r0 + label]

@@ -102,8 +102,7 @@ void AsmA65k::handleDirective_SetPC(const string line)
         throw error;
     }
     
-    try { PC = convertStringToInteger(value[1].str()); }
-    catch (...) { throwException_InvalidNumberFormat(); }
+    PC = convertStringToInteger(value[1].str());
     
     // create a new segment, store it in 'segments' vector
     segments.push_back(Segment());
@@ -179,9 +178,8 @@ void AsmA65k::handleDirective_ByteWordDword(const string line, const int directi
     {
         // convert string into integer, check validity
         int value;
-        try { value = convertStringToInteger(iter->str()); }
-        catch(...) { throwException_InvalidNumberFormat(); }
-        
+        value = convertStringToInteger(iter->str());
+    
         // handle data size
         switch (directiveType)
         {
@@ -239,9 +237,8 @@ void AsmA65k::handleDirective_Define(const string line)
     smatch valueMatch;
     if(regex_match(matches[2].str(), valueMatch, rx_matchConstant))
     {   // if yes, convert it into decimal and add it into the symbol table
-        try { labels[label] = convertStringToInteger(valueMatch[1].str()); }
-        catch(...) { throwException_InvalidNumberFormat(); }
-        
+        labels[label] = convertStringToInteger(valueMatch[1].str());
+    
         return;
     }
     
@@ -268,9 +265,8 @@ void AsmA65k::handleDirective_Define(const string line)
         string rvalue = expressionOperands[2].str();
         
         // look up symbol (lvalue) and add the decimal value of the rvalue to it, then add the result as a new symbol
-        try { labels[label] = (dword)labels[lvalue] + (dword)convertStringToInteger(rvalue); }
-        catch(...) { throwException_InvalidNumberFormat(); }
-        
+        labels[label] = (dword)labels[lvalue] + (dword)convertStringToInteger(rvalue);
+    
         return;
     }
     
