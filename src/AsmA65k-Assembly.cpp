@@ -277,7 +277,7 @@ void AsmA65k::handleOperand_Register_IndirectConstant(const string operand, Inst
     instructionWord.registerConfiguration = RC_REGISTER;
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.left);
-    addData((OpcodeSize)instructionWord.opcodeSize, convertStringToInteger(sp.right));
+    addData(OS_32BIT, convertStringToInteger(sp.right));
 }
 
 // ============================================================================
@@ -508,8 +508,8 @@ void AsmA65k::handleOperand_Register_Constant(const string operand, InstructionW
     instructionWord.registerConfiguration = RC_REGISTER;
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.left);
-    try { addData((OpcodeSize)instructionWord.opcodeSize, convertStringToInteger(sp.right)); }
-    catch(...) { throwException_InvalidNumberFormat(); }
+    verifyRangeForConstant(operand, (OpcodeSize)instructionWord.opcodeSize);
+    addData((OpcodeSize)instructionWord.opcodeSize, convertStringToInteger(sp.right));
 }
 
 // ============================================================================
@@ -522,6 +522,7 @@ void AsmA65k::handleOperand_Register_Label(const string operand, InstructionWord
     instructionWord.registerConfiguration = RC_REGISTER;
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.left);
+    verifyRangeForConstant(operand, (OpcodeSize)instructionWord.opcodeSize);
     addData((OpcodeSize)instructionWord.opcodeSize, resolveLabel(sp.right));
 }
 
@@ -619,9 +620,9 @@ AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromInteger(int32_t value)
 
 // ============================================================================
 
-void AsmA65k::verifyRangeForConstant(const string constant, InstructionWord instructionWord)
+void AsmA65k::verifyRangeForConstant(const string constant, OpcodeSize opcodeSize)
 {
-    if(getOpcodeSizeFromInteger(convertStringToInteger(constant)) < (OpcodeSize)instructionWord.opcodeSize)
+    if(getOpcodeSizeFromInteger(convertStringToInteger(constant)) < opcodeSize)
     {
         AsmError error(actLineNumber, actLine, "Value out of range");
         throw error;
@@ -649,11 +650,7 @@ void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instr
         switch (instruction)
         {
             case I_PSH: // psh $ff
-                if(getOpcodeSizeFromInteger(convertStringToInteger(operand)) < (OpcodeSize)instructionWord.opcodeSize)
-                {
-                    AsmError error(actLineNumber, actLine, "Value out of range");
-                    throw error;
-                }
+                verifyRangeForConstant(operand, (OpcodeSize)instructionWord.opcodeSize);
                 instructionWord.addressingMode = AM_CONST_IMMEDIATE;
                 instructionWord.registerConfiguration = RC_NOREGISTER;
                 addInstructionWord(instructionWord);

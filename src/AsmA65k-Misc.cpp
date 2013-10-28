@@ -142,7 +142,7 @@ void AsmA65k::checkIntegerRange(uint64_t result)
     
     if((uint64_t)result > maxInt)
     {
-        AsmError error(actLineNumber, actLine, "Value out of range");
+        AsmError error(actLineNumber, actLine, "Value exceeding range of 32 bits");
         throw error;
     }
 }

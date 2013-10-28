@@ -1,5 +1,3 @@
 .pc = 0
 
-    sei
-    cli
-    rts
+    psh $3243344
