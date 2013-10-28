@@ -82,7 +82,7 @@ int AsmA65k::convertStringToInteger(const string valueStr)
 
 // ============================================================================
 
-int AsmA65k::findChar(string text, char c)
+int AsmA65k::findChar(const string text, char c)
 {
 	const int size = (int)text.size();
     c = toupper(c);
@@ -136,7 +136,7 @@ void AsmA65k::throwException_InvalidRegister()
 
 // ============================================================================
 
-void AsmA65k::checkIntegerRange(uint64_t result)
+void AsmA65k::checkIntegerRange(const uint64_t result)
 {
     const uint64_t maxInt = 0xffffffff;
     
@@ -168,7 +168,7 @@ void AsmA65k::throwException_InvalidOperands()
 
 // ============================================================================
 
-string AsmA65k::removeSquaredBrackets(string operand)
+string AsmA65k::removeSquaredBrackets(const string operand)
 {
     const static regex rx_removeSquareBrackets(R"(\[\s*(.*)\s*\])");
     smatch result;

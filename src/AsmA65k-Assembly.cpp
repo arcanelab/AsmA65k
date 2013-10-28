@@ -75,16 +75,16 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
         case OT_REGISTER:                                    // INC r0
             handleOperand_Register(operand, instructionWord);
             break;
-        case OT_LABEL:                                       // INC label
-            effectiveAddress = resolveLabel(operand);        // NOTE: break omitted on purpose!
-        case OT_CONSTANT:                                    // BNE 40 or INC $f000
+        case OT_LABEL:                                       // BEQ label
+            effectiveAddress = resolveLabel(operand, PC+2);        // NOTE: break omitted on purpose!
+        case OT_CONSTANT:                                    // BNE $4000 or PSH $f000
             handleOperand_Constant(operand, instructionWord, effectiveAddress);
             break;
         case OT_INDIRECT_REGISTER:                           // INC [r0]
             handleOperand_IndirectRegister(operand, instructionWord);
             break;
         case OT_INDIRECT_LABEL:                              // INC [label]
-            effectiveAddress = resolveLabel(removeSquaredBrackets(operand));
+            effectiveAddress = resolveLabel(removeSquaredBrackets(operand), PC+2);
             handleOperand_IndirectConstant(effectiveAddress, instructionWord);
             break;
         case OT_INDIRECT_CONSTANT:                           // INC.w [$ffff]
@@ -289,7 +289,7 @@ void AsmA65k::handleOperand_Register_IndirectLabel(const string operand, Instruc
     instructionWord.registerConfiguration = RC_REGISTER;
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.left);
-    addData(OS_32BIT, resolveLabel(sp.right));
+    addData(OS_32BIT, resolveLabel(sp.right, PC));
 }
 
 // ============================================================================
@@ -317,7 +317,7 @@ void AsmA65k::handleOperand_IndirectLabel_Register(const string operand, Instruc
     instructionWord.registerConfiguration = RC_REGISTER;
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.right);
-    addData(OS_32BIT, resolveLabel(sp.left));
+    addData(OS_32BIT, resolveLabel(sp.left, PC));
 }
 
 // ============================================================================
@@ -345,7 +345,7 @@ void AsmA65k::handleOperand_IndirectLabelPlusRegister_Register(const string oper
     
     instructionWord.addressingMode = AM_INDEXED_DEST;
     handleDoubleRegisters(StringPair(match[2], match[3]), instructionWord);
-    addData(OS_32BIT, resolveLabel(match[1]));
+    addData(OS_32BIT, resolveLabel(match[1], PC));
 }
 
 // ============================================================================
@@ -373,7 +373,7 @@ void AsmA65k::handleOperand_IndirectRegisterPlusLabel_Register(const string oper
     
     instructionWord.addressingMode = AM_INDEXED_DEST;
     handleDoubleRegisters(StringPair(match[1], match[3]), instructionWord);
-    addData(OS_32BIT, resolveLabel(match[2]));
+    addData(OS_32BIT, resolveLabel(match[2], PC));
 }
 
 // ============================================================================
@@ -423,7 +423,7 @@ void AsmA65k::handleOperand_Register_IndirectRegisterPlusLabel(const string oper
     
     instructionWord.addressingMode = AM_INDEXED_SRC;
     handleDoubleRegisters(StringPair(match[1], match[2]), instructionWord);
-    addData(OS_32BIT, resolveLabel(match[3]));
+    addData(OS_32BIT, resolveLabel(match[3], PC));
 }
 
 // ============================================================================
@@ -438,12 +438,12 @@ void AsmA65k::handleOperand_Register_IndirectLabelPlusRegister(const string oper
 
     instructionWord.addressingMode = AM_INDEXED_SRC;
     handleDoubleRegisters(StringPair(match[1], match[3]), instructionWord);
-    addData(OS_32BIT, resolveLabel(match[2]));
+    addData(OS_32BIT, resolveLabel(match[2], PC));
 }
 
 // ============================================================================
 
-void AsmA65k::handleDoubleRegisters(StringPair sp, InstructionWord instructionWord)
+void AsmA65k::handleDoubleRegisters(const StringPair sp, InstructionWord instructionWord)
 {
     RegisterType regLeft = detectRegisterType(sp.left);
     RegisterType regRight = detectRegisterType(sp.right);
@@ -521,7 +521,7 @@ void AsmA65k::handleOperand_Register_Label(const string operand, InstructionWord
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.left);
     
-    dword address = resolveLabel(sp.right);
+    dword address = resolveLabel(sp.right, (OpcodeSize)instructionWord.opcodeSize);
     verifyRangeForConstant(std::to_string(address), (OpcodeSize)instructionWord.opcodeSize);
     addData((OpcodeSize)instructionWord.opcodeSize, address);
 }
@@ -572,7 +572,7 @@ void AsmA65k::handleOperand_IndirectRegisterPlusLabel(const string operand, Inst
     addInstructionWord(instructionWord); // 2 byte
     addRegisterConfigurationByte(sp.left); // 1 byte
     // add constant after RCB
-    addData(OS_32BIT, resolveLabel(sp.right)); // 4 bytes
+    addData(OS_32BIT, resolveLabel(sp.right, PC)); // 4 bytes
 }
 
 // ============================================================================
@@ -598,7 +598,7 @@ void AsmA65k::handleOperand_Register(const string operand, InstructionWord instr
 
 // ============================================================================
 
-void AsmA65k::addRegisterConfigurationByte(string registerString)
+void AsmA65k::addRegisterConfigurationByte(const string registerString)
 {
     // check for valid register specification in operand
     RegisterType registerIndex = detectRegisterType(registerString);
@@ -732,7 +732,7 @@ byte AsmA65k::getOpcodeSize(const string modifierCharacter)
 
 // ============================================================================
 
-void AsmA65k::addInstructionWord(InstructionWord instructionWord)
+void AsmA65k::addInstructionWord(const InstructionWord instructionWord)
 {
     segments.back().addWord(*(word *)&instructionWord);
     PC += 2;
@@ -786,14 +786,15 @@ void AsmA65k::addData(const string sizeSpecifier, const dword data)
 
 // ============================================================================
 
-dword AsmA65k::resolveLabel(const string label)
+dword AsmA65k::resolveLabel(const string label, const dword address, const OpcodeSize size)
 {
 //    log("resolveLabel: '%s'\n", label.c_str());
     dword effectiveAddress = 0;
     
     if(labels.find(label) == labels.end())
     {
-        unresolvedLabels[label].push_back(PC+2);
+//        unresolvedLabels[label].push_back(PC+2);
+        throw; // undefined label
     }
     else
     {
