@@ -621,9 +621,9 @@ AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromInteger(int32_t value)
 
 void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instructionWord, const dword effectiveAddress)
 {
-    const byte in = instructionWord.instructionCode;
+    const byte instruction = instructionWord.instructionCode;
     // if branching instruction, eg.: BNE 363
-    if(in >= I_BRA && in <= I_BGE)
+    if(instruction >= I_BRA && instruction <= I_BGE)
     {
         instructionWord.addressingMode = AM_RELATIVE;
         instructionWord.registerConfiguration = RC_NOREGISTER;
@@ -635,7 +635,7 @@ void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instr
         addData((OpcodeSize)instructionWord.opcodeSize, diff);
     }
     else
-        switch (in)
+        switch (instruction)
         {
             case I_PSH: // psh $ff
                 if(getOpcodeSizeFromInteger(convertStringToInteger(operand)) < (OpcodeSize)instructionWord.opcodeSize)
