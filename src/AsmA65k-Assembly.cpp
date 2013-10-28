@@ -555,8 +555,7 @@ void AsmA65k::handleOperand_IndirectRegisterPlusConstant(const string operand, I
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.left);
     // add constant after i.w.
-    try { addData(OS_32BIT, convertStringToInteger(sp.right)); }
-    catch(...) { throwException_InvalidNumberFormat(); }
+    addData(OS_32BIT, convertStringToInteger(sp.right));
 }
 
 // ============================================================================
@@ -615,7 +614,8 @@ AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromInteger(int32_t value)
     if(value >= -32768 && value <= 32767)
         return OS_16BIT;
     
-    return OS_32BIT;}
+    return OS_32BIT;
+}
 
 // ============================================================================
 
@@ -657,13 +657,6 @@ void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instr
                 addData(OS_32BIT, convertStringToInteger(operand));
                 break;
         }
-    /*
-    if(instructionWord.opcodeSize == OS_DIVSIGN)
-    {
-        AsmError error(actLineNumber, actLine, "Invalid size specifier");
-        throw error;
-    }
-    */
 }
 
 // ============================================================================

@@ -76,7 +76,8 @@ int AsmA65k::convertStringToInteger(const string valueStr)
         return (int)result;
     }
     
-    throw; // invalid number format
+    throwException_InvalidNumberFormat(); // invalid number format
+    return 0;
 }
 
 // ============================================================================
