@@ -612,6 +612,18 @@ void AsmA65k::addRegisterConfigurationByte(string registerString)
 
 // ============================================================================
 
+AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromInteger(dword value)
+{
+    if(value >= -128 && value <= 127)
+        return OS_8BIT;
+    if(value >= -32768 && value <= 32767)
+        return OS_16BIT;
+    
+    return OS_32BIT;
+}
+
+// ============================================================================
+
 void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instructionWord, const dword effectiveAddress)
 {
     const byte in = instructionWord.instructionCode;
@@ -622,26 +634,10 @@ void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instr
         instructionWord.registerConfiguration = RC_NOREGISTER;
 
         int32_t diff = effectiveAddress - PC;
-        if((diff >= -128) && (diff <= 127)) // diff = [-128,127] inclusive
-        {
-            instructionWord.opcodeSize = OS_8BIT;
-            addInstructionWord(instructionWord);
-            addData(OS_8BIT, (byte)diff);
-            return;
-        }
-        if((diff >= -32768) && (diff <= 32767)) // diff = [-32768,32767] inclusive
-        {
-            instructionWord.opcodeSize = OS_16BIT;
-            addInstructionWord(instructionWord);
-            addData(OS_16BIT, (word)diff);
-            return;
-        }
-
-        // diff = [-0x8000000,0x7fffffff] inclusive
-        instructionWord.opcodeSize = OS_32BIT;
+        
+        instructionWord.opcodeSize = getOpcodeSizeFromInteger(diff);
         addInstructionWord(instructionWord);
-        addData(OS_32BIT, (dword)diff);
-        return;
+        addData((OpcodeSize)instructionWord.opcodeSize, diff);
     }
     else
         switch (in)

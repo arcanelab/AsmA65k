@@ -232,6 +232,7 @@ private:
     void checkIfSizeSpecifierIsAllowed(const string mnemonic, const OpcodeSize opcodeSize);
     void checkIfAddressingModeIsLegalForThisInstruction(const string mnemonic, const OperandTypes operandType);
     bool findAddressingMode(const string mnemonic, AddressingModes am);
+    OpcodeSize getOpcodeSizeFromInteger(dword value);
     
     // AsmA65k-Directives.cpp
     bool processDirectives(const string line);              // the main method for processing & handling the directives
