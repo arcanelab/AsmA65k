@@ -614,9 +614,10 @@ void AsmA65k::addRegisterConfigurationByte(string registerString)
 
 AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromInteger(dword value)
 {
-    if(value >= -128 && value <= 127)
+    if(value <= 0xff)
         return OS_8BIT;
-    if(value >= -32768 && value <= 32767)
+    
+    if(value <= 0xffff)
         return OS_16BIT;
     
     return OS_32BIT;
@@ -643,6 +644,12 @@ void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instr
         switch (in)
         {
             case I_PSH: // psh $ff
+                log("operand = %X, opcodeSize = %d\n", convertStringToInteger(operand), getOpcodeSizeFromInteger(convertStringToInteger(operand)));
+                if(getOpcodeSizeFromInteger(convertStringToInteger(operand)) != (OpcodeSize)instructionWord.opcodeSize)
+                {
+                    AsmError error(actLineNumber, actLine, "Value out of range");
+                    throw error;
+                }
                 instructionWord.addressingMode = AM_CONST_IMMEDIATE;
                 instructionWord.registerConfiguration = RC_NOREGISTER;
                 addInstructionWord(instructionWord);

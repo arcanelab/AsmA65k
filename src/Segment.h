@@ -27,7 +27,7 @@ public:
         data.push_back((wordToBeAdded & 0xff00) >> 8);
     }
 
-    void addDword(byte dwordToBeAdded)
+    void addDword(dword dwordToBeAdded)
     {
         data.push_back(dwordToBeAdded & 0xff);
         data.push_back((dwordToBeAdded & 0xff00) >> 8);
