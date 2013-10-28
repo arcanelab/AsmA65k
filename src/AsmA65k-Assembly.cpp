@@ -177,13 +177,7 @@ AsmA65k::AddressingModes AsmA65k::getAddressingModeFromOperand(const OperandType
         
         case OT_LABEL:                                       // INC label
         case OT_CONSTANT:                                    // BNE 40 or INC $f000
-            return AM_AMBIGOUS;
-/*
-            return AM_RELATIVE;
-            return AM_DIRECT;
-            return AM_CONST_IMMEDIATE;
- */
-        break;
+            return AM_AMBIGOUS; // AM_RELATIVE or AM_DIRECT or AM_CONST_IMMEDIATE
 
         case OT_INDIRECT_REGISTER:                           // INC [r0]
             return AM_REGISTER1;
@@ -240,10 +234,14 @@ AsmA65k::AddressingModes AsmA65k::getAddressingModeFromOperand(const OperandType
     return AM_NONE; // will never get here
 }
 
+// ============================================================================
+
 bool AsmA65k::findAddressingMode(const string mnemonic, AddressingModes am)
 {
     return (std::find(opcodes[mnemonic].addressingModesAllowed.begin(), opcodes[mnemonic].addressingModesAllowed.end(), am)) != opcodes[mnemonic].addressingModesAllowed.end();
 }
+
+// ============================================================================
 
 void AsmA65k::checkIfAddressingModeIsLegalForThisInstruction(const string mnemonic, const OperandTypes operandType)
 {
