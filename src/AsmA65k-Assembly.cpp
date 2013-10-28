@@ -644,8 +644,8 @@ void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instr
         switch (in)
         {
             case I_PSH: // psh $ff
-                log("operand = %X, opcodeSize = %d\n", convertStringToInteger(operand), getOpcodeSizeFromInteger(convertStringToInteger(operand)));
-                if(getOpcodeSizeFromInteger(convertStringToInteger(operand)) != (OpcodeSize)instructionWord.opcodeSize)
+                log("operand = $%X, opcodeSize = %d\n", convertStringToInteger(operand), getOpcodeSizeFromInteger(convertStringToInteger(operand)));
+                if(getOpcodeSizeFromInteger(convertStringToInteger(operand)) < (OpcodeSize)instructionWord.opcodeSize)
                 {
                     AsmError error(actLineNumber, actLine, "Value out of range");
                     throw error;
