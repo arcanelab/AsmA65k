@@ -603,25 +603,19 @@ void AsmA65k::addRegisterConfigurationByte(string registerString)
     // check for valid register specification in operand
     RegisterType registerIndex = detectRegisterType(registerString);
     
-    log("register = %s, registerIndex = %d\n", registerString.c_str(), registerIndex);
-    
-    // asserting correct range for register
-    
     addData(OS_8BIT, registerIndex);
 }
 
 // ============================================================================
 
-AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromInteger(dword value)
+AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromInteger(int32_t value)
 {
-    if(value <= 0xff)
+    if(value >= -128 && value <= 127)
         return OS_8BIT;
-    
-    if(value <= 0xffff)
+    if(value >= -32768 && value <= 32767)
         return OS_16BIT;
     
-    return OS_32BIT;
-}
+    return OS_32BIT;}
 
 // ============================================================================
 
@@ -644,7 +638,6 @@ void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instr
         switch (in)
         {
             case I_PSH: // psh $ff
-                log("operand = $%X, opcodeSize = %d\n", convertStringToInteger(operand), getOpcodeSizeFromInteger(convertStringToInteger(operand)));
                 if(getOpcodeSizeFromInteger(convertStringToInteger(operand)) < (OpcodeSize)instructionWord.opcodeSize)
                 {
                     AsmError error(actLineNumber, actLine, "Value out of range");

@@ -1,3 +1,5 @@
 .pc = 0
 
-psh $1
+back:
+    mov r15, $ffffffff
+    bne back
