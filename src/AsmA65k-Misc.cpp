@@ -142,7 +142,7 @@ void AsmA65k::checkIntegerRange(uint64_t result)
     
     if((uint64_t)result > maxInt)
     {
-        AsmError error(actLineNumber, actLine, "Value exceeding range of 32 bits");
+        AsmError error(actLineNumber, actLine, "Value exceeding 32 bit range");
         throw error;
     }
 }
@@ -174,8 +174,7 @@ string AsmA65k::removeSquaredBrackets(string operand)
     smatch result;
     if(regex_match(operand, result, rx_removeSquareBrackets) == false)
     {
-        log("Internal error\n");
-        throw;
+        throwException_InternalError();
     }
     
     return result[1].str();

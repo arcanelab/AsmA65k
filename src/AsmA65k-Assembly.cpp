@@ -221,9 +221,8 @@ AsmA65k::AddressingModes AsmA65k::getAddressingModeFromOperand(const OperandType
         default:
             throwException_InvalidOperands();
     }
-    
-    log("Internal error\n");
-    throw;
+
+    throwException_InternalError();
     
     return AM_NONE; // will never get here
 }
@@ -521,8 +520,10 @@ void AsmA65k::handleOperand_Register_Label(const string operand, InstructionWord
     instructionWord.registerConfiguration = RC_REGISTER;
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.left);
-    verifyRangeForConstant(sp.right, (OpcodeSize)instructionWord.opcodeSize);
-    addData((OpcodeSize)instructionWord.opcodeSize, resolveLabel(sp.right));
+    
+    dword address = resolveLabel(sp.right);
+    verifyRangeForConstant(std::to_string(address), (OpcodeSize)instructionWord.opcodeSize);
+    addData((OpcodeSize)instructionWord.opcodeSize, address);
 }
 
 // ============================================================================
@@ -756,8 +757,7 @@ void AsmA65k::addData(const OpcodeSize size, const dword data)
             PC++;
             break;
         case OS_DIVSIGN:
-            log("Internal error");
-            throw;
+            throwException_InternalError();
     }
 }
 
