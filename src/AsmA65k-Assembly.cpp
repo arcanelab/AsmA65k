@@ -277,7 +277,7 @@ void AsmA65k::handleOperand_Register_IndirectConstant(const string operand, Inst
     instructionWord.registerConfiguration = RC_REGISTER;
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.left);
-    addData(OS_32BIT, convertStringToInteger(sp.right));
+    addData((OpcodeSize)instructionWord.opcodeSize, convertStringToInteger(sp.right));
 }
 
 // ============================================================================
@@ -615,6 +615,17 @@ AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromInteger(int32_t value)
         return OS_16BIT;
     
     return OS_32BIT;
+}
+
+// ============================================================================
+
+void AsmA65k::verifyRangeForConstant(const string constant, InstructionWord instructionWord)
+{
+    if(getOpcodeSizeFromInteger(convertStringToInteger(constant)) < (OpcodeSize)instructionWord.opcodeSize)
+    {
+        AsmError error(actLineNumber, actLine, "Value out of range");
+        throw error;
+    }
 }
 
 // ============================================================================

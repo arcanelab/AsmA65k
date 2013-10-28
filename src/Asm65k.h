@@ -233,6 +233,7 @@ private:
     void checkIfAddressingModeIsLegalForThisInstruction(const string mnemonic, const OperandTypes operandType);
     bool findAddressingMode(const string mnemonic, AddressingModes am);
     OpcodeSize getOpcodeSizeFromInteger(int32_t value);
+    void verifyRangeForConstant(const string constant, InstructionWord instructionWord);
     
     // AsmA65k-Directives.cpp
     bool processDirectives(const string line);              // the main method for processing & handling the directives
