@@ -237,7 +237,7 @@ AsmA65k::AddressingModes AsmA65k::getAddressingModeFromOperand(const OperandType
     log("Internal error\n");
     throw;
     
-    return AM_NONE; // should never get here
+    return AM_NONE; // will never get here
 }
 
 void AsmA65k::checkIfAddressingModeIsLegalForThisInstruction(const string mnemonic, const OperandTypes operandType)
@@ -264,7 +264,7 @@ void AsmA65k::checkIfSizeSpecifierIsAllowed(const string mnemonic, const OpcodeS
 {
     if((opcodes[mnemonic].isSizeSpecifierAllowed == false) && (opcodeSize != OS_NONE))
     {
-        AsmError error(AsmError(actLineNumber, actLine, "Size specifier is not allowed for this instruction"));
+        AsmError error(actLineNumber, actLine, "Size specifier is not allowed for this instruction");
         throw error;
     }
 }
