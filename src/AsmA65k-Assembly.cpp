@@ -53,25 +53,18 @@ void AsmA65k::processAsmLine(string line)
 
 void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, const string operand)
 {
-    //printf("assembleInstruction(): instr. = '%s',\t\t.b/w = '%1s',\t\t\toperands = '%s'\n", mnemonic.c_str(), modifier.c_str(), operand.c_str());
-    //printf("OT_NONE: %d\nOT_REGISTER: %d\nOT_LABEL: %d\nOT_CONSTANT: %d\n\n", OT_NONE, OT_REGISTER, OT_LABEL, OT_CONSTANT);
-    //printf("assembleInstruction(): operandType = %d\n", detectOperandType(operand));
-    
     InstructionWord instructionWord;
-    
-    //log("modifier = '%s'\n", modifier.c_str());
     
     instructionWord.opcodeSize = getOpcodeSize(modifier);
     instructionWord.instructionCode = opcodes[mnemonic].instructionCode;
     
     checkIfSizeSpecifierIsAllowed(mnemonic, (OpcodeSize)instructionWord.opcodeSize);
 
-    dword effectiveAddress = 0;
-    
     OperandTypes operandType = detectOperandType(operand);
     checkIfAddressingModeIsLegalForThisInstruction(mnemonic, operandType);
     
-    //log("operandType = %d\n", operandType);
+    dword effectiveAddress = 0;
+    
     switch (operandType)
     {
         case OT_NONE:                                        // SEI
@@ -165,6 +158,8 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
     }
 }
 
+// ============================================================================
+
 AsmA65k::AddressingModes AsmA65k::getAddressingModeFromOperand(const OperandTypes operandType)
 {
     switch (operandType)
@@ -176,7 +171,7 @@ AsmA65k::AddressingModes AsmA65k::getAddressingModeFromOperand(const OperandType
             return AM_REGISTER1;
         
         case OT_LABEL:                                       // INC label
-        case OT_CONSTANT:                                    // BNE 40 or INC $f000
+        case OT_CONSTANT:                                    // BNE 40 or INC $f000 or PSH.w 0
             return AM_AMBIGOUS; // AM_RELATIVE or AM_DIRECT or AM_CONST_IMMEDIATE
 
         case OT_INDIRECT_REGISTER:                           // INC [r0]
@@ -660,8 +655,7 @@ void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instr
         // depending on the size modifier, add effective address as operand
         addData((OpcodeSize)instructionWord.opcodeSize, effectiveAddress);
 
-        // TODO: write a method that decides if an opcode size specifier is valid for a given instruction.
-        if(instructionWord.opcodeSize == OS_NONE)
+        if(instructionWord.opcodeSize == OS_DIVSIGN)
         {
             AsmError error(actLineNumber, actLine, "Invalid size specifier");
             throw error;

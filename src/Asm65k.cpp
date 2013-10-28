@@ -72,7 +72,7 @@ void AsmA65k::initializeOpcodetable()
 {
     OpcodeAttribute oa;
     oa.isSizeSpecifierAllowed = true;
-    
+
     oa.addressingModesAllowed = { AM_DIRECT, AM_REGISTER1, AM_ABSOLUTE1, AM_REGISTER_INDIRECT1, AM_INDEXED1 };
     oa.instructionCode = I_JMP; opcodes["jmp"] = oa;
     oa.instructionCode = I_JSR; opcodes["jsr"] = oa;
