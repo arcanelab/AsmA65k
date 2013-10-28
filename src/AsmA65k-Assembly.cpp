@@ -240,22 +240,26 @@ AsmA65k::AddressingModes AsmA65k::getAddressingModeFromOperand(const OperandType
     return AM_NONE; // will never get here
 }
 
+bool AsmA65k::findAddressingMode(const string mnemonic, AddressingModes am)
+{
+    return (std::find(opcodes[mnemonic].addressingModesAllowed.begin(), opcodes[mnemonic].addressingModesAllowed.end(), am)) != opcodes[mnemonic].addressingModesAllowed.end();
+}
+
 void AsmA65k::checkIfAddressingModeIsLegalForThisInstruction(const string mnemonic, const OperandTypes operandType)
 {
     AddressingModes addressingMode = getAddressingModeFromOperand(operandType);
     
-    if(addressingMode == AM_AMBIGOUS)
+    if(addressingMode == AM_AMBIGOUS) // AM_RELATIVE or AM_DIRECT or AM_CONST_IMMEDIATE
     {
-        
+        if (findAddressingMode(mnemonic, AM_RELATIVE)) return;
+        if (findAddressingMode(mnemonic, AM_DIRECT)) return;
+        if (findAddressingMode(mnemonic, AM_CONST_IMMEDIATE)) return;
     }
-    
-    if( std::find(opcodes[mnemonic].addressingModesAllowed.begin(),
-                  opcodes[mnemonic].addressingModesAllowed.end(), addressingMode)
-                  == opcodes[mnemonic].addressingModesAllowed.end() )
-    {
-        AsmError error(actLineNumber, actLine, "Invalid addressing mode");
-        throw error;
-    }
+    else if( findAddressingMode(mnemonic, addressingMode) )
+        return;
+
+    AsmError error(actLineNumber, actLine, "Invalid addressing mode");
+    throw error;
 }
 
 // ============================================================================
