@@ -615,52 +615,59 @@ void AsmA65k::addRegisterConfigurationByte(string registerString)
 void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instructionWord, const dword effectiveAddress)
 {
     const byte in = instructionWord.instructionCode;
-    
     // if branching instruction, eg.: BNE 363
     if(in >= I_BRA && in <= I_BGE)
     {
-        //instructionWord.addressingMode = AM_RELATIVE;
-        dword diff = effectiveAddress - PC;
-        *(dword *)&instructionWord = diff & 0xff; // we store the low byte of the relative address in the high byte of the instruction word
-        addInstructionWord(instructionWord);
-        segments.back().addByte((diff & 0xff00) >> 8);
-    }
-    else // non-branching instruction, eg.: DEC.w $ff32
-    {   // TODO: should I maybe convert this to a switch statement?
-        // absolute?
-        if (in == I_CLR || in == I_PSH || in == I_POP || in == I_INC || in == I_DEC )
-        {
-            instructionWord.addressingMode = AM_ABSOLUTE1;
-        }
-        else // direct?
-        {
-            if (in == I_JMP || in == I_JSR)
-                instructionWord.addressingMode = AM_DIRECT;
-            else
-            {
-                if (in == I_PSH)
-                    instructionWord.addressingMode = AM_CONST_IMMEDIATE;
-                else // neither -> error
-                {
-                    AsmError error(actLineNumber, actLine, "Invalid addressing mode");
-                    throw error;
-                }
-            }
-        }
-        
-        // either with absolute1 or direct, the registerConfiguration is empty
+        instructionWord.addressingMode = AM_RELATIVE;
         instructionWord.registerConfiguration = RC_NOREGISTER;
-        addInstructionWord(instructionWord); // add finished instruction word
-        
-        // depending on the size modifier, add effective address as operand
-        addData((OpcodeSize)instructionWord.opcodeSize, effectiveAddress);
 
-        if(instructionWord.opcodeSize == OS_DIVSIGN)
+        int32_t diff = effectiveAddress - PC;
+        if((diff >= -128) && (diff <= 127)) // diff = [-128,127] inclusive
         {
-            AsmError error(actLineNumber, actLine, "Invalid size specifier");
-            throw error;
+            instructionWord.opcodeSize = OS_8BIT;
+            addInstructionWord(instructionWord);
+            addData(OS_8BIT, (byte)diff);
+            return;
         }
+        if((diff >= -32768) && (diff <= 32767)) // diff = [-32768,32767] inclusive
+        {
+            instructionWord.opcodeSize = OS_16BIT;
+            addInstructionWord(instructionWord);
+            addData(OS_16BIT, (word)diff);
+            return;
+        }
+
+        // diff = [-0x8000000,0x7fffffff] inclusive
+        instructionWord.opcodeSize = OS_32BIT;
+        addInstructionWord(instructionWord);
+        addData(OS_32BIT, (dword)diff);
+        return;
     }
+    else
+        switch (in)
+        {
+            case I_PSH: // psh $ff
+                instructionWord.addressingMode = AM_CONST_IMMEDIATE;
+                instructionWord.registerConfiguration = RC_NOREGISTER;
+                addInstructionWord(instructionWord);
+                addData((OpcodeSize)instructionWord.opcodeSize, convertStringToInteger(operand));
+                break;
+            case I_JMP: // jmp $43434
+            case I_JSR: // jsr $3434
+                // these always use 32 bit address/constant
+                instructionWord.addressingMode = AM_DIRECT;
+                instructionWord.registerConfiguration = RC_NOREGISTER;
+                addInstructionWord(instructionWord);
+                addData(OS_32BIT, convertStringToInteger(operand));
+                break;
+        }
+    /*
+    if(instructionWord.opcodeSize == OS_DIVSIGN)
+    {
+        AsmError error(actLineNumber, actLine, "Invalid size specifier");
+        throw error;
+    }
+    */
 }
 
 // ============================================================================
