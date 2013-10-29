@@ -11,7 +11,8 @@
 #ifndef __AsmA65k__AsmA65k__
 #define __AsmA65k__AsmA65k__
 
-#define log(fmt, ...) printf(("[%s: %d] %s(): " fmt), __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+//#define log(fmt, ...) printf(("[%s: %d] %s(): " fmt), __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define log printf
 
 #include "Segment.h"
 #include <iostream>

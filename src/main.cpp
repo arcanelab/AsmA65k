@@ -22,7 +22,7 @@ int main(int argc, const char * argv[])
         printf("Please specify an argument.\n");
         return -1;
     }
-    printf("AsmA65K alpha version. Copyright (c) 2013 Zoltán Majoros. (zoltan@arcanelab.com)\n");
+    printf("AsmA65K alpha version. Copyright (c) 2013 Zoltán Majoros. (zoltan@arcanelab.com)\n\n");
     
     // load source file into 'buffer'
     ifstream fs(argv[1]);
@@ -41,8 +41,8 @@ int main(int argc, const char * argv[])
     try { segments = asm65k.assemble(buffer); }
     catch(AsmError error)
     {
-        log("%s\n", error.lineContent.c_str());
         log("Assembly error in line %d: \"%s\"\n", error.lineNumber, error.errorMessage.c_str());
+        log("Line content: %s\n", error.lineContent.c_str());
         return 1;
     }
 
@@ -52,7 +52,7 @@ int main(int argc, const char * argv[])
     {
         Segment actSegment = (*segments)[i];
         
-        printf("\n$%.8X:\n", actSegment.address);
+        printf("$%.8X:\n", actSegment.address);
         
         for(int j = 0; j < actSegment.data.size(); j++)
         {
