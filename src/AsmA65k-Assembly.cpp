@@ -793,8 +793,12 @@ dword AsmA65k::resolveLabel(const string label, const dword address, const Opcod
     
     if(labels.find(label) == labels.end())
     {
-//        unresolvedLabels[label].push_back(PC+2);
-        throw; // undefined label
+        LabelLocation labelLocation;
+        labelLocation.address = address;
+        labelLocation.opcodeSize = size;
+        unresolvedLabels[label].push_back(labelLocation);
+        
+        return 0;
     }
     else
     {
