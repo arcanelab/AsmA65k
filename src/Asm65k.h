@@ -178,15 +178,17 @@ private:
     {
         dword address;
         OpcodeSize opcodeSize;
+        dword lineNumber;
+        string lineContent;
     };
     
     // variables
-    std::vector<Segment> segments;          // the machine code & data get compiled into this
+    vector<Segment> segments;          // the machine code & data get compiled into this
     map<string, OpcodeAttribute> opcodes;   // contains info about each instruction, indexed by their names
     map<string, dword> labels;              // symbol table containing all labels and their addresses
     map<string, vector<LabelLocation>> unresolvedLabels;
     dword PC = 0;                           // keeps track of the current compiling position
-    unsigned int actLineNumber = 0;         // keeps track of the current line in the source code
+    unsigned int actLineNumber = 1;         // keeps track of the current line in the source code
     string actLine;                         // the content of the current source code line being assembled
     
     // AsmA65k.cpp
@@ -262,6 +264,7 @@ private:
     void throwException_InvalidRegister();                  // throws an exception
     void throwException_InvalidOperands();                  // throws an exception
     void throwException_InternalError();                    // throws an exception
+    void throwException_SymbolOutOfRange();
     string removeSquaredBrackets(const string operand);           // removes the enclosing squared bracked from a string
     StringPair splitStringByPlusSign(const string operand); // splits a string into a StringPair separated by a '+' character
     StringPair splitStringByComma(const string operand);    // splits a string into a StringPair separated by a ',' character

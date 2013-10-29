@@ -1,5 +1,5 @@
 .pc = 0
 
-    mov.b   r7, label
+    mov   r7, [magic]
 
-.def label = $12345678
+.def magic = $12345678

@@ -521,7 +521,7 @@ void AsmA65k::handleOperand_Register_Label(const string operand, InstructionWord
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.left);
     
-    dword address = resolveLabel(sp.right, (OpcodeSize)instructionWord.opcodeSize);
+    dword address = resolveLabel(sp.right, PC, (OpcodeSize)instructionWord.opcodeSize);
     verifyRangeForConstant(std::to_string(address), (OpcodeSize)instructionWord.opcodeSize);
     addData((OpcodeSize)instructionWord.opcodeSize, address);
 }
@@ -636,10 +636,7 @@ AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromUnsigedInteger(dword value)
 void AsmA65k::verifyRangeForConstant(const string constant, OpcodeSize opcodeSize)
 {
     if(getOpcodeSizeFromUnsigedInteger(convertStringToInteger(constant)) < opcodeSize)
-    {
-        AsmError error(actLineNumber, actLine, "Value out of range");
-        throw error;
-    }
+        throwException_SymbolOutOfRange();
 }
 
 // ============================================================================
@@ -796,6 +793,8 @@ dword AsmA65k::resolveLabel(const string label, const dword address, const Opcod
         LabelLocation labelLocation;
         labelLocation.address = address;
         labelLocation.opcodeSize = size;
+        labelLocation.lineContent = actLine;
+        labelLocation.lineNumber = actLineNumber;
         unresolvedLabels[label].push_back(labelLocation);
         
         return 0;

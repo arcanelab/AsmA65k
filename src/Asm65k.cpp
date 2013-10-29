@@ -34,11 +34,64 @@ std::vector<Segment>* AsmA65k::assemble(stringstream &source)
             processAsmLine(actLine);
         actLineNumber++;
     }
-/*
-    log("----- labels -----\n");
-    for(auto label : labels)
-        log("'%-8s' = $%.8X\n", label.first.c_str(), label.second);
-*/    
+    
+//    for(auto label : labels)
+//        log("'%-16s' = $%.8X\n", label.first.c_str(), label.second);
+
+    // iterate through all unresolved labels map
+    for(auto unresolvedLabel : unresolvedLabels)
+    {
+        // extract vector of LabelLocations from map (as a reference)
+        vector<LabelLocation> &locations = unresolvedLabel.second;
+        string label = unresolvedLabel.first;
+
+        // iterate through LabelLocations in vector
+        for(auto &actLocation : locations)
+        {
+            // check if label had been resolved later in assembly file
+            if(labels.find(label) == labels.end())
+            {
+                AsmError error(actLocation.lineNumber, actLocation.lineContent, "Undefined label: " + label);
+                throw error;
+            }
+            
+            // now we must find which segment this value must be written, so we iterate thorugh each segments
+            for(auto &actSegment : segments)
+            {
+                // make boundary check for given segment
+                if((actSegment.address <= actLocation.address) && ((actSegment.data.size()+actSegment.address) > actLocation.address))
+                {
+                    // suitable segment found, write value to stored address in that segment in the right size
+                    dword value = labels[label];
+                    
+                    if(getOpcodeSizeFromUnsigedInteger(value) < actLocation.opcodeSize)
+                    {
+                        AsmError error(actLocation.lineNumber, actLocation.lineContent, "Symbol out of range for specified size");
+                        throw error;
+                    }
+                    
+//                    log("location = $%X, size = %u, value = $%X\n", actLocation.address, actLocation.opcodeSize, value);
+                    
+                    switch (actLocation.opcodeSize)
+                    {
+                        case OS_8BIT:
+                            actSegment.writeByte(actLocation.address, (byte)value);
+                            break;
+                        case OS_16BIT:
+                            actSegment.writeWord(actLocation.address, (word)value);
+                            break;
+                        case OS_32BIT:
+                            actSegment.writeDword(actLocation.address, (dword)value);
+                            break;
+                        default:
+                            throwException_InternalError();
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    
     return &segments;
 }
 

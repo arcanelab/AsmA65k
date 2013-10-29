@@ -134,6 +134,12 @@ void AsmA65k::throwException_InvalidRegister()
     throw error;
 }
 
+void AsmA65k::throwException_SymbolOutOfRange()
+{
+    AsmError error(actLineNumber, actLine, "Symbol out of range for specified size");
+    throw error;
+}
+
 // ============================================================================
 
 void AsmA65k::checkIntegerRange(const uint64_t result)

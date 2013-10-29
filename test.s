@@ -25,8 +25,9 @@ loop:   mov     [$1000+r7], r6
         add     pc, [nev + r10]  ; here's a comment, too
         add     [adatok], r4
         add     [adatok + r3], r4
+        mov.b   r9, [MINIVIC]
         rts
 
 nev:    .text "John Doe"
-;adatok: .dword $f, 2, 3 ,4, 5,6,$7,$8,$6444,%01101011
-;nev2:   .text "Majoros "The Guy" Bálint" ; a fiam neve
+adatok: .dword $f, 2, 3 ,4, 5,6,$7,$8,$6444,%01101011
+nev2:   .text "Majoros "The Guy" Bálint" ; a fiam neve

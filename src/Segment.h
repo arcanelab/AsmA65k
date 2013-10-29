@@ -35,6 +35,27 @@ public:
         data.push_back((dwordToBeAdded & 0xff000000) >> 24);
     }
     
+    void writeByte(dword address, byte value)
+    {
+        data[address - this->address] = value;
+    }
+
+    void writeWord(dword address, word value)
+    {
+        dword index = address - this->address;
+        data[index++] = (byte)(value & 0xff);
+        data[index]   = (byte)((value & 0xff00) >> 8);
+    }
+
+    void writeDword(dword address, dword value)
+    {
+        dword index = address - this->address;
+        data[index++] = (byte)(value & 0xff);
+        data[index++] = (byte)((value & 0xff00) >> 8);
+        data[index++] = (byte)((value & 0xff0000) >> 16);
+        data[index]   = (byte)((value & 0xff000000) >> 24);
+    }
+
     std::vector<byte> data;
     dword address;
 };
