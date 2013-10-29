@@ -237,13 +237,6 @@ private:
     void handleOperand_Register_IndirectConstant(const string operand, InstructionWord instructionWord);
     void handleDoubleRegisters(const StringPair sp, const InstructionWord instructionWord);
 
-    void checkIfSizeSpecifierIsAllowed(const string mnemonic, const OpcodeSize opcodeSize);
-    void checkIfAddressingModeIsLegalForThisInstruction(const string mnemonic, const OperandTypes operandType);
-    bool findAddressingMode(const string mnemonic, const AddressingModes am);
-    OpcodeSize getOpcodeSizeFromSignedInteger(const int32_t value);
-    OpcodeSize getOpcodeSizeFromUnsigedInteger(const dword value);
-    void verifyRangeForConstant(const string constant, const OpcodeSize opcodeSize);
-    
     // AsmA65k-Directives.cpp
     bool processDirectives(const string line);              // the main method for processing & handling the directives
     int detectDirective(const string line);                 // detects if there's a directive on the given line
@@ -253,22 +246,28 @@ private:
     void handleDirective_Define(const string line);         // handles the .define directive
 
     // AsmA65k-Misc.cpp
+    bool isCommentLine(const string line);                  // check if a line is made of entirely out of a comment
     int convertStringToInteger(const string valueStr);      // as the name implies, converts a std::string into an int
     int findChar(const string text, char c);                      // searches for the given character and returns its index or -1
     void throwException_ValueOutOfRange();                  // throws an exception
     void throwException_InvalidNumberFormat();              // throws an exception
     void checkIntegerRange(const uint64_t result);                // checks if the 64 bit value can be fit into 32 bits (that's the max. allowed)
-    bool isCommentLine(const string line);                  // check if a line is made of entirely out of a comment
     void throwException_SyntaxError(const string line);     // throws an exception
-    dword resolveLabel(const string label, const dword address, const OpcodeSize size = OS_32BIT);                 // returns the address associated with a label
     void throwException_InvalidRegister();                  // throws an exception
     void throwException_InvalidOperands();                  // throws an exception
     void throwException_InternalError();                    // throws an exception
     void throwException_SymbolOutOfRange();
+    dword resolveLabel(const string label, const dword address, const OpcodeSize size = OS_32BIT);                 // returns the address associated with a label
     string removeSquaredBrackets(const string operand);           // removes the enclosing squared bracked from a string
     StringPair splitStringByPlusSign(const string operand); // splits a string into a StringPair separated by a '+' character
     StringPair splitStringByComma(const string operand);    // splits a string into a StringPair separated by a ',' character
     RegisterType detectRegisterType(const string registerStr); // converts the string into a RegisterType
+    bool findAddressingMode(const string mnemonic, const AddressingModes am);
+    void checkIfAddressingModeIsLegalForThisInstruction(const string mnemonic, const OperandTypes operandType);
+    void checkIfSizeSpecifierIsAllowed(const string mnemonic, const OpcodeSize opcodeSize);
+    OpcodeSize getOpcodeSizeFromSignedInteger(const int32_t value);
+    OpcodeSize getOpcodeSizeFromUnsigedInteger(const dword value);
+    void verifyRangeForConstant(const string constant, const OpcodeSize opcodeSize);
 };
 
 #endif /* defined(__AsmA65k__AsmA65k__) */

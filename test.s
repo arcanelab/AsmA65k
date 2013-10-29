@@ -25,7 +25,7 @@ loop:   mov     [$1000+r7], r6
         add     pc, [nev + r10]  ; here's a comment, too
         add     [adatok], r4
         add     [adatok + r3], r4
-        mov.b   r9, [MINIVIC]
+        mov.b   r9, sp
         rts
 
 nev:    .text "John Doe"

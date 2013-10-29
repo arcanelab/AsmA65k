@@ -229,43 +229,6 @@ AsmA65k::AddressingModes AsmA65k::getAddressingModeFromOperand(const OperandType
 
 // ============================================================================
 
-bool AsmA65k::findAddressingMode(const string mnemonic, AddressingModes am)
-{
-    return (std::find(opcodes[mnemonic].addressingModesAllowed.begin(), opcodes[mnemonic].addressingModesAllowed.end(), am)) != opcodes[mnemonic].addressingModesAllowed.end();
-}
-
-// ============================================================================
-
-void AsmA65k::checkIfAddressingModeIsLegalForThisInstruction(const string mnemonic, const OperandTypes operandType)
-{
-    AddressingModes addressingMode = getAddressingModeFromOperand(operandType);
-    
-    if(addressingMode == AM_AMBIGOUS) // AM_RELATIVE or AM_DIRECT or AM_CONST_IMMEDIATE
-    {
-        if (findAddressingMode(mnemonic, AM_RELATIVE)) return;
-        if (findAddressingMode(mnemonic, AM_DIRECT)) return;
-        if (findAddressingMode(mnemonic, AM_CONST_IMMEDIATE)) return;
-    }
-    else if( findAddressingMode(mnemonic, addressingMode) )
-        return;
-
-    AsmError error(actLineNumber, actLine, "Invalid addressing mode");
-    throw error;
-}
-
-// ============================================================================
-
-void AsmA65k::checkIfSizeSpecifierIsAllowed(const string mnemonic, const OpcodeSize opcodeSize)
-{
-    if((opcodes[mnemonic].isSizeSpecifierAllowed == false) && (opcodeSize != OS_NONE))
-    {
-        AsmError error(actLineNumber, actLine, "Size specifier is not allowed for this instruction");
-        throw error;
-    }
-}
-
-// ============================================================================
-
 void AsmA65k::handleOperand_Register_IndirectConstant(const string operand, InstructionWord instructionWord) // MOV r0, [$4434]
 {
     StringPair sp = splitStringByComma(operand);
@@ -604,39 +567,6 @@ void AsmA65k::addRegisterConfigurationByte(const string registerString)
     RegisterType registerIndex = detectRegisterType(registerString);
     
     addData(OS_8BIT, registerIndex);
-}
-
-// ============================================================================
-
-AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromSignedInteger(int32_t value)
-{
-    if(value >= -128 && value <= 127)
-        return OS_8BIT;
-    if(value >= -32768 && value <= 32767)
-        return OS_16BIT;
-    
-    return OS_32BIT;
-}
-
-// ============================================================================
-
-AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromUnsigedInteger(dword value)
-{
-    if(value <= 0xff)
-        return OS_8BIT;
-    
-    if(value <= 0xffff)
-        return OS_16BIT;
-    
-    return OS_32BIT;
-}
-
-// ============================================================================
-
-void AsmA65k::verifyRangeForConstant(const string constant, OpcodeSize opcodeSize)
-{
-    if(getOpcodeSizeFromUnsigedInteger(convertStringToInteger(constant)) < opcodeSize)
-        throwException_SymbolOutOfRange();
 }
 
 // ============================================================================
