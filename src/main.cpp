@@ -1,9 +1,11 @@
 //
-//  main.cpp
-//  Bassember65k
+//  AsmA65k.h
+//  AsmA65k - The assembler for the A65000 microprocessor
 //
-//  Created by Zoltán Majoros on 2013.05.16.
+//  Created by Zoltán Majoros on 2013.05.16
 //  Copyright (c) 2013 Zoltán Majoros. All rights reserved.
+//
+//  C++11
 //
 
 #include "Asm65k.h"

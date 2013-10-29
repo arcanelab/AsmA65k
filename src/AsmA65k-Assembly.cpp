@@ -561,16 +561,6 @@ void AsmA65k::handleOperand_Register(const string operand, InstructionWord instr
 
 // ============================================================================
 
-void AsmA65k::addRegisterConfigurationByte(const string registerString)
-{
-    // check for valid register specification in operand
-    RegisterType registerIndex = detectRegisterType(registerString);
-    
-    addData(OS_8BIT, registerIndex);
-}
-
-// ============================================================================
-
 void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instructionWord, const dword effectiveAddress)
 {
     const byte instruction = instructionWord.instructionCode;
@@ -622,119 +612,6 @@ void AsmA65k::handleOperand_IndirectRegister(const string operand, InstructionWo
     instructionWord.registerConfiguration = RC_REGISTER;
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(registerMatch[1]);
-}
-
-// ============================================================================
-
-string AsmA65k::detectAndRemoveLabelDefinition(string line)
-{
-    const static regex rx_detectLabel(R"(^(\s*[a-z][a-z_0-9]*:\s*)(.*))", regex_constants::icase);
-    // check is there's a label definition at the beginning of the line
-    if(regex_match(line, rx_detectLabel))
-        line = regex_replace(line, rx_detectLabel, "$2");
-    
-    return line;
-}
-
-// ============================================================================
-
-byte AsmA65k::getOpcodeSize(const string modifierCharacter)
-{
-    if(modifierCharacter == "b")
-        return OS_8BIT;
-    if(modifierCharacter == "w")
-        return OS_16BIT;
-    if(modifierCharacter == "")
-        return OS_NONE;
-    
-    if(modifierCharacter == "u" || modifierCharacter == "s")
-        return OS_DIVSIGN;
-    
-    AsmError error(actLineNumber, actLine);
-    error.errorMessage = "Invalid size specifier";
-    throw error;
-    
-    return OS_NONE; // never reached. Just to silence warning.
-}
-
-// ============================================================================
-
-void AsmA65k::addInstructionWord(const InstructionWord instructionWord)
-{
-    segments.back().addWord(*(word *)&instructionWord);
-    PC += 2;
-}
-
-// ============================================================================
-
-void AsmA65k::addData(const OpcodeSize size, const dword data)
-{
-    switch(size)
-    {
-        case OS_32BIT:
-            segments.back().addDword(data);
-            PC += 4;
-            break;
-        case OS_16BIT:
-            segments.back().addWord(data);
-            PC += 2;
-            break;
-        case OS_8BIT:
-            segments.back().addByte(data);
-            PC++;
-            break;
-        case OS_DIVSIGN:
-            throwException_InternalError();
-    }
-}
-
-// ============================================================================
-
-void AsmA65k::addData(const string sizeSpecifier, const dword data)
-{
-    if(sizeSpecifier == "b")
-    {
-        addData(OS_8BIT, data);
-        return;
-    }
-    if(sizeSpecifier == "w")
-    {
-        addData(OS_16BIT, data);
-        return;
-    }
-    if(sizeSpecifier == "")
-    {
-        addData(OS_32BIT, data);
-        return;
-    }
-    
-    throw AsmError(actLineNumber, actLine, "Invalid size specifier");
-}
-
-// ============================================================================
-
-dword AsmA65k::resolveLabel(const string label, const dword address, const OpcodeSize size)
-{
-//    log("resolveLabel: '%s'\n", label.c_str());
-    dword effectiveAddress = 0;
-    
-    if(labels.find(label) == labels.end())
-    {
-        LabelLocation labelLocation;
-        labelLocation.address = address;
-        labelLocation.opcodeSize = size;
-        labelLocation.lineContent = actLine;
-        labelLocation.lineNumber = actLineNumber;
-        unresolvedLabels[label].push_back(labelLocation);
-        
-        return 0;
-    }
-    else
-    {
-        effectiveAddress = labels[label];
-    }
-    
-    return effectiveAddress;
 }
 
 // ============================================================================

@@ -199,16 +199,8 @@ private:
     void processAsmLine(string line);     // prepares and assembles the line. see also assembleInstruction()
     void assembleInstruction(const string mnemonic, const string modifier, const string operand); // does the actual assembly -> machine code translation
 
-    string detectAndRemoveLabelDefinition(string line);
-    byte getOpcodeSize(const string modifierCharacter); // takes the modifier character (eg.: mov.b -> 'b') and returns its numerical value
     OperandTypes detectOperandType(const string operandStr); // given the operand string, detects its type. see enum OperandType
     AddressingModes getAddressingModeFromOperand(const OperandTypes operandType);
-
-    void addInstructionWord(const InstructionWord instructionWord);
-    void addRegisterConfigurationByte(const string registerString);
-
-    void addData(const OpcodeSize size, const dword data);
-    void addData(const string sizeSpecifier, const dword data);
 
     void handleOperand_Register(const string operand, InstructionWord instructionWord);
     void handleOperand_Constant(const string operand, InstructionWord instructionWord, const dword effectiveAddress);
@@ -268,6 +260,12 @@ private:
     OpcodeSize getOpcodeSizeFromSignedInteger(const int32_t value);
     OpcodeSize getOpcodeSizeFromUnsigedInteger(const dword value);
     void verifyRangeForConstant(const string constant, const OpcodeSize opcodeSize);
+    void addData(const OpcodeSize size, const dword data);
+    void addData(const string sizeSpecifier, const dword data);
+    byte getOpcodeSize(const string modifierCharacter); // takes the modifier character (eg.: mov.b -> 'b') and returns its numerical value
+    void addInstructionWord(const InstructionWord instructionWord);
+    void addRegisterConfigurationByte(const string registerString);
+    string detectAndRemoveLabelDefinition(string line);
 };
 
 #endif /* defined(__AsmA65k__AsmA65k__) */
