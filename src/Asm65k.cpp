@@ -28,16 +28,13 @@ std::vector<Segment>* AsmA65k::assemble(stringstream &source)
             actLineNumber++;
             continue;
         }
-        printf("-------------- line %d -------------- '%s'\n", actLineNumber, actLine.c_str());
+//        printf("-------------- line %d -------------- '%s'\n", actLineNumber, actLine.c_str());
         processLabelDefinition(actLine);
         if(!processDirectives(actLine))
             processAsmLine(actLine);
         actLineNumber++;
     }
     
-//    for(auto label : labels)
-//        log("'%-16s' = $%.8X\n", label.first.c_str(), label.second);
-
     // iterate through all unresolved labels map
     for(auto unresolvedLabel : unresolvedLabels)
     {
@@ -69,8 +66,6 @@ std::vector<Segment>* AsmA65k::assemble(stringstream &source)
                         AsmError error(actLocation.lineNumber, actLocation.lineContent, "Symbol out of range for specified size");
                         throw error;
                     }
-                    
-//                    log("location = $%X, size = %u, value = $%X\n", actLocation.address, actLocation.opcodeSize, value);
                     
                     switch (actLocation.opcodeSize)
                     {

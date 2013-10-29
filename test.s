@@ -20,12 +20,17 @@ start:
         mov.w   r4, $ffff
 loop:   mov     [$1000+r7], r6
         bra     loop
+        bra     future
+
+        .pc = $2000
+
         mov     r1, adatok
         add     r2, [nev + r9]  ; here's a comment, too
         add     pc, [nev + r10]  ; here's a comment, too
         add     [adatok], r4
         add     [adatok + r3], r4
-        mov.b   r9, sp
+future: mov     r9, MINIVIC
+        bne     start
         rts
 
 nev:    .text "John Doe"
