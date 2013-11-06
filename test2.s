@@ -1,5 +1,7 @@
 .pc = 0
 
-    mov.b   r7, magic
+back:
+    mov   r7, magic
+    bne   back
 
 .def magic = $12345678

@@ -115,17 +115,21 @@ private:
     
     enum RegisterConfigurations
     {
-        RC_NOREGISTER,
-        RC_REGISTER,
-        RC_2_GENERAL_REGISTERS,
-        RC_SPECIAL_GENERAL,
-        RC_GENERAL_SPECIAL
+        RC_NOREGISTER,                  // 0000
+        RC_REGISTER,                    // 0001
+        RC_2_GENERAL_REGISTERS,         // 0010
+        RC_SPECIAL_GENERAL,             // 0011
+        RC_GENERAL_SPECIAL,             // 0100
+        RC_REGISTER_POSTINCREMENT,      // 0101
+        RC_REGISTER_POSTDECREMENT,      // 0110
+        RC_2_GENREGISTER_POSTINCREMENT, // 0111
+        RC_2_GENREGISTER_POSTDECREMENT  // 1000
     };
 
     enum Instructions
     {
         I_MOV, I_CLR, I_ADD, I_SUB, I_INC,
-        I_DEC, I_MUL, I_DIV, I_AND, I_EOR,
+        I_DEC, I_MUL, I_DIV, I_AND, I_BOR,
         I_XOR, I_SHL, I_SHR, I_ROL, I_ROR,
         I_CMP, I_SEC, I_CLC, I_SEI, I_CLI,
         I_PSH, I_POP, I_PHA, I_POA, I_JMP,
@@ -146,9 +150,10 @@ private:
     
     struct OpcodeAttribute
     {
-        bool isSizeSpecifierAllowed;
-        vector<AddressingModes> addressingModesAllowed;
         byte instructionCode;
+        vector<AddressingModes> addressingModesAllowed;
+        bool isSizeSpecifierAllowed;
+        bool isPostfixEnabled;
     };
     
     struct InstructionWord

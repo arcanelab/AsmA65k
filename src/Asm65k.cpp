@@ -120,6 +120,7 @@ void AsmA65k::initializeOpcodetable()
 {
     OpcodeAttribute oa;
     oa.isSizeSpecifierAllowed = true;
+    oa.isPostfixEnabled = true;
 
     oa.addressingModesAllowed = { AM_DIRECT, AM_REGISTER1, AM_ABSOLUTE1, AM_REGISTER_INDIRECT1, AM_INDEXED1 };
     oa.instructionCode = I_JMP; opcodes["jmp"] = oa;
@@ -147,7 +148,7 @@ void AsmA65k::initializeOpcodetable()
     oa.instructionCode = I_ADD; opcodes["add"] = oa;
     oa.instructionCode = I_SUB; opcodes["sub"] = oa;
     oa.instructionCode = I_AND; opcodes["and"] = oa;
-    oa.instructionCode = I_EOR; opcodes["eor"] = oa;
+    oa.instructionCode = I_BOR; opcodes["bor"] = oa;
     oa.instructionCode = I_XOR; opcodes["xor"] = oa;
     oa.instructionCode = I_SHL; opcodes["shl"] = oa;
     oa.instructionCode = I_SHR; opcodes["shr"] = oa;
@@ -157,7 +158,8 @@ void AsmA65k::initializeOpcodetable()
     oa.isSizeSpecifierAllowed = false;
     oa.instructionCode = I_MUL; opcodes["mul"] = oa;
     oa.instructionCode = I_DIV; opcodes["div"] = oa;
-    
+
+    oa.isPostfixEnabled = false;
     oa.addressingModesAllowed = {AM_NONE};
     oa.instructionCode = I_SEC; opcodes["sec"] = oa;
     oa.instructionCode = I_CLC; opcodes["clc"] = oa;
