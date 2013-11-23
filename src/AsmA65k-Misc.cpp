@@ -244,7 +244,7 @@ AsmA65k::RegisterType AsmA65k::detectRegisterType(const string registerStr)
         throwException_InvalidRegister();
     }
     
-    if(registerIndex < REG_R0 || registerIndex > REG_R15)
+    if(registerIndex < REG_R0 || registerIndex > REG_PC)
         throwException_InvalidRegister();
     
     return (RegisterType)registerIndex;

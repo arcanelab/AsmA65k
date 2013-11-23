@@ -52,7 +52,7 @@ int main(int argc, const char * argv[])
     {
         Segment actSegment = (*segments)[i];
         
-        printf("$%.8X:\n", actSegment.address);
+        printf("\n$%.8X:\n", actSegment.address);
         
         for(int j = 0; j < actSegment.data.size(); j++)
         {

@@ -11,8 +11,8 @@
 #ifndef __AsmA65k__AsmA65k__
 #define __AsmA65k__AsmA65k__
 
-//#define log(fmt, ...) printf(("[%s: %d] %s(): " fmt), __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
-#define log printf
+#define log(fmt, ...) printf(("[%s: %d] %s(): " fmt), __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+//#define log printf
 
 #include "Segment.h"
 #include <iostream>
@@ -112,18 +112,25 @@ private:
         AM_DIRECT,                  // $4244           -- only jmp/jsr
         AM_AMBIGOUS                 // used in getAddressingModeFromOperand() when encountering OS_CONSTANT, which can be either AM_IMMEDIATE or AM_RELATIVE or AM_DIRECT
     };
-    
+
     enum RegisterConfigurations
     {
-        RC_NOREGISTER,                  // 0000
-        RC_REGISTER,                    // 0001
-        RC_2_GENERAL_REGISTERS,         // 0010
-        RC_SPECIAL_GENERAL,             // 0011
-        RC_GENERAL_SPECIAL,             // 0100
-        RC_REGISTER_POSTINCREMENT,      // 0101
-        RC_REGISTER_POSTDECREMENT,      // 0110
-        RC_2_GENREGISTER_POSTINCREMENT, // 0111
-        RC_2_GENREGISTER_POSTDECREMENT  // 1000
+        RC_NOREGISTER,                  // 0000, 0
+        RC_REGISTER,                    // 0001, 1
+        RC_2REGISTERS,                  // 0010, 2
+        RC__INVALID3__,                 // 0011, 3
+        RC__INVALID4__,                 // 0100, 4
+        RC_REGISTER_POSTINCREMENT,      // 0101, 5
+        RC_2REGISTERS_POSTINCREMENT,    // 0110, 6
+        RC__INVALID7__,                 // 0111, 7
+        RC__INVALID8__,                 // 1000, 8
+        RC_REGISTER_POSTDECREMENT,      // 1001, 9
+        RC_2REGISTERS_POSTDECREMENT,    // 1010, 10
+        RC__INVALID11__,                // 1011, 11
+        RC__INVALID12__,                // 1100, 12
+        RC__INVALID13__,                // 1101, 13
+        RC__INVALID14__,                // 1110, 14
+        RC__INVALID15__,                // 1111, 15
     };
 
     enum Instructions
@@ -176,8 +183,7 @@ private:
     enum RegisterType
     {
         REG_R0, REG_R1, REG_R2, REG_R3, REG_R4, REG_R5, REG_R6, REG_R7, REG_R8,
-        REG_R9, REG_R10, REG_R11, REG_R12, REG_R13, REG_R14, REG_R15, REG_SP, REG_PC,
-        REG_LAST
+        REG_R9, REG_R10, REG_R11, REG_R12, REG_R13, REG_SP, REG_PC
     };
     
     struct LabelLocation
@@ -219,7 +225,7 @@ private:
     void handleOperand_Register_Label(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_Constant(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_Register(const string operand, InstructionWord instructionWord);
-    void handleOperand_Register_IndirectRegister(const string operand, InstructionWord instructionWord);
+    void handleOperand_Register_IndirectRegister(string operand, InstructionWord instructionWord);
     void handleOperand_Register_IndirectConstantPlusRegister(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_IndirectRegisterPlusLabel(const string operand, InstructionWord instructionWord);
@@ -233,7 +239,8 @@ private:
     void handleOperand_IndirectConstant_Register(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_IndirectLabel(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_IndirectConstant(const string operand, InstructionWord instructionWord);
-    void handleDoubleRegisters(const StringPair sp, const InstructionWord instructionWord);
+//    void handleDoubleRegisters(const StringPair sp, InstructionWord instructionWord, const char postfixChar);
+    void handleDoubleRegisters(const StringPair sp, InstructionWord instructionWord);
 
     // AsmA65k-Directives.cpp
     bool processDirectives(const string line);              // the main method for processing & handling the directives

@@ -68,8 +68,8 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
     switch (operandType)
     {
         case OT_NONE:                                        // SEI
-            instructionWord.addressingMode = AM_NONE;
-            instructionWord.registerConfiguration = RC_NOREGISTER;
+            instructionWord.addressingMode = 7;//AM_NONE;
+            instructionWord.registerConfiguration = 5;//RC_NOREGISTER;
             addInstructionWord(instructionWord);
             break;
         case OT_REGISTER:                                    // INC r0
@@ -406,31 +406,13 @@ void AsmA65k::handleOperand_Register_IndirectLabelPlusRegister(const string oper
 
 // ============================================================================
 
+//void AsmA65k::handleDoubleRegisters(const StringPair sp, InstructionWord instructionWord, const char postfixChar)
 void AsmA65k::handleDoubleRegisters(const StringPair sp, InstructionWord instructionWord)
 {
     RegisterType regLeft = detectRegisterType(sp.left);
     RegisterType regRight = detectRegisterType(sp.right);
-    if((regLeft == REG_PC || regLeft == REG_SP) && (regRight == REG_PC || regRight == REG_SP))
-    {
-        AsmError error(actLineNumber, actLine, "Invalid combination of registers");
-        throw error;
-    }
     
     byte registerSelector = 0;
-    
-    instructionWord.registerConfiguration = RC_NOREGISTER; // to verify if this would be changed after the following conditions
-    
-    if(regLeft == REG_PC || regLeft == REG_SP) // MOV PC, r4
-        instructionWord.registerConfiguration = RC_SPECIAL_GENERAL;
-    
-    if(regRight == REG_PC || regRight == REG_SP) // MOV r4, PC
-        instructionWord.registerConfiguration = RC_GENERAL_SPECIAL;
-    
-    if((regLeft != REG_PC) && (regLeft != REG_SP) && (regRight != REG_PC) && (regRight != REG_SP))
-        instructionWord.registerConfiguration = RC_2_GENERAL_REGISTERS;
-    
-    if(instructionWord.registerConfiguration == RC_NOREGISTER) // check if any of the prev. conditions were met
-        throwException_InternalError();
     
     registerSelector = ((regLeft & 15) << 4) | (regRight & 15);
     
@@ -440,8 +422,18 @@ void AsmA65k::handleDoubleRegisters(const StringPair sp, InstructionWord instruc
 
 // ============================================================================
 
-void AsmA65k::handleOperand_Register_IndirectRegister(const string operand, InstructionWord instructionWord) // mov r0, [r1]
+void AsmA65k::handleOperand_Register_IndirectRegister(string operand, InstructionWord instructionWord) // mov r0, [r1]
 {
+    static const regex rx_detectPostfixSign(R"((.*\])([\+\-])$)");
+    smatch result;
+    if(regex_match(operand, result, rx_detectPostfixSign) == true)
+    {
+        log("result[1] = %s, result[2] = %s\n", result[1].str().c_str(), result[2].str().c_str());
+        operand = result[1].str();
+    }
+    
+    log("result[2] = %c\n", result[2].str().c_str()[0]);
+    
     StringPair sp = splitStringByComma(operand);
     sp.right = removeSquaredBrackets(sp.right);
 
@@ -599,7 +591,7 @@ void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instr
 
 // ============================================================================
 
-void AsmA65k::handleOperand_IndirectRegister(const string operand, InstructionWord instructionWord)
+void AsmA65k::handleOperand_IndirectRegister(const string operand, InstructionWord instructionWord) // inc [r0]
 {
     // verify register correctness and extract register name from square brackets
     static const regex rx_extractRegister(R"(\[\s*((r[0-9]{1,2})|(pc)|(sp))\s*\])", regex_constants::icase);
@@ -625,11 +617,11 @@ AsmA65k::OperandTypes AsmA65k::detectOperandType(const string operandStr)
     const static regex rx_register                  (R"((r[0-9]{1,2})|(PC|SP))", icase);                                     // r0
     const static regex rx_indirectConstant          (R"(\[\s*[$%]?[0-9a-f]+\s*\])", icase);                                  // [$5000]
     const static regex rx_indirectLabel             (R"(\[[a-z][a-z_0-9]*\])", icase);                                       // [names]
-    const static regex rx_indirectRegister          (R"(\[\s*((r[0-9]{1,2})|(PC|SP))\s*\])", icase);                         // [r0]
-    const static regex rx_indirectRegisterPlusConst (R"(\[\s*((r[0-9]{1,2})|(PC|SP))\s*\+\s*[$%]?[0-9]+\s*\])", icase);      // [r0 + $1000]
-    const static regex rx_indirectConstPlusRegister (R"(\[\s*[$%]?[0-9a-f]+\s*\+\s*((r[0-9]{1,2})|(pc))\s*\])", icase);      // [$1000 + r0]
-    const static regex rx_indirectRegisterPlusLabel (R"(\[\s*((r[0-9]{1,2})|(PC|SP))\s*\+\s*[a-z][a-z_0-9]*\s*\])", icase);  // [r0 + names]
-    const static regex rx_indirectLabelPlusRegister (R"(\[\s*[a-z][a-z_0-9]*\s*\+\s*((r[0-9]{1,2})|(PC|SP))\s*\])", icase);  // [names + r0]
+    const static regex rx_indirectRegister          (R"(\[\s*((r[0-9]{1,2})|(PC|SP))\s*\][\+\-]?)", icase);                    // [r0]
+    const static regex rx_indirectRegisterPlusConst (R"(\[\s*((r[0-9]{1,2})|(PC|SP))\s*\+\s*[$%]?[0-9]+\s*\][\+\-]?)", icase);      // [r0 + $1000]
+    const static regex rx_indirectConstPlusRegister (R"(\[\s*[$%]?[0-9a-f]+\s*\+\s*((r[0-9]{1,2})|(pc))\s*\][\+\-]?)", icase);      // [$1000 + r0]
+    const static regex rx_indirectRegisterPlusLabel (R"(\[\s*((r[0-9]{1,2})|(PC|SP))\s*\+\s*[a-z][a-z_0-9]*\s*\][\+\-]?)", icase);  // [r0 + names]
+    const static regex rx_indirectLabelPlusRegister (R"(\[\s*[a-z][a-z_0-9]*\s*\+\s*((r[0-9]{1,2})|(PC|SP))\s*\][\+\-]?)", icase);  // [names + r0]
     
     if(operandStr == "")
         return OT_NONE;
