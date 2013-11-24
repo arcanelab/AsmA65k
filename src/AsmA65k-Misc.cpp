@@ -244,7 +244,7 @@ AsmA65k::RegisterType AsmA65k::detectRegisterType(const string registerStr)
         throwException_InvalidRegister();
     }
     
-    if(registerIndex < REG_R0 || registerIndex > REG_PC)
+    if(registerIndex < REG_R0 || registerIndex > REG_R13)
         throwException_InvalidRegister();
     
     return (RegisterType)registerIndex;
@@ -458,6 +458,8 @@ AsmA65k::PostfixType AsmA65k::getPostFixType(const string operand)
     smatch result;
     if(regex_match(operand, result, rx_detectPostfixSign) == true)
         sign = result[2].str();
+    else
+        return PF_NONE;
     
     if(sign=="+")
         return PF_INC;
@@ -465,5 +467,5 @@ AsmA65k::PostfixType AsmA65k::getPostFixType(const string operand)
     if(sign=="-")
         return PF_DEC;
     
-    return PF_NONE;
+    return PF_NONE; // "fake" return to silence warning
 }

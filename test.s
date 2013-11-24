@@ -7,8 +7,9 @@
 .pc = $100 ;fds
 
 start:
-        mov     r0, [r1]+
-        mov     r0, [r2]-
+        mov     r0, [r13]-
+        mov     r0, [r2]+
+        mov     r0, [r1]
         MOV     R1, R5
         MOV     R6, PC
         MOV.w   [$3948], R5

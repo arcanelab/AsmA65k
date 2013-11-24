@@ -464,6 +464,7 @@ void AsmA65k::handleDoubleRegisters(const StringPair sp, InstructionWord instruc
             break;
         case PF_DEC:
             instructionWord.registerConfiguration = RC_2REGISTERS_POSTDECREMENT;
+            break;
         default:
             instructionWord.registerConfiguration = RC_2REGISTERS;
             break;
