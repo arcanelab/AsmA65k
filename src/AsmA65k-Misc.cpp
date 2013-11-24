@@ -176,7 +176,7 @@ void AsmA65k::throwException_InvalidOperands()
 
 string AsmA65k::removeSquaredBrackets(const string operand)
 {
-    const static regex rx_removeSquareBrackets(R"(\[\s*(.*)\s*\])");
+    const static regex rx_removeSquareBrackets(R"(\[\s*(.*)\s*\][\+\-]?)");
     smatch result;
     if(regex_match(operand, result, rx_removeSquareBrackets) == false)
     {
@@ -226,7 +226,7 @@ AsmA65k::StringPair AsmA65k::splitStringByComma(const string operand)
 
 AsmA65k::RegisterType AsmA65k::detectRegisterType(const string registerStr)
 {
-    if(registerStr == "pc") // TODO: verify that the input string is in lower case
+    if(registerStr == "pc")
         return REG_PC;
     if(registerStr == "sp")
         return REG_SP;
@@ -411,23 +411,29 @@ void AsmA65k::addData(const string sizeSpecifier, const dword data)
 
 dword AsmA65k::resolveLabel(const string label, const dword address, const OpcodeSize size)
 {
+    static const regex rx_removeSurroundingWhiteSpace(R"(\s*(\S*)\s*)");
+    smatch result;
+    if(regex_match(label, result, rx_removeSurroundingWhiteSpace)==false)
+        throwException_InternalError();
+    
     //    log("resolveLabel: '%s'\n", label.c_str());
     dword effectiveAddress = 0;
+    string cleanLabel = result[1].str();
     
-    if(labels.find(label) == labels.end())
+    if(labels.find(cleanLabel) == labels.end())
     {
         LabelLocation labelLocation;
         labelLocation.address = address;
         labelLocation.opcodeSize = size;
         labelLocation.lineContent = actLine;
         labelLocation.lineNumber = actLineNumber;
-        unresolvedLabels[label].push_back(labelLocation);
+        unresolvedLabels[cleanLabel].push_back(labelLocation);
         
         return 0;
     }
     else
     {
-        effectiveAddress = labels[label];
+        effectiveAddress = labels[cleanLabel];
     }
     
     return effectiveAddress;
@@ -443,3 +449,21 @@ void AsmA65k::addRegisterConfigurationByte(const string registerString)
     addData(OS_8BIT, registerIndex);
 }
 
+// ============================================================================
+
+AsmA65k::PostfixType AsmA65k::getPostFixType(const string operand)
+{
+    static const regex rx_detectPostfixSign(R"((.*\])([\+\-])$)");
+    string sign;
+    smatch result;
+    if(regex_match(operand, result, rx_detectPostfixSign) == true)
+        sign = result[2].str();
+    
+    if(sign=="+")
+        return PF_INC;
+
+    if(sign=="-")
+        return PF_DEC;
+    
+    return PF_NONE;
+}

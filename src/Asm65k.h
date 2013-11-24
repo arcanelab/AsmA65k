@@ -194,6 +194,13 @@ private:
         string lineContent;
     };
     
+    enum PostfixType
+    {
+        PF_NONE,
+        PF_INC,
+        PF_DEC
+    };
+    
     // variables
     vector<Segment> segments;          // the machine code & data get compiled into this
     map<string, OpcodeAttribute> opcodes;   // contains info about each instruction, indexed by their names
@@ -240,7 +247,7 @@ private:
     void handleOperand_Register_IndirectLabel(const string operand, InstructionWord instructionWord);
     void handleOperand_Register_IndirectConstant(const string operand, InstructionWord instructionWord);
 //    void handleDoubleRegisters(const StringPair sp, InstructionWord instructionWord, const char postfixChar);
-    void handleDoubleRegisters(const StringPair sp, InstructionWord instructionWord);
+    void handleDoubleRegisters(const StringPair sp, InstructionWord instructionWord, const PostfixType postFix);
 
     // AsmA65k-Directives.cpp
     bool processDirectives(const string line);              // the main method for processing & handling the directives
@@ -279,6 +286,7 @@ private:
     void addInstructionWord(const InstructionWord instructionWord);
     void addRegisterConfigurationByte(const string registerString);
     string detectAndRemoveLabelDefinition(string line);
+    PostfixType getPostFixType(const string operand);
 };
 
 #endif /* defined(__AsmA65k__AsmA65k__) */
