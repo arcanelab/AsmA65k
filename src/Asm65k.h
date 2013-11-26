@@ -115,22 +115,13 @@ private:
 
     enum RegisterConfigurations
     {
-        RC_NOREGISTER,                  // 0000, 0
-        RC_REGISTER,                    // 0001, 1
-        RC_2REGISTERS,                  // 0010, 2
-        RC__INVALID3__,                 // 0011, 3
-        RC__INVALID4__,                 // 0100, 4
-        RC_REGISTER_POSTINCREMENT,      // 0101, 5
-        RC_2REGISTERS_POSTINCREMENT,    // 0110, 6
-        RC__INVALID7__,                 // 0111, 7
-        RC__INVALID8__,                 // 1000, 8
-        RC_REGISTER_POSTDECREMENT,      // 1001, 9
-        RC_2REGISTERS_POSTDECREMENT,    // 1010, 10
-        RC__INVALID11__,                // 1011, 11
-        RC__INVALID12__,                // 1100, 12
-        RC__INVALID13__,                // 1101, 13
-        RC__INVALID14__,                // 1110, 14
-        RC__INVALID15__,                // 1111, 15
+        RC_NOREGISTER               = 0, // 0000, 0
+        RC_REGISTER                 = 1, // 0001, 1
+        RC_2REGISTERS               = 2, // 0010, 2
+        RC_REGISTER_POSTINCREMENT   = 5, // 0101, 5
+        RC_2REGISTERS_POSTINCREMENT = 6, // 0110, 6
+        RC_REGISTER_POSTDECREMENT   = 9, // 1001, 9
+        RC_2REGISTERS_POSTDECREMENT = 10,// 1010, 10
     };
 
     enum Instructions
@@ -165,10 +156,10 @@ private:
     
     struct InstructionWord
     {
-        byte registerConfiguration: 4;
         byte addressingMode: 4;
-        byte opcodeSize: 2;
+        byte registerConfiguration: 4;
         byte instructionCode: 6;
+        byte opcodeSize: 2;
     };
     
     struct StringPair
