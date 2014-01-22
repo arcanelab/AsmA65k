@@ -25,7 +25,7 @@ void AsmA65k::processAsmLine(string line)
     
     // ==== extract mnemonic and operands ====    
     // $1 = instruction, $2 = .b/w, $3 = operands
-    const static regex rx_matchInstructionAndOperands(R"(\s*([a-z]{3,4})\.?([bw]?)\s*(.*))", regex_constants::icase);
+    const static regex rx_matchInstructionAndOperands(R"(\s*([a-z]{2,5})\.?([bw]?)\s*(.*))", regex_constants::icase);
     smatch asmMatches;
     if(regex_match(line, asmMatches, rx_matchInstructionAndOperands) == false)
         throwException_SyntaxError(line);
