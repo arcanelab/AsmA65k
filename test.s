@@ -7,6 +7,12 @@
 .pc = $100 ;fds
 
 start:
+        pop.b   [r6]
+        push    [r5]
+        push    $12345678
+        pusha
+        popa
+        or      r1, $ff76
         MOV     R1, R5
         MOV     R6, PC
         MOV.w   [$3948], R5

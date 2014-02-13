@@ -134,7 +134,8 @@ private:
         I_JSR, I_RTS, I_RTI, I_BRK, I_NOP,
         I_BRA, I_BEQ, I_BNE, I_BCC, I_BCS,
         I_BPL, I_BMI, I_BVC, I_BVS, I_BLT,
-        I_BGT, I_BLE, I_BGE, I_SEV, I_CLV
+        I_BGT, I_BLE, I_BGE, I_SEV, I_CLV,
+        I_SLP
     };
     
     enum OpcodeSize

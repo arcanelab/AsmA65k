@@ -173,6 +173,7 @@ void AsmA65k::initializeOpcodetable()
     oa.instructionCode = I_BRK; opcodes["brk"] = oa;
     oa.instructionCode = I_RTS; opcodes["rts"] = oa;
     oa.instructionCode = I_RTI; opcodes["rti"] = oa;
+    oa.instructionCode = I_SLP; opcodes["slp"] = oa;
 
     oa.addressingModesAllowed = {AM_RELATIVE};
     oa.instructionCode = I_BRA; opcodes["bra"] = oa;
