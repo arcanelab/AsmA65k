@@ -235,7 +235,8 @@ void AsmA65k::handleDirective_Define(const string line)
     // check if rvalue is a single constant
     const static regex rx_matchConstant(R"(([%$]?[0-9a-f]+)\s*)", regex_constants::icase);
     smatch valueMatch;
-    if(regex_match(matches[2].str(), valueMatch, rx_matchConstant))
+    string match2 = matches[2].str();
+    if(regex_match(match2, valueMatch, rx_matchConstant))
     {   // if yes, convert it into decimal and add it into the symbol table
         labels[label] = convertStringToInteger(valueMatch[1].str());
     
@@ -245,7 +246,8 @@ void AsmA65k::handleDirective_Define(const string line)
     // check if rvalue is an expression (only the simple 'label + const' format is allowed)
     const static regex rx_matchExpression(R"(([a-z][a-z_0-9]*)\s*\+\s*([%$]?[0-9a-f]+).*)", regex_constants::icase);
     smatch expressionOperands;
-    if(regex_match(matches[2].str(), expressionOperands, rx_matchExpression))
+    match2 = matches[2].str();
+    if(regex_match(match2, expressionOperands, rx_matchExpression))
     {
         // read lvalue and convert it into lower case
         string lvalue = expressionOperands[1].str();
@@ -265,7 +267,7 @@ void AsmA65k::handleDirective_Define(const string line)
         string rvalue = expressionOperands[2].str();
         
         // look up symbol (lvalue) and add the decimal value of the rvalue to it, then add the result as a new symbol
-        labels[label] = (dword)labels[lvalue] + (dword)convertStringToInteger(rvalue);
+        labels[label] = (uint32_t)labels[lvalue] + (uint32_t)convertStringToInteger(rvalue);
     
         return;
     }

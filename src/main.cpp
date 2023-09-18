@@ -15,6 +15,14 @@
 
 using namespace std;
 
+void logger(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    va_end(args);
+}
+
 int main(int argc, const char * argv[])
 {
     if(argc != 2)
@@ -41,8 +49,8 @@ int main(int argc, const char * argv[])
     try { segments = asm65k.assemble(buffer); }
     catch(AsmError error)
     {
-        log("Assembly error in line %d: \"%s\"\n", error.lineNumber, error.errorMessage.c_str());
-        log("Line content: %s\n", error.lineContent.c_str());
+        logger("Assembly error in line %d: \"%s\"\n", error.lineNumber, error.errorMessage.c_str());
+        logger("Line content: %s\n", error.lineContent.c_str());
         return 1;
     }
 

@@ -301,7 +301,7 @@ AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromSignedInteger(int32_t value)
 
 // ============================================================================
 
-AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromUnsigedInteger(dword value)
+AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromUnsigedInteger(uint32_t value)
 {
     if(value <= 0xff)
         return OS_8BIT;
@@ -334,7 +334,7 @@ string AsmA65k::detectAndRemoveLabelDefinition(string line)
 
 // ============================================================================
 
-byte AsmA65k::getOpcodeSize(const string modifierCharacter)
+uint8_t AsmA65k::getOpcodeSize(const string modifierCharacter)
 {
     if(modifierCharacter == "b")
         return OS_8BIT;
@@ -357,13 +357,13 @@ byte AsmA65k::getOpcodeSize(const string modifierCharacter)
 
 void AsmA65k::addInstructionWord(const InstructionWord instructionWord)
 {
-    segments.back().addWord(*(word *)&instructionWord);
+    segments.back().addWord(*(uint16_t *)&instructionWord);
     PC += 2;
 }
 
 // ============================================================================
 
-void AsmA65k::addData(const OpcodeSize size, const dword data)
+void AsmA65k::addData(const OpcodeSize size, const uint32_t data)
 {
     switch(size)
     {
@@ -386,7 +386,7 @@ void AsmA65k::addData(const OpcodeSize size, const dword data)
 
 // ============================================================================
 
-void AsmA65k::addData(const string sizeSpecifier, const dword data)
+void AsmA65k::addData(const string sizeSpecifier, const uint32_t data)
 {
     if(sizeSpecifier == "b")
     {
@@ -409,7 +409,7 @@ void AsmA65k::addData(const string sizeSpecifier, const dword data)
 
 // ============================================================================
 
-dword AsmA65k::resolveLabel(const string label, const dword address, const OpcodeSize size)
+uint32_t AsmA65k::resolveLabel(const string label, const uint32_t address, const OpcodeSize size)
 {
     static const regex rx_removeSurroundingWhiteSpace(R"(\s*(\S*)\s*)");
     smatch result;
@@ -417,7 +417,7 @@ dword AsmA65k::resolveLabel(const string label, const dword address, const Opcod
         throwException_InternalError();
     
     //    log("resolveLabel: '%s'\n", label.c_str());
-    dword effectiveAddress = 0;
+    uint32_t effectiveAddress = 0;
     string cleanLabel = result[1].str();
     
     if(labels.find(cleanLabel) == labels.end())

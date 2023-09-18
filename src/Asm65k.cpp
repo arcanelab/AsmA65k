@@ -59,7 +59,7 @@ std::vector<Segment>* AsmA65k::assemble(stringstream &source)
                 if((actSegment.address <= actLocation.address) && ((actSegment.data.size()+actSegment.address) > actLocation.address))
                 {
                     // suitable segment found, write value to stored address in that segment in the right size
-                    dword value = labels[label];
+                    uint32_t value = labels[label];
                     
                     if(getOpcodeSizeFromUnsigedInteger(value) < actLocation.opcodeSize)
                     {
@@ -70,13 +70,13 @@ std::vector<Segment>* AsmA65k::assemble(stringstream &source)
                     switch (actLocation.opcodeSize)
                     {
                         case OS_8BIT:
-                            actSegment.writeByte(actLocation.address, (byte)value);
+                            actSegment.writeByte(actLocation.address, (uint8_t)value);
                             break;
                         case OS_16BIT:
-                            actSegment.writeWord(actLocation.address, (word)value);
+                            actSegment.writeWord(actLocation.address, (uint16_t)value);
                             break;
                         case OS_32BIT:
-                            actSegment.writeDword(actLocation.address, (dword)value);
+                            actSegment.writeDword(actLocation.address, (uint32_t)value);
                             break;
                         default:
                             throwException_InternalError();

@@ -11,7 +11,7 @@
 #ifndef __AsmA65k__AsmA65k__
 #define __AsmA65k__AsmA65k__
 
-#define log(fmt, ...) printf(("[%s: %d] %s(): " fmt), __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+// #define log(fmt, ...) printf(("[%s: %d] %s(): " fmt), __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
 //#define log printf
 
 #include "Segment.h"
@@ -149,7 +149,7 @@ private:
     
     struct OpcodeAttribute
     {
-        byte instructionCode;
+        uint8_t instructionCode;
         vector<AddressingModes> addressingModesAllowed;
         bool isSizeSpecifierAllowed;
         bool isPostfixEnabled;
@@ -157,10 +157,10 @@ private:
     
     struct InstructionWord
     {
-        byte addressingMode: 4;
-        byte registerConfiguration: 4;
-        byte instructionCode: 6;
-        byte opcodeSize: 2;
+        uint8_t addressingMode: 4;
+        uint8_t registerConfiguration: 4;
+        uint8_t instructionCode: 6;
+        uint8_t opcodeSize: 2;
     };
     
     struct StringPair
@@ -180,9 +180,9 @@ private:
     
     struct LabelLocation
     {
-        dword address;
+        uint32_t address;
         OpcodeSize opcodeSize;
-        dword lineNumber;
+        uint32_t lineNumber;
         string lineContent;
     };
     
@@ -196,9 +196,9 @@ private:
     // variables
     vector<Segment> segments;          // the machine code & data get compiled into this
     map<string, OpcodeAttribute> opcodes;   // contains info about each instruction, indexed by their names
-    map<string, dword> labels;              // symbol table containing all labels and their addresses
+    map<string, uint32_t> labels;              // symbol table containing all labels and their addresses
     map<string, vector<LabelLocation>> unresolvedLabels;
-    dword PC = 0;                           // keeps track of the current compiling position
+    uint32_t PC = 0;                           // keeps track of the current compiling position
     unsigned int actLineNumber = 1;         // keeps track of the current line in the source code
     string actLine;                         // the content of the current source code line being assembled
     
@@ -214,9 +214,9 @@ private:
     AddressingModes getAddressingModeFromOperand(const OperandTypes operandType);
 
     void handleOperand_Register(const string operand, InstructionWord instructionWord);
-    void handleOperand_Constant(const string operand, InstructionWord instructionWord, const dword effectiveAddress);
+    void handleOperand_Constant(const string operand, InstructionWord instructionWord, const uint32_t effectiveAddress);
     void handleOperand_IndirectRegister(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectConstant(const dword constant, InstructionWord instructionWord);
+    void handleOperand_IndirectConstant(const uint32_t constant, InstructionWord instructionWord);
     void handleOperand_IndirectRegisterPlusLabel(const string operand, InstructionWord instructionWord);
     void handleOperand_IndirectRegisterPlusConstant(const string operand, InstructionWord instructionWord);
     void handleOperand_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord);
@@ -261,7 +261,7 @@ private:
     void throwException_InvalidOperands();                  // throws an exception
     void throwException_InternalError();                    // throws an exception
     void throwException_SymbolOutOfRange();
-    dword resolveLabel(const string label, const dword address, const OpcodeSize size = OS_32BIT);                 // returns the address associated with a label
+    uint32_t resolveLabel(const string label, const uint32_t address, const OpcodeSize size = OS_32BIT);                 // returns the address associated with a label
     string removeSquaredBrackets(const string operand);           // removes the enclosing squared bracked from a string
     StringPair splitStringByPlusSign(const string operand); // splits a string into a StringPair separated by a '+' character
     StringPair splitStringByComma(const string operand);    // splits a string into a StringPair separated by a ',' character
@@ -270,11 +270,11 @@ private:
     void checkIfAddressingModeIsLegalForThisInstruction(const string mnemonic, const OperandTypes operandType);
     void checkIfSizeSpecifierIsAllowed(const string mnemonic, const OpcodeSize opcodeSize);
     OpcodeSize getOpcodeSizeFromSignedInteger(const int32_t value);
-    OpcodeSize getOpcodeSizeFromUnsigedInteger(const dword value);
+    OpcodeSize getOpcodeSizeFromUnsigedInteger(const uint32_t value);
     void verifyRangeForConstant(const string constant, const OpcodeSize opcodeSize);
-    void addData(const OpcodeSize size, const dword data);
-    void addData(const string sizeSpecifier, const dword data);
-    byte getOpcodeSize(const string modifierCharacter); // takes the modifier character (eg.: mov.b -> 'b') and returns its numerical value
+    void addData(const OpcodeSize size, const uint32_t data);
+    void addData(const string sizeSpecifier, const uint32_t data);
+    uint8_t getOpcodeSize(const string modifierCharacter); // takes the modifier character (eg.: mov.b -> 'b') and returns its numerical value
     void addInstructionWord(const InstructionWord instructionWord);
     void addRegisterConfigurationByte(const string registerString);
     string detectAndRemoveLabelDefinition(string line);

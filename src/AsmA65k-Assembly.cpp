@@ -63,7 +63,7 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
     OperandTypes operandType = detectOperandType(operand);
     checkIfAddressingModeIsLegalForThisInstruction(mnemonic, operandType);
     
-    dword effectiveAddress = 0;
+    uint32_t effectiveAddress = 0;
     
     switch (operandType)
     {
@@ -456,7 +456,7 @@ void AsmA65k::handleDoubleRegisters(const StringPair sp, InstructionWord instruc
     RegisterType regLeft = detectRegisterType(sp.left);
     RegisterType regRight = detectRegisterType(sp.right);
     
-    byte registerSelector = ((regLeft & 15) << 4) | (regRight & 15);
+    uint8_t registerSelector = ((regLeft & 15) << 4) | (regRight & 15);
     
     switch (postFix) {
         case PF_INC:
@@ -520,7 +520,7 @@ void AsmA65k::handleOperand_Register_Label(const string operand, InstructionWord
     addInstructionWord(instructionWord);
     addRegisterConfigurationByte(sp.left);
     
-    dword address = resolveLabel(sp.right, PC, (OpcodeSize)instructionWord.opcodeSize);
+    uint32_t address = resolveLabel(sp.right, PC, (OpcodeSize)instructionWord.opcodeSize);
     verifyRangeForConstant(std::to_string(address), (OpcodeSize)instructionWord.opcodeSize);
     addData((OpcodeSize)instructionWord.opcodeSize, address);
 }
@@ -576,7 +576,7 @@ void AsmA65k::handleOperand_IndirectRegisterPlusLabel(const string operand, Inst
 
 // ============================================================================
 
-void AsmA65k::handleOperand_IndirectConstant(const dword constant, InstructionWord instructionWord) // INC.w [$ffff]
+void AsmA65k::handleOperand_IndirectConstant(const uint32_t constant, InstructionWord instructionWord) // INC.w [$ffff]
 {
     instructionWord.addressingMode = AM_ABSOLUTE1;
     instructionWord.registerConfiguration = RC_NOREGISTER;
@@ -597,9 +597,9 @@ void AsmA65k::handleOperand_Register(const string operand, InstructionWord instr
 
 // ============================================================================
 
-void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instructionWord, const dword effectiveAddress)
+void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instructionWord, const uint32_t effectiveAddress)
 {
-    const byte instruction = instructionWord.instructionCode;
+    const uint8_t instruction = instructionWord.instructionCode;
     // if branching instruction, eg.: BNE 363
     if(instruction >= I_BRA && instruction <= I_BGE)
     {

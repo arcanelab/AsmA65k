@@ -11,25 +11,24 @@
 #ifndef __AsmA65k__Segment__
 #define __AsmA65k__Segment__
 
-#include "types.h"
 #include <iostream>
 #include <vector>
 
 class Segment
 {
 public:
-    void addByte(byte byteToBeAdded)
+    void addByte(uint8_t byteToBeAdded)
     {
         data.push_back(byteToBeAdded);
     }
     
-    void addWord(word wordToBeAdded)
+    void addWord(uint16_t wordToBeAdded)
     {
         data.push_back(wordToBeAdded & 0xff);
         data.push_back((wordToBeAdded & 0xff00) >> 8);
     }
 
-    void addDword(dword dwordToBeAdded)
+    void addDword(uint32_t dwordToBeAdded)
     {
         data.push_back(dwordToBeAdded & 0xff);
         data.push_back((dwordToBeAdded & 0xff00) >> 8);
@@ -37,29 +36,29 @@ public:
         data.push_back((dwordToBeAdded & 0xff000000) >> 24);
     }
     
-    void writeByte(dword address, byte value)
+    void writeByte(uint32_t address, uint8_t value)
     {
         data[address - this->address] = value;
     }
 
-    void writeWord(dword address, word value)
+    void writeWord(uint32_t address, uint16_t value)
     {
-        dword index = address - this->address;
-        data[index++] = (byte)(value & 0xff);
-        data[index]   = (byte)((value & 0xff00) >> 8);
+        uint32_t index = address - this->address;
+        data[index++] = (uint8_t)(value & 0xff);
+        data[index]   = (uint8_t)((value & 0xff00) >> 8);
     }
 
-    void writeDword(dword address, dword value)
+    void writeDword(uint32_t address, uint32_t value)
     {
-        dword index = address - this->address;
-        data[index++] = (byte)(value & 0xff);
-        data[index++] = (byte)((value & 0xff00) >> 8);
-        data[index++] = (byte)((value & 0xff0000) >> 16);
-        data[index]   = (byte)((value & 0xff000000) >> 24);
+        uint32_t index = address - this->address;
+        data[index++] = (uint8_t)(value & 0xff);
+        data[index++] = (uint8_t)((value & 0xff00) >> 8);
+        data[index++] = (uint8_t)((value & 0xff0000) >> 16);
+        data[index]   = (uint8_t)((value & 0xff000000) >> 24);
     }
 
-    std::vector<byte> data;
-    dword address;
+    std::vector<uint8_t> data;
+    uint32_t address;
 };
 
 #endif /* defined(__Bassember65k__Segment__) */
