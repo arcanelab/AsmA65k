@@ -23,6 +23,31 @@ void logger(const char *format, ...)
     va_end(args);
 }
 
+void WriteFile(std::vector<Segment> *segments, const char *filename)
+{
+    std::string outfilename = filename;
+    size_t lastindex = outfilename.find_last_of(".");
+    outfilename = outfilename.substr(0, lastindex);
+    outfilename += ".rsb"; // RetroSim binary
+    std::ofstream outfile(outfilename, std::ofstream::binary);
+
+    outfile.write("RSX0", 4);
+
+    for(int i = 0; i < segments->size(); i++)
+    {
+        Segment actSegment = (*segments)[i];
+        uint32_t address = actSegment.address;
+        uint32_t length = actSegment.data.size();
+        outfile.write((char*)&address, 4);
+        outfile.write((char*)&length, 4);
+        outfile.write((char*)&actSegment.data[0], actSegment.data.size());
+    }
+
+    outfile.close();
+
+    printf("Output: '%s'\n", outfilename.c_str());
+}
+
 int main(int argc, const char * argv[])
 {
     if(argc != 2)
@@ -54,8 +79,9 @@ int main(int argc, const char * argv[])
         return 1;
     }
 
+    WriteFile(segments, argv[1]);
+
     // dump machine code
-    
     for(int i = 0; i < segments->size(); i++)
     {
         Segment actSegment = (*segments)[i];
@@ -74,3 +100,4 @@ int main(int argc, const char * argv[])
     
     return 0;
 }
+
