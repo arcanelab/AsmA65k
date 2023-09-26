@@ -19,7 +19,9 @@
 #include <vector>
 #include <map>
 
-using namespace std;
+using string = std::string;
+
+// using namespace std;
 
 struct AsmError
 {
@@ -40,7 +42,7 @@ struct AsmError
 class AsmA65k
 {
 public:
-    vector<Segment>* assemble(stringstream &source);
+    std::vector<Segment>* assemble(std::stringstream &source);
     
 private:
     // constants, structs
@@ -89,7 +91,11 @@ private:
         OT_REGISTER__INDIRECT_REGISTER_PLUS_CONSTANT,   // r0, [r1 + 1234]      !
         OT_REGISTER__INDIRECT_REGISTER_PLUS_LABEL,      // r0, [r1 + names]     !
         OT_REGISTER__INDIRECT_CONSTANT_PLUS_REGISTER,   // r0, [1234 + r1]      !
-        OT_REGISTER__INDIRECT_LABEL_PLUS_REGISTER       // r0, [names + r1]     !
+        OT_REGISTER__INDIRECT_LABEL_PLUS_REGISTER,      // r0, [names + r1]     !
+        OT_CONSTANT__LABEL,                             // 1234, label
+        OT_CONSTANT__CONSTANT,                          // 1234, 5678
+        OT_LABEL__CONSTANT,                             // label, 1234
+        OT_LABEL__LABEL,                                // label1, label2
     };
 
     enum AddressingModes
@@ -110,7 +116,8 @@ private:
         AM_INDEXED_DEST,            // [Rx + 432], Ry
         AM_RELATIVE,                // 44              -- only branching instr.
         AM_DIRECT,                  // $4244           -- only jmp/jsr
-        AM_AMBIGOUS                 // used in getAddressingModeFromOperand() when encountering OS_CONSTANT, which can be either AM_IMMEDIATE or AM_RELATIVE or AM_DIRECT
+        AM_AMBIGOUS,                // used in getAddressingModeFromOperand() when encountering OS_CONSTANT, which can be either AM_IMMEDIATE or AM_RELATIVE or AM_DIRECT
+        AM_SYSCALL
     };
 
     enum RegisterConfigurations
@@ -135,7 +142,7 @@ private:
         I_BRA, I_BEQ, I_BNE, I_BCC, I_BCS,
         I_BPL, I_BMI, I_BVC, I_BVS, I_BLT,
         I_BGT, I_BLE, I_BGE, I_SEV, I_CLV,
-        I_SLP
+        I_SLP, I_SYS
     };
     
     enum OpcodeSize
@@ -240,6 +247,10 @@ private:
     void handleOperand_Register_IndirectConstant(const string operand, InstructionWord instructionWord);
 //    void handleDoubleRegisters(const StringPair sp, InstructionWord instructionWord, const char postfixChar);
     void handleDoubleRegisters(const StringPair sp, InstructionWord instructionWord, const PostfixType postFix);
+    void handleOperand_Constant_Label(const string operand, InstructionWord instructionWord);
+    void handleOperand_Constant_Constant(const string operand, InstructionWord instructionWord);
+    void handleOperand_Label_Constant(const string operand, InstructionWord instructionWord);
+    void handleOperand_Label_Label(const string operand, InstructionWord instructionWord);
 
     // AsmA65k-Directives.cpp
     bool processDirectives(const string line);              // the main method for processing & handling the directives
@@ -279,6 +290,16 @@ private:
     void addRegisterConfigurationByte(const string registerString);
     string detectAndRemoveLabelDefinition(string line);
     PostfixType getPostFixType(const string operand);
+
+public:
+    void asmlog(const char *fmt, ...)
+    {
+        va_list args;
+        va_start(args, fmt);
+        printf(("[%s: %d] %s(): "), __FILE__, __LINE__, __FUNCTION__);
+        vprintf(fmt, args);
+        va_end(args);
+    }
 };
 
 #endif /* defined(__AsmA65k__AsmA65k__) */

@@ -154,6 +154,18 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
         case OT_REGISTER__INDIRECT_CONSTANT:                // MOV r0, [$4434]
             handleOperand_Register_IndirectConstant(operand, instructionWord);
             break;
+        case OT_CONSTANT__LABEL:
+            handleOperand_Constant_Label(operand, instructionWord);
+            break;
+        case OT_CONSTANT__CONSTANT:                         // MOV $1234, $5678
+            handleOperand_Constant_Constant(operand, instructionWord);
+            break;
+        case OT_LABEL__CONSTANT:
+            handleOperand_Label_Constant(operand, instructionWord);
+            break;
+        case OT_LABEL__LABEL:
+            handleOperand_Label_Label(operand, instructionWord);
+            break;
     }
 }
 
@@ -218,6 +230,13 @@ AsmA65k::AddressingModes AsmA65k::getAddressingModeFromOperand(const OperandType
         case OT_REGISTER__INDIRECT_LABEL:                   // MOV r0, [kacsa]
         case OT_REGISTER__INDIRECT_CONSTANT:                // MOV r0, [$4434]
             return AM_ABSOLUTE_SRC;
+
+        case OT_CONSTANT__LABEL:                            // SYS $1234, symbol
+        case OT_CONSTANT__CONSTANT:                         // SYS $1234, $5678
+        case OT_LABEL__CONSTANT:                            // SYS symbol, $5678        
+        case OT_LABEL__LABEL:                               // SYS symbol, symbol
+            return AM_SYSCALL;
+
         default:
             throwException_InvalidOperands();
     }
@@ -652,6 +671,59 @@ void AsmA65k::handleOperand_IndirectRegister(const string operand, InstructionWo
 
 // ============================================================================
 
+void AsmA65k::handleOperand_Constant_Label(const string operand, InstructionWord instructionWord)
+{
+    StringPair sp = splitStringByComma(operand);
+    
+    instructionWord.addressingMode = AM_SYSCALL;
+    instructionWord.registerConfiguration = RC_NOREGISTER;
+    addInstructionWord(instructionWord);
+    addData(OS_32BIT, convertStringToInteger(sp.left));
+    addData(OS_32BIT, resolveLabel(sp.right, PC));
+}
+
+// ============================================================================
+
+void AsmA65k::handleOperand_Constant_Constant(const string operand, InstructionWord instructionWord)
+{
+    StringPair sp = splitStringByComma(operand);
+
+    instructionWord.addressingMode = AM_SYSCALL;
+    instructionWord.registerConfiguration = RC_NOREGISTER;
+    addInstructionWord(instructionWord);
+    addData(OS_32BIT, convertStringToInteger(sp.left));
+    addData(OS_32BIT, convertStringToInteger(sp.right));
+}
+
+// ============================================================================
+
+void AsmA65k::handleOperand_Label_Label(const string operand, InstructionWord instructionWord)
+{
+    StringPair sp = splitStringByComma(operand);
+
+    instructionWord.addressingMode = AM_SYSCALL;
+    instructionWord.registerConfiguration = RC_NOREGISTER;
+    addInstructionWord(instructionWord);
+    addData(OS_16BIT, resolveLabel(sp.left, PC));
+    addData(OS_32BIT, resolveLabel(sp.right, PC));
+}
+
+// ============================================================================
+
+void AsmA65k::handleOperand_Label_Constant(const string operand, InstructionWord instructionWord)
+{
+    StringPair sp = splitStringByComma(operand);
+    
+    instructionWord.addressingMode = AM_SYSCALL;
+    instructionWord.registerConfiguration = RC_NOREGISTER;
+    addInstructionWord(instructionWord);
+    addData(OS_16BIT, resolveLabel(sp.left, PC));
+    addData(OS_32BIT, convertStringToInteger(sp.right));
+}
+
+
+// ============================================================================
+
 AsmA65k::OperandTypes AsmA65k::detectOperandType(const string operandStr)
 {
     const static regex_constants::syntax_option_type icase = regex_constants::icase;
@@ -712,6 +784,14 @@ AsmA65k::OperandTypes AsmA65k::detectOperandType(const string operandStr)
             return OT_REGISTER__LABEL;
         if(regex_match(left, rx_register) && regex_match(right, rx_indirectLabel))
             return OT_REGISTER__INDIRECT_LABEL;
+        if(regex_match(left, rx_constant) && regex_match(right, rx_label))
+            return OT_CONSTANT__LABEL;
+        if(regex_match(left, rx_constant) && regex_match(right, rx_constant))
+            return OT_CONSTANT__CONSTANT;
+        if(regex_match(left, rx_label) && regex_match(right, rx_constant))
+            return OT_LABEL__CONSTANT;
+        if(regex_match(left, rx_label) && regex_match(right, rx_label))
+            return OT_LABEL__LABEL;
     }
     else // single operand
     {

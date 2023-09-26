@@ -189,4 +189,7 @@ void AsmA65k::initializeOpcodetable()
     oa.instructionCode = I_BGT; opcodes["bgt"] = oa;
     oa.instructionCode = I_BLE; opcodes["ble"] = oa;
     oa.instructionCode = I_BGE; opcodes["bge"] = oa;
+
+    oa.addressingModesAllowed = {AM_SYSCALL};
+    oa.instructionCode = I_SYS; opcodes["sys"] = oa;
 }
