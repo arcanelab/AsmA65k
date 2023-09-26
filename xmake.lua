@@ -43,7 +43,7 @@ end
 if _target == Target.standalone then
     target("AsmA65k")
         AddCommon()
-        add_files("src/standalone/main.cpp")
+        add_files("src/main.cpp")
         set_kind("binary")
 elseif _target == Target.library then
     target("AsmA65k-lib")
