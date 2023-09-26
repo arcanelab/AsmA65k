@@ -157,7 +157,7 @@ private:
     struct OpcodeAttribute
     {
         uint8_t instructionCode;
-        vector<AddressingModes> addressingModesAllowed;
+        std::vector<AddressingModes> addressingModesAllowed;
         bool isSizeSpecifierAllowed;
         bool isPostfixEnabled;
     };
@@ -201,10 +201,10 @@ private:
     };
     
     // variables
-    vector<Segment> segments;          // the machine code & data get compiled into this
-    map<string, OpcodeAttribute> opcodes;   // contains info about each instruction, indexed by their names
-    map<string, uint32_t> labels;              // symbol table containing all labels and their addresses
-    map<string, vector<LabelLocation>> unresolvedLabels;
+    std::vector<Segment> segments;          // the machine code & data get compiled into this
+    std::map<string, OpcodeAttribute> opcodes;   // contains info about each instruction, indexed by their names
+    std::map<string, uint32_t> labels;              // symbol table containing all labels and their addresses
+    std::map<string, std::vector<LabelLocation>> unresolvedLabels;
     uint32_t PC = 0;                           // keeps track of the current compiling position
     unsigned int actLineNumber = 1;         // keeps track of the current line in the source code
     string actLine;                         // the content of the current source code line being assembled

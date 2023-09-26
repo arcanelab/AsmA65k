@@ -675,10 +675,10 @@ void AsmA65k::handleOperand_Constant_Label(const string operand, InstructionWord
 {
     StringPair sp = splitStringByComma(operand);
     
-    instructionWord.addressingMode = AM_SYSCALL;
+    instructionWord.addressingMode = AM_NONE;
     instructionWord.registerConfiguration = RC_NOREGISTER;
     addInstructionWord(instructionWord);
-    addData(OS_32BIT, convertStringToInteger(sp.left));
+    addData(OS_16BIT, convertStringToInteger(sp.left));
     addData(OS_32BIT, resolveLabel(sp.right, PC));
 }
 
@@ -688,10 +688,10 @@ void AsmA65k::handleOperand_Constant_Constant(const string operand, InstructionW
 {
     StringPair sp = splitStringByComma(operand);
 
-    instructionWord.addressingMode = AM_SYSCALL;
+    instructionWord.addressingMode = AM_NONE;
     instructionWord.registerConfiguration = RC_NOREGISTER;
     addInstructionWord(instructionWord);
-    addData(OS_32BIT, convertStringToInteger(sp.left));
+    addData(OS_16BIT, convertStringToInteger(sp.left));
     addData(OS_32BIT, convertStringToInteger(sp.right));
 }
 
@@ -701,10 +701,10 @@ void AsmA65k::handleOperand_Label_Label(const string operand, InstructionWord in
 {
     StringPair sp = splitStringByComma(operand);
 
-    instructionWord.addressingMode = AM_SYSCALL;
+    instructionWord.addressingMode = AM_NONE;
     instructionWord.registerConfiguration = RC_NOREGISTER;
     addInstructionWord(instructionWord);
-    addData(OS_16BIT, resolveLabel(sp.left, PC));
+    addData(OS_16BIT, resolveLabel(sp.left, PC, OS_16BIT));
     addData(OS_32BIT, resolveLabel(sp.right, PC));
 }
 
@@ -712,12 +712,14 @@ void AsmA65k::handleOperand_Label_Label(const string operand, InstructionWord in
 
 void AsmA65k::handleOperand_Label_Constant(const string operand, InstructionWord instructionWord)
 {
+    printf("operand = '%s'\n", operand.c_str());
+
     StringPair sp = splitStringByComma(operand);
     
-    instructionWord.addressingMode = AM_SYSCALL;
+    instructionWord.addressingMode = AM_NONE;
     instructionWord.registerConfiguration = RC_NOREGISTER;
     addInstructionWord(instructionWord);
-    addData(OS_16BIT, resolveLabel(sp.left, PC));
+    addData(OS_16BIT, resolveLabel(sp.left, PC, OS_16BIT));
     addData(OS_32BIT, convertStringToInteger(sp.right));
 }
 
