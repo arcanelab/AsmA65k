@@ -56,6 +56,12 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
     InstructionWord instructionWord;
     
     instructionWord.opcodeSize = getOpcodeSize(modifier);
+
+    if(opcodes.find(mnemonic) == opcodes.end())
+    {
+        throwException_InvalidMnemonic();
+    }
+
     instructionWord.instructionCode = opcodes[mnemonic].instructionCode;
     
     checkIfSizeSpecifierIsAllowed(mnemonic, (OpcodeSize)instructionWord.opcodeSize);
@@ -76,9 +82,12 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
             handleOperand_Register(operand, instructionWord);
             break;
         case OT_LABEL:                                       // BEQ label
-            effectiveAddress = resolveLabel(operand, PC+2);        // NOTE: break omitted on purpose!
-        case OT_CONSTANT:                                    // BNE $4000 or PSH $f000
-            handleOperand_Constant(operand, instructionWord, effectiveAddress);
+            effectiveAddress = resolveLabel(operand, PC+2);
+            handleOperand_Constant(effectiveAddress, instructionWord);
+            break;
+        case OT_CONSTANT:          
+            effectiveAddress = convertStringToInteger(operand);                          // BNE $4000 or PSH $f000            
+            handleOperand_Constant(effectiveAddress, instructionWord);
             break;
         case OT_INDIRECT_REGISTER:                           // INC [r0]
             handleOperand_IndirectRegister(operand, instructionWord);
@@ -616,7 +625,7 @@ void AsmA65k::handleOperand_Register(const string operand, InstructionWord instr
 
 // ============================================================================
 
-void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instructionWord, const uint32_t effectiveAddress)
+void AsmA65k::handleOperand_Constant(const uint32_t effectiveAddress, InstructionWord instructionWord)
 {
     const uint8_t instruction = instructionWord.instructionCode;
     // if branching instruction, eg.: BNE 363
@@ -634,12 +643,12 @@ void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instr
     else
         switch (instruction)
         {
-            case I_PSH: // psh $ff
-                verifyRangeForConstant(operand, (OpcodeSize)instructionWord.opcodeSize);
+            case I_PSH: // push $ff
+                verifyRangeForConstant(effectiveAddress, (OpcodeSize)instructionWord.opcodeSize);
                 instructionWord.addressingMode = AM_CONST_IMMEDIATE;
                 instructionWord.registerConfiguration = RC_NOREGISTER;
                 addInstructionWord(instructionWord);
-                addData((OpcodeSize)instructionWord.opcodeSize, convertStringToInteger(operand));
+                addData((OpcodeSize)instructionWord.opcodeSize, effectiveAddress);
                 break;
             case I_JMP: // jmp $43434
             case I_JSR: // jsr $3434
@@ -647,7 +656,7 @@ void AsmA65k::handleOperand_Constant(const string operand, InstructionWord instr
                 instructionWord.addressingMode = AM_DIRECT;
                 instructionWord.registerConfiguration = RC_NOREGISTER;
                 addInstructionWord(instructionWord);
-                addData(OS_32BIT, convertStringToInteger(operand));
+                addData(OS_32BIT, effectiveAddress);
                 break;
         }
 }

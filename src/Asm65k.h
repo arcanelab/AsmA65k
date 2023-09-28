@@ -34,9 +34,9 @@ struct AsmError
         lineContent(lineContent),
         errorMessage(errorString){}
 
-    string errorMessage;
     unsigned int lineNumber;
     string lineContent;
+    string errorMessage;
 };
 
 class AsmA65k
@@ -221,7 +221,7 @@ private:
     AddressingModes getAddressingModeFromOperand(const OperandTypes operandType);
 
     void handleOperand_Register(const string operand, InstructionWord instructionWord);
-    void handleOperand_Constant(const string operand, InstructionWord instructionWord, const uint32_t effectiveAddress);
+    void handleOperand_Constant(const uint32_t constant, InstructionWord instructionWord);
     void handleOperand_IndirectRegister(const string operand, InstructionWord instructionWord);
     void handleOperand_IndirectConstant(const uint32_t constant, InstructionWord instructionWord);
     void handleOperand_IndirectRegisterPlusLabel(const string operand, InstructionWord instructionWord);
@@ -270,6 +270,7 @@ private:
     void throwException_SyntaxError(const string line);     // throws an exception
     void throwException_InvalidRegister();                  // throws an exception
     void throwException_InvalidOperands();                  // throws an exception
+    void throwException_InvalidMnemonic();
     void throwException_InternalError();                    // throws an exception
     void throwException_SymbolOutOfRange();
     uint32_t resolveLabel(const string label, const uint32_t address, const OpcodeSize size = OS_32BIT);                 // returns the address associated with a label
@@ -283,6 +284,7 @@ private:
     OpcodeSize getOpcodeSizeFromSignedInteger(const int32_t value);
     OpcodeSize getOpcodeSizeFromUnsigedInteger(const uint32_t value);
     void verifyRangeForConstant(const string constant, const OpcodeSize opcodeSize);
+    void verifyRangeForConstant(const uint32_t constant, OpcodeSize opcodeSize);
     void addData(const OpcodeSize size, const uint32_t data);
     void addData(const string sizeSpecifier, const uint32_t data);
     uint8_t getOpcodeSize(const string modifierCharacter); // takes the modifier character (eg.: mov.b -> 'b') and returns its numerical value

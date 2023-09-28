@@ -166,6 +166,14 @@ bool AsmA65k::isCommentLine(const string line)
 
 // ============================================================================
 
+void AsmA65k::throwException_InvalidMnemonic()
+{
+    AsmError error(actLineNumber, actLine, "Invalid opcode");
+    throw error;
+}
+
+// ============================================================================
+
 void AsmA65k::throwException_InvalidOperands()
 {
     AsmError error(actLineNumber, actLine, "Invalid operand");
@@ -317,6 +325,14 @@ AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromUnsigedInteger(uint32_t value)
 void AsmA65k::verifyRangeForConstant(const string constant, OpcodeSize opcodeSize)
 {
     if(getOpcodeSizeFromUnsigedInteger(convertStringToInteger(constant)) < opcodeSize)
+        throwException_SymbolOutOfRange();
+}
+
+// ============================================================================
+
+void AsmA65k::verifyRangeForConstant(const uint32_t constant, OpcodeSize opcodeSize)
+{
+    if(getOpcodeSizeFromUnsigedInteger(constant) < opcodeSize)
         throwException_SymbolOutOfRange();
 }
 
