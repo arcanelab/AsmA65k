@@ -85,6 +85,15 @@ private:
         OT_INDIRECT_REGISTER_PLUS_CONSTANT__REGISTER,   // [r0 + 1234], r1      !
         OT_INDIRECT_LABEL_PLUS_REGISTER__REGISTER,      // [names + r0], r1     !
         OT_INDIRECT_CONSTANT_PLUS_REGISTER__REGISTER,   // [$2344 + r0], r1     !
+        
+        OT_INDIRECT_REGISTER__CONSTANT,                 // [r0], 64
+        OT_INDIRECT_LABEL__CONSTANT,                    // [names], 64
+        OT_INDIRECT_CONSTANT__CONSTANT,                 // [$1234], 64
+        OT_INDIRECT_REGISTER_PLUS_LABEL__CONSTANT,      // [r0 + names], 64
+        OT_INDIRECT_REGISTER_PLUS_CONSTANT__CONSTANT,   // [r0 + 1234], 64
+        OT_INDIRECT_LABEL_PLUS_REGISTER__CONSTANT,      // [names + r0], 64
+        OT_INDIRECT_CONSTANT_PLUS_REGISTER__CONSTANT,   // [$2344 + r0], 64
+        
         OT_REGISTER__INDIRECT_REGISTER,                 // r0, [r1]             !
         OT_REGISTER__INDIRECT_LABEL,                    // r0, [names]          !
         OT_REGISTER__INDIRECT_CONSTANT,                 // r0, [1234]           !
@@ -100,35 +109,38 @@ private:
 
     enum AddressingModes
     {
-        AM_NONE,
-        AM_REG_IMMEDIATE,           // Rx, 55
-        AM_CONST_IMMEDIATE,         // 555 (for PUSH)
-        AM_REGISTER1,               // Rx
-        AM_REGISTER2,               // Rx, Ry
-        AM_ABSOLUTE1,               // [$f000]
-        AM_ABSOLUTE_SRC,            // Rx, [$f000]
-        AM_ABSOLUTE_DEST,           // [$f000], Rx
-        AM_REGISTER_INDIRECT1,      // [Rx]
-        AM_REGISTER_INDIRECT_SRC,   // Rx, [Ry]
-        AM_REGISTER_INDIRECT_DEST,  // [Rx], Ry
-        AM_INDEXED1,                // [Rx + 234]
-        AM_INDEXED_SRC,             // Rx, [Ry + 432]
-        AM_INDEXED_DEST,            // [Rx + 432], Ry
-        AM_RELATIVE,                // 44              -- only branching instr.
-        AM_DIRECT,                  // $4244           -- only jmp/jsr
-        AM_AMBIGOUS,                // used in getAddressingModeFromOperand() when encountering OS_CONSTANT, which can be either AM_IMMEDIATE or AM_RELATIVE or AM_DIRECT
-        AM_SYSCALL
+        AM_IMPLIED = 0,                   // -no operand-
+        AM_REG_IMMEDIATE,                 // Rx, const
+        AM_CONST_IMMEDIATE,               // const
+        AM_REGISTER1,                     // Rx
+        AM_REGISTER2,                     // Rx, Ry
+        AM_ABSOLUTE1,                     // [Address]
+        AM_ABSOLUTE_SRC,                  // Rx, [Address]
+        AM_ABSOLUTE_DEST,                 // [Address], Rx
+        AM_ABSOLUTE_CONST,                // [Address], const       !
+        AM_REGISTER_INDIRECT1,            // [Rx]
+        AM_REGISTER_INDIRECT_SRC,         // Rx, [Ry]
+        AM_REGISTER_INDIRECT_DEST,        // [Rx], Ry
+        AM_REGISTER_INDIRECT_CONST,       // [Rx], const            !
+        AM_INDEXED1,                      // [Rx + const]
+        AM_INDEXED_SRC,                   // Rx, [Ry + const]
+        AM_INDEXED_DEST,                  // [Rx + const], Ry
+        AM_INDEXED_CONST,                 // [Rx + const], const    !
+        AM_RELATIVE,                      // branch
+        AM_DIRECT,                        // direct
+        AM_SYSCALL,                       // syscall
+        AM_AMBIGOUS,
     };
 
     enum RegisterConfigurations
     {
-        RC_NOREGISTER               = 0, // 0000, 0
-        RC_REGISTER                 = 1, // 0001, 1
-        RC_2REGISTERS               = 2, // 0010, 2
-        RC_REGISTER_POSTINCREMENT   = 5, // 0101, 5
-        RC_2REGISTERS_POSTINCREMENT = 6, // 0110, 6
-        RC_REGISTER_POSTDECREMENT   = 9, // 1001, 9
-        RC_2REGISTERS_POSTDECREMENT = 10,// 1010, 10
+        RC_NOREGISTER               = 0,
+        RC_REGISTER                 = 1,
+        RC_2REGISTERS               = 2,
+        RC_REGISTER_POSTINCREMENT   = 3,
+        RC_2REGISTERS_POSTINCREMENT = 4,
+        RC_REGISTER_PREDECREMENT    = 5,
+        RC_2REGISTERS_PREDECREMENT  = 6,
     };
 
     enum Instructions
@@ -142,7 +154,7 @@ private:
         I_BRA, I_BEQ, I_BNE, I_BCC, I_BCS,
         I_BPL, I_BMI, I_BVC, I_BVS, I_BLT,
         I_BGT, I_BLE, I_BGE, I_SEV, I_CLV,
-        I_SLP, I_SYS
+        I_SLP, I_SXB, I_SXW, I_SYS
     };
     
     enum OpcodeSize
@@ -164,8 +176,8 @@ private:
     
     struct InstructionWord
     {
-        uint8_t addressingMode: 4;
-        uint8_t registerConfiguration: 4;
+        uint8_t addressingMode: 5;
+        uint8_t registerConfiguration: 3;
         uint8_t instructionCode: 6;
         uint8_t opcodeSize: 2;
     };
@@ -251,6 +263,13 @@ private:
     void handleOperand_Constant_Constant(const string operand, InstructionWord instructionWord);
     void handleOperand_Label_Constant(const string operand, InstructionWord instructionWord);
     void handleOperand_Label_Label(const string operand, InstructionWord instructionWord);
+    void handleOperand_IndirectRegister_Constant(const string operand, InstructionWord instructionWord);
+    void handleOperand_IndirectLabel_Constant(const string operand, InstructionWord instructionWord);
+    void handleOperand_IndirectConstant_Constant(const string operand, InstructionWord instructionWord);
+    void handleOperand_IndirectRegisterPlusLabel_Constant(const string operand, InstructionWord instructionWord);
+    void handleOperand_IndirectRegisterPlusConstant_Constant(const string operand, InstructionWord instructionWord);
+    void handleOperand_IndirectLabelPlusRegister_Constant(const string operand, InstructionWord instructionWord);
+    void handleOperand_IndirectConstantPlusRegister_Constant(const string operand, InstructionWord instructionWord);
 
     // AsmA65k-Directives.cpp
     bool processDirectives(const string line);              // the main method for processing & handling the directives
@@ -266,7 +285,7 @@ private:
     int findChar(const string text, char c);                      // searches for the given character and returns its index or -1
     void throwException_ValueOutOfRange();                  // throws an exception
     void throwException_InvalidNumberFormat();              // throws an exception
-    void checkIntegerRange(const uint64_t result);                // checks if the 64 bit value can be fit into 32 bits (that's the max. allowed)
+    void checkIntegerRange(const int64_t result);                // checks if the 64 bit value can be fit into 32 bits (that's the max. allowed)
     void throwException_SyntaxError(const string line);     // throws an exception
     void throwException_InvalidRegister();                  // throws an exception
     void throwException_InvalidOperands();                  // throws an exception
@@ -282,14 +301,14 @@ private:
     void checkIfAddressingModeIsLegalForThisInstruction(const string mnemonic, const OperandTypes operandType);
     void checkIfSizeSpecifierIsAllowed(const string mnemonic, const OpcodeSize opcodeSize);
     OpcodeSize getOpcodeSizeFromSignedInteger(const int32_t value);
-    OpcodeSize getOpcodeSizeFromUnsigedInteger(const uint32_t value);
+    OpcodeSize getOpcodeSizeFromUnsigedInteger(const int64_t value);
     void verifyRangeForConstant(const string constant, const OpcodeSize opcodeSize);
     void verifyRangeForConstant(const uint32_t constant, OpcodeSize opcodeSize);
     void addData(const OpcodeSize size, const uint32_t data);
     void addData(const string sizeSpecifier, const uint32_t data);
     uint8_t getOpcodeSize(const string modifierCharacter); // takes the modifier character (eg.: mov.b -> 'b') and returns its numerical value
     void addInstructionWord(const InstructionWord instructionWord);
-    void addRegisterConfigurationByte(const string registerString);
+    void addRegisterConfigurationByte(const string registerString, InstructionWord instructionWord, const PostfixType postfixType = PF_NONE);
     string detectAndRemoveLabelDefinition(string line);
     PostfixType getPostFixType(const string operand);
 

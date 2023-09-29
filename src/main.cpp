@@ -75,7 +75,7 @@ int main(int argc, const char * argv[])
     catch(AsmError error)
     {
         logger("Assembly error in line %d: \"%s\"\n", error.lineNumber, error.errorMessage.c_str());
-        logger("Line content: %s\n", error.lineContent.c_str());
+        logger("in line: %s\n", error.lineContent.c_str());
         return 1;
     }
 

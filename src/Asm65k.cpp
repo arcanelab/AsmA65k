@@ -135,14 +135,17 @@ void AsmA65k::initializeOpcodetable()
     oa.addressingModesAllowed = { AM_CONST_IMMEDIATE, AM_REGISTER1, AM_REGISTER_INDIRECT1, AM_ABSOLUTE1, AM_INDEXED1 };
     oa.instructionCode = I_PSH; opcodes["push"] = oa;
 
-    oa.addressingModesAllowed = { AM_REG_IMMEDIATE,         // Rx, const
-                                  AM_REGISTER2,             // Rx, Ry
-                                  AM_ABSOLUTE_SRC,          // Rx, [$1234]
-                                  AM_ABSOLUTE_DEST,         // [$1234], Rx
-                                  AM_REGISTER_INDIRECT_SRC, // Rx, [Ry]
-                                  AM_REGISTER_INDIRECT_DEST,// [Rx], Ry
-                                  AM_INDEXED_SRC,           // Rx, [Ry + 123]
-                                  AM_INDEXED_DEST };        // [Rx + 123], Ry
+    oa.addressingModesAllowed = { AM_REG_IMMEDIATE,             // Rx, const
+                                  AM_REGISTER2,                 // Rx, Ry
+                                  AM_ABSOLUTE_SRC,              // Rx, [$1234]
+                                  AM_ABSOLUTE_DEST,             // [$1234], Rx
+                                  AM_REGISTER_INDIRECT_SRC,     // Rx, [Ry]
+                                  AM_REGISTER_INDIRECT_DEST,    // [Rx], Ry
+                                  AM_INDEXED_SRC,               // Rx, [Ry + 123]
+                                  AM_INDEXED_DEST,              // [Rx + 123], Ry                                  
+                                  AM_ABSOLUTE_CONST,            // [$1234], const 
+                                  AM_INDEXED_CONST,             // [Rx + 123], const
+                                  AM_REGISTER_INDIRECT_CONST }; // [Rx], const
     
     oa.instructionCode = I_MOV; opcodes["mov"] = oa;
     oa.instructionCode = I_ADD; opcodes["add"] = oa;
@@ -158,9 +161,11 @@ void AsmA65k::initializeOpcodetable()
     oa.isSizeSpecifierAllowed = false;
     oa.instructionCode = I_MUL; opcodes["mul"] = oa;
     oa.instructionCode = I_DIV; opcodes["div"] = oa;
+    oa.instructionCode = I_SXB; opcodes["sxb"] = oa;
+    oa.instructionCode = I_SXW; opcodes["sxw"] = oa;
 
     oa.isPostfixEnabled = false;
-    oa.addressingModesAllowed = {AM_NONE};
+    oa.addressingModesAllowed = {AM_IMPLIED};
     oa.instructionCode = I_SEC; opcodes["sec"] = oa;
     oa.instructionCode = I_CLC; opcodes["clc"] = oa;
     oa.instructionCode = I_SEV; opcodes["sev"] = oa;

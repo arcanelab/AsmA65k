@@ -19,9 +19,9 @@ using namespace std;
 
 int AsmA65k::convertStringToInteger(const string valueStr)
 {
-    static const regex rx_checkIfBin(R"(^%([0-1]+))", regex_constants::icase);
+    static const regex rx_checkIfBin(R"(^%([01]+))", regex_constants::icase);
     static const regex rx_checkIfHex(R"(^\$([0-9a-z]+))", regex_constants::icase);
-    static const regex rx_checkIfDec(R"(^([0-9]+))", regex_constants::icase);
+    static const regex rx_checkIfDec(R"(^(-?[0-9]+))", regex_constants::icase);
     static const string table = "0123456789ABCDEF";
     smatch rxResult;
     int i;
@@ -68,6 +68,12 @@ int AsmA65k::convertStringToInteger(const string valueStr)
         for(i = length-1; i >= 0; i--)
         {
             actChar = tmpStr[i];
+            int charIndex = findChar(table, actChar);
+            if(charIndex == -1)
+            {
+                result *= -1;
+                continue;
+            }
             result += findChar(table, actChar) * baseValue;
             baseValue *= 10;
         }
@@ -87,6 +93,9 @@ int AsmA65k::findChar(const string text, char c)
 	const int size = (int)text.size();
     c = toupper(c);
 	
+    if(c=='-')
+        return -1;
+
 	for(int i = 0; i < size; i++)
 		if(text[i] == c)
 			return i;
@@ -134,6 +143,8 @@ void AsmA65k::throwException_InvalidRegister()
     throw error;
 }
 
+// ============================================================================
+
 void AsmA65k::throwException_SymbolOutOfRange()
 {
     AsmError error(actLineNumber, actLine, "Symbol out of range for specified size");
@@ -142,8 +153,18 @@ void AsmA65k::throwException_SymbolOutOfRange()
 
 // ============================================================================
 
-void AsmA65k::checkIntegerRange(const uint64_t result)
+void AsmA65k::checkIntegerRange(const int64_t result)
 {
+    if(result < 0)
+    {
+        if(result < -2147483648)
+            throwException_ValueOutOfRange();
+        if(result > 2147483647)
+            throwException_ValueOutOfRange();
+
+        return;
+    }
+
     const uint64_t maxInt = 0xffffffff;
     
     if((uint64_t)result > maxInt)
@@ -309,13 +330,26 @@ AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromSignedInteger(int32_t value)
 
 // ============================================================================
 
-AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromUnsigedInteger(uint32_t value)
+AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromUnsigedInteger(int64_t value)
 {
-    if(value <= 0xff)
-        return OS_8BIT;
-    
-    if(value <= 0xffff)
-        return OS_16BIT;
+    if(value < 0)
+    {
+        if(value >= -128 && value <= 127)
+            return OS_8BIT;
+        
+        if(value >= -32768 && value <= 32767)
+            return OS_16BIT;
+    }
+    else
+    {
+        uint32_t unisgnedValue = (uint32_t)value;
+
+        if(unisgnedValue <= 0xff)
+            return OS_8BIT;
+        
+        if(unisgnedValue <= 0xffff)
+            return OS_16BIT;
+    }
     
     return OS_32BIT;
 }
@@ -457,12 +491,46 @@ uint32_t AsmA65k::resolveLabel(const string label, const uint32_t address, const
 
 // ============================================================================
 
-void AsmA65k::addRegisterConfigurationByte(const string registerString)
+void AsmA65k::handleDoubleRegisters(const StringPair sp, InstructionWord instructionWord, PostfixType postFix)
 {
-    // check for valid register specification in operand
-    RegisterType registerIndex = detectRegisterType(registerString);
+    RegisterType regLeft = detectRegisterType(sp.left);
+    RegisterType regRight = detectRegisterType(sp.right);
     
-    addData(OS_8BIT, registerIndex);
+    uint8_t registerSelector = ((regLeft & 15) << 4) | (regRight & 15);
+    
+    switch (postFix) {
+        case PF_INC:
+            instructionWord.registerConfiguration = RC_2REGISTERS_POSTINCREMENT;
+            break;
+        case PF_DEC:
+            instructionWord.registerConfiguration = RC_2REGISTERS_PREDECREMENT;
+            break;
+        default:
+            instructionWord.registerConfiguration = RC_2REGISTERS;
+            break;
+    }
+    addInstructionWord(instructionWord); // 2 bytes
+    addData(OS_8BIT, registerSelector); // 1 byte
+}
+
+void AsmA65k::addRegisterConfigurationByte(const string registerString, InstructionWord instructionWord, const PostfixType postFix)
+{
+    switch (postFix)
+    {
+        case PF_INC:
+            instructionWord.registerConfiguration = RC_REGISTER_POSTINCREMENT;
+            break;
+        case PF_DEC:
+            instructionWord.registerConfiguration = RC_REGISTER_PREDECREMENT;
+            break;
+        default:
+            instructionWord.registerConfiguration = RC_REGISTER;
+            break;
+    }
+    RegisterType registerIndex = detectRegisterType(registerString);
+
+    addInstructionWord(instructionWord); // 2 bytes
+    addData(OS_8BIT, registerIndex); // 1 byte
 }
 
 // ============================================================================
