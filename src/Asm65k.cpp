@@ -133,7 +133,7 @@ void AsmA65k::initializeOpcodetable()
     oa.instructionCode = I_DEC; opcodes["dec"] = oa;
 
     oa.addressingModesAllowed = { AM_CONST_IMMEDIATE, AM_REGISTER1, AM_REGISTER_INDIRECT1, AM_ABSOLUTE1, AM_INDEXED1 };
-    oa.instructionCode = I_PSH; opcodes["push"] = oa;
+    oa.instructionCode = I_PUSH; opcodes["push"] = oa;
 
     oa.addressingModesAllowed = { AM_REG_IMMEDIATE,             // Rx, const
                                   AM_REGISTER2,                 // Rx, Ry
@@ -151,7 +151,7 @@ void AsmA65k::initializeOpcodetable()
     oa.instructionCode = I_ADD; opcodes["add"] = oa;
     oa.instructionCode = I_SUB; opcodes["sub"] = oa;
     oa.instructionCode = I_AND; opcodes["and"] = oa;
-    oa.instructionCode = I_BOR; opcodes["or"] = oa;
+    oa.instructionCode = I_OR; opcodes["or"] = oa;
     oa.instructionCode = I_XOR; opcodes["xor"] = oa;
     oa.instructionCode = I_SHL; opcodes["shl"] = oa;
     oa.instructionCode = I_SHR; opcodes["shr"] = oa;
@@ -172,8 +172,8 @@ void AsmA65k::initializeOpcodetable()
     oa.instructionCode = I_CLV; opcodes["clv"] = oa;
     oa.instructionCode = I_SEI; opcodes["sei"] = oa;
     oa.instructionCode = I_CLI; opcodes["cli"] = oa;
-    oa.instructionCode = I_PHA; opcodes["pusha"] = oa;
-    oa.instructionCode = I_POA; opcodes["popa"] = oa;
+    oa.instructionCode = I_PUSHA; opcodes["pusha"] = oa;
+    oa.instructionCode = I_POPA; opcodes["popa"] = oa;
     oa.instructionCode = I_NOP; opcodes["nop"] = oa;
     oa.instructionCode = I_BRK; opcodes["brk"] = oa;
     oa.instructionCode = I_RTS; opcodes["rts"] = oa;
