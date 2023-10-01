@@ -1,15 +1,17 @@
+.pc = $14
+.dword InstructionExceptionHandler
+
 .pc = $200
 
+.def PRINT = $face
+
 start:
-    mov [r0], -1
-    sxb [$a000], -2
-    ;mov [PC+start]+, 5
-    ;or.w [$69857463], 4
+    sys PRINT, $12345678
 
-;    sxb r0, -1
-;    sxw r2, r0
-;    sxw r0, [$babefeab]
-
-;    sys $8412, $12345678
 loop:
-;    jmp loop
+    jmp loop
+
+InstructionExceptionHandler:
+
+    slp
+    jmp InstructionExceptionHandler
