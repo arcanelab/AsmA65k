@@ -768,7 +768,7 @@ void AsmA65k::handleOperand_Label_Constant(const string operand, InstructionWord
 {
     StringPair sp = splitStringByComma(operand);
     
-    instructionWord.addressingMode = AM_IMPLIED;
+    instructionWord.addressingMode = AM_SYSCALL;
     instructionWord.registerConfiguration = RC_NOREGISTER;
     addInstructionWord(instructionWord);
     addData(OS_16BIT, resolveLabel(sp.left, PC, OS_16BIT));
