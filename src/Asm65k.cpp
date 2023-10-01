@@ -23,6 +23,9 @@ std::vector<Segment>* AsmA65k::assemble(stringstream &source)
     
     while(getline(source, actLine))
     {
+        // convert line to lowercase
+        std::transform(actLine.begin(), actLine.end(), actLine.begin(), ::tolower);
+        
         if(isCommentLine(actLine))
         {
             actLineNumber++;

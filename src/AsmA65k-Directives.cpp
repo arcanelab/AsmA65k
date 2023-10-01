@@ -170,15 +170,19 @@ void AsmA65k::handleDirective_ByteWordDword(const string line, const int directi
     }
     
     // match the individual numbers
-    static const regex rx_matchNumber(R"(([%$]?[0-9a-f]+)\s*,\s*)");
+    static const regex rx_matchNumber(R"(([%$]?([0-9a-f]+|\s*[a-z][a-z_0-9]*))\s*,?\s*)");
     const string matchStr = dataMatch[2].str(); // dataMatch[1] = (byte|word|dword); dataMatch[2] = "%1, $2, 3, 4", etc
     sregex_token_iterator iter(matchStr.begin(), matchStr.end(), rx_matchNumber, 1);
     const sregex_token_iterator end;
     while(iter != end) // iterate through sub-matches, that is, each data element after the directive, skipping ',' and white space
     {
-        // convert string into integer, check validity
-        int value;
-        value = convertStringToInteger(iter->str());
+        uint32_t value;
+        const string token = iter->str();
+        // check if the string is a label
+        if(token[0] >= 'a' && token[0] <= 'z')
+            value = resolveLabel(token, PC, OS_32BIT);
+        else
+            value = convertStringToInteger(token);
     
         // handle data size
         switch (directiveType)
