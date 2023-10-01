@@ -215,10 +215,10 @@ private:
 
     struct InstructionWord
     {
-        uint8_t addressingMode : 5;
-        uint8_t registerConfiguration : 3;
-        uint8_t instructionCode : 6;
-        uint8_t opcodeSize : 2;
+        uint16_t addressingMode : 5;
+        uint16_t registerConfiguration : 3;
+        uint16_t instructionCode : 6;
+        uint16_t opcodeSize : 2;
     };
 
     struct StringPair
