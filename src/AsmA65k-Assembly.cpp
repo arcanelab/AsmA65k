@@ -74,8 +74,8 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
     switch (operandType)
     {
         case OT_NONE:                                        // SEI
-            instructionWord.addressingMode = 7;//AM_IMPLIED;
-            instructionWord.registerConfiguration = 5;//RC_NOREGISTER;
+            instructionWord.addressingMode = AM_IMPLIED;
+            instructionWord.registerConfiguration = RC_NOREGISTER;
             addInstructionWord(instructionWord);
             break;
         case OT_REGISTER:                                    // INC r0
