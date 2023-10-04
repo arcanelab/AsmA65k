@@ -330,26 +330,15 @@ AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromSignedInteger(int32_t value)
 
 // ============================================================================
 
-AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromUnsigedInteger(int64_t value)
+AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromUnsigedInteger(uint64_t value)
 {
-    if(value < 0)
-    {
-        if(value >= -128 && value <= 127)
-            return OS_8BIT;
-        
-        if(value >= -32768 && value <= 32767)
-            return OS_16BIT;
-    }
-    else
-    {
-        uint32_t unisgnedValue = (uint32_t)value;
+    uint32_t unisgnedValue = (uint32_t)value;
 
-        if(unisgnedValue <= 0xff)
-            return OS_8BIT;
-        
-        if(unisgnedValue <= 0xffff)
-            return OS_16BIT;
-    }
+    if(unisgnedValue <= 0xff)
+        return OS_8BIT;
+    
+    if(unisgnedValue <= 0xffff)
+        return OS_16BIT;
     
     return OS_32BIT;
 }
@@ -459,7 +448,7 @@ void AsmA65k::addData(const string sizeSpecifier, const uint32_t data)
 
 // ============================================================================
 
-uint32_t AsmA65k::resolveLabel(const string label, const uint32_t address, const OpcodeSize size)
+uint32_t AsmA65k::resolveLabel(const string label, const uint32_t address, const OpcodeSize size, bool isRelative)
 {
     static const regex rx_removeSurroundingWhiteSpace(R"(\s*(\S*)\s*)");
     smatch result;
@@ -477,6 +466,7 @@ uint32_t AsmA65k::resolveLabel(const string label, const uint32_t address, const
         labelLocation.opcodeSize = size;
         labelLocation.lineContent = actLine;
         labelLocation.lineNumber = actLineNumber;
+        labelLocation.isRelative = isRelative;
         unresolvedLabels[cleanLabel].push_back(labelLocation);
         
         return 0;

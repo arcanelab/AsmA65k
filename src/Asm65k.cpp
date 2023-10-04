@@ -64,10 +64,19 @@ std::vector<Segment>* AsmA65k::assemble(stringstream &source)
                     // suitable segment found, write value to stored address in that segment in the right size
                     uint32_t value = labels[label];
                     
-                    if(getOpcodeSizeFromUnsigedInteger(value) < actLocation.opcodeSize)
+                    if(actLocation.isRelative)
                     {
-                        AsmError error(actLocation.lineNumber, actLocation.lineContent, "Symbol out of range for specified size");
-                        throw error;
+                        value -= actLocation.address;
+                        value += 2;
+                        actLocation.opcodeSize = OS_16BIT;
+                        if(getOpcodeSizeFromSignedInteger(value) <OS_16BIT)
+                        {
+                            throwException_SymbolOutOfRange();
+                        }
+                    }
+                    else if(getOpcodeSizeFromUnsigedInteger(value) < actLocation.opcodeSize)
+                    {
+                        throwException_SymbolOutOfRange();
                     }
                     
                     switch (actLocation.opcodeSize)

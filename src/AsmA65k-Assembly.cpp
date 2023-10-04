@@ -81,8 +81,16 @@ void AsmA65k::assembleInstruction(const string mnemonic, const string modifier, 
         case OT_REGISTER:                                    // INC r0
             handleOperand_Register(operand, instructionWord);
             break;
-        case OT_LABEL:                                       // BEQ label
-            effectiveAddress = resolveLabel(operand, PC+2);
+        case OT_LABEL:                                      // BEQ label
+            {
+                const uint8_t instruction = instructionWord.instructionCode;
+                if(instruction >= I_BRA && instruction <= I_BGE)
+                {
+                    int32_t diff = effectiveAddress - PC;
+                    instructionWord.opcodeSize = getOpcodeSizeFromSignedInteger(diff);
+                }
+                effectiveAddress = resolveLabel(operand, PC+2, (OpcodeSize)instructionWord.opcodeSize, instruction >= I_BRA && instruction <= I_BGE);
+            }
             handleOperand_Constant(effectiveAddress, instructionWord);
             break;
         case OT_CONSTANT:          
@@ -600,10 +608,12 @@ void AsmA65k::handleOperand_Constant(const uint32_t effectiveAddress, Instructio
         instructionWord.registerConfiguration = RC_NOREGISTER;
 
         int32_t diff = effectiveAddress - PC;
+        if(diff < -32768 || diff > 32767)
+            throwException_SymbolOutOfRange();
         
-        instructionWord.opcodeSize = getOpcodeSizeFromSignedInteger(diff);
+        instructionWord.opcodeSize = OS_16BIT;
         addInstructionWord(instructionWord);
-        addData((OpcodeSize)instructionWord.opcodeSize, diff);
+        addData(OS_16BIT, diff);
     }
     else
         switch (instruction)

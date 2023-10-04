@@ -256,6 +256,7 @@ private:
         OpcodeSize opcodeSize;
         uint32_t lineNumber;
         string lineContent;
+        bool isRelative;
     };
 
     enum PostfixType
@@ -345,7 +346,7 @@ private:
     void throwException_InvalidMnemonic();
     void throwException_InternalError(); // throws an exception
     void throwException_SymbolOutOfRange();
-    uint32_t resolveLabel(const string label, const uint32_t address, const OpcodeSize size = OS_32BIT); // returns the address associated with a label
+    uint32_t resolveLabel(const string label, const uint32_t address, const OpcodeSize size = OS_32BIT, bool isRelative = false); // returns the address associated with a label
     string removeSquaredBrackets(const string operand);                                                  // removes the enclosing squared bracked from a string
     StringPair splitStringByPlusSign(const string operand);                                              // splits a string into a StringPair separated by a '+' character
     StringPair splitStringByComma(const string operand);                                                 // splits a string into a StringPair separated by a ',' character
@@ -354,7 +355,7 @@ private:
     void checkIfAddressingModeIsLegalForThisInstruction(const string mnemonic, const OperandTypes operandType);
     void checkIfSizeSpecifierIsAllowed(const string mnemonic, const OpcodeSize opcodeSize);
     OpcodeSize getOpcodeSizeFromSignedInteger(const int32_t value);
-    OpcodeSize getOpcodeSizeFromUnsigedInteger(const int64_t value);
+    OpcodeSize getOpcodeSizeFromUnsigedInteger(const uint64_t value);
     void verifyRangeForConstant(const string constant, const OpcodeSize opcodeSize);
     void verifyRangeForConstant(const uint32_t constant, OpcodeSize opcodeSize);
     void addData(const OpcodeSize size, const uint32_t data);
