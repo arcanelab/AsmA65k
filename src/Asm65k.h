@@ -8,11 +8,7 @@
 //  C++11
 //
 
-#ifndef __AsmA65k__AsmA65k__
-#define __AsmA65k__AsmA65k__
-
-// #define log(fmt, ...) printf(("[%s: %d] %s(): " fmt), __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
-// #define log printf
+#pragma once
 
 #include "Segment.h"
 #include <iostream>
@@ -20,8 +16,6 @@
 #include <map>
 
 using string = std::string;
-
-// using namespace std;
 
 struct AsmError
 {
@@ -376,21 +370,3 @@ public:
         va_end(args);
     }
 };
-
-#endif /* defined(__AsmA65k__AsmA65k__) */
-/*
- union reg
- {
- byte  b;
- word  w;
- dword d;
- };
-
- struct
- {
- reg r[16];
- dword pc;
- dword sp;
- byte  status;
- }cpu;
-*/
