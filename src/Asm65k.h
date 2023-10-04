@@ -143,6 +143,7 @@ private:
 
     enum Instructions
     {
+        I_BRK,
         I_MOV,
         I_CLR,
         I_ADD,
@@ -173,7 +174,6 @@ private:
         I_JSR,
         I_RTS,
         I_RTI,
-        I_BRK,
         I_NOP,
         I_BRA,
         I_BEQ,
