@@ -220,7 +220,7 @@ string AsmA65k::removeSquaredBrackets(const string operand)
 AsmA65k::StringPair AsmA65k::splitStringByPlusSign(const string operand)
 {
     // extract the two parts
-    static const regex rx_matchOperands(R"((.*)\s*\+\s*(.*))");
+    static const regex rx_matchOperands(R"((\S+)\s*\+\s*(\S+))");
     smatch operandsMatch;
     if(regex_match(operand, operandsMatch, rx_matchOperands) == false)
         throwException_InvalidOperands();
