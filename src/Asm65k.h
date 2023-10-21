@@ -12,6 +12,7 @@
 
 #include "Segment.h"
 #include <iostream>
+#include <cstdarg>
 #include <vector>
 #include <map>
 
