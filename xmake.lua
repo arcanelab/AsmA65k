@@ -29,7 +29,7 @@ Target =
     library = 2
 }
 
-local _target = Target.standalone
+local _target = Target.library
 
 function AddCommon()
     add_includedirs("src")
