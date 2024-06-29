@@ -19,6 +19,8 @@ std::vector<Segment> *AsmA65k::assemble(stringstream &source)
 {
     initializeOpcodetable();
 
+    segments.clear();
+
     while (getline(source, actLine))
     {
         // convert line to lowercase
