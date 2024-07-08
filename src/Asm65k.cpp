@@ -67,7 +67,7 @@ std::vector<Segment> *AsmA65k::assemble(stringstream &source)
                     if (actLocation.isRelative)
                     {
                         value -= actLocation.address;
-                        value += 2;
+                        value -= 2;
                         actLocation.opcodeSize = OS_16BIT;
                         if (getOpcodeSizeFromSignedInteger(value) < OS_16BIT)
                         {
