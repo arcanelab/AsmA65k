@@ -82,10 +82,7 @@ void AsmA65k::assembleInstruction(const string& mnemonic, const string& modifier
         const uint8_t instruction = instructionWord.instructionCode;
         effectiveAddress = resolveLabel(operand, PC + 2, (OpcodeSize)instructionWord.opcodeSize, instruction >= I_BRA && instruction <= I_BGE);
         if (instruction >= I_BRA && instruction <= I_BGE)
-        {
-            int32_t diff = effectiveAddress - PC - 4;
             instructionWord.opcodeSize = OS_16BIT;
-        }
     }
         handleOperand_Constant(effectiveAddress, instructionWord);
         break;
