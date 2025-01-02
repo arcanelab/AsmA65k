@@ -15,7 +15,7 @@
 
 using namespace std;
 
-int AsmA65k::convertStringToInteger(const string valueStr)
+int AsmA65k::convertStringToInteger(const string& valueStr)
 {
     static const regex rx_checkIfBin(R"(^%([01]+))", regex_constants::icase);
     static const regex rx_checkIfHex(R"(^\$([0-9a-z]+))", regex_constants::icase);
@@ -84,7 +84,7 @@ int AsmA65k::convertStringToInteger(const string valueStr)
     return 0;
 }
 
-int AsmA65k::findChar(const string text, char c)
+int AsmA65k::findChar(const string& text, char c)
 {
     const int size = (int)text.size();
     c = toupper(c);
@@ -117,7 +117,7 @@ void AsmA65k::throwException_InvalidNumberFormat()
     throw error;
 }
 
-void AsmA65k::throwException_SyntaxError(const string line)
+void AsmA65k::throwException_SyntaxError(const string& line)
 {
     AsmError error(actLineNumber, line, "Syntax error");
     throw error;
@@ -156,7 +156,7 @@ void AsmA65k::checkIntegerRange(const int64_t result)
     }
 }
 
-bool AsmA65k::isCommentLine(const string line)
+bool AsmA65k::isCommentLine(const string& line)
 {
     const static regex rx_isLineComment(R"((^\s*$)|(\s*;.*))"); // empty or comment line
     if (regex_match(line, rx_isLineComment))
@@ -177,7 +177,7 @@ void AsmA65k::throwException_InvalidOperands()
     throw error;
 }
 
-string AsmA65k::removeSquaredBrackets(const string operand)
+string AsmA65k::removeSquaredBrackets(const string& operand)
 {
     const static regex rx_removeSquareBrackets(R"(\[\s*(.*)\s*\][\+\-]?)");
     smatch result;
@@ -189,7 +189,7 @@ string AsmA65k::removeSquaredBrackets(const string operand)
     return result[1].str();
 }
 
-AsmA65k::StringPair AsmA65k::splitStringByPlusSign(const string operand)
+AsmA65k::StringPair AsmA65k::splitStringByPlusSign(const string& operand)
 {
     // extract the two parts
     static const regex rx_matchOperands(R"((\S+)\s*\+\s*(\S+))");
@@ -205,7 +205,7 @@ AsmA65k::StringPair AsmA65k::splitStringByPlusSign(const string operand)
     return sp;
 }
 
-AsmA65k::StringPair AsmA65k::splitStringByComma(const string operand)
+AsmA65k::StringPair AsmA65k::splitStringByComma(const string& operand)
 {
     // extract the two parts
     static const regex rx_matchOperands(R"((.*)\s*,\s*(.*))");
@@ -221,7 +221,7 @@ AsmA65k::StringPair AsmA65k::splitStringByComma(const string operand)
     return sp;
 }
 
-AsmA65k::RegisterType AsmA65k::detectRegisterType(const string registerStr)
+AsmA65k::RegisterType AsmA65k::detectRegisterType(const string& registerStr)
 {
     if (registerStr == "pc")
         return REG_PC;
@@ -250,12 +250,12 @@ AsmA65k::RegisterType AsmA65k::detectRegisterType(const string registerStr)
     return (RegisterType)registerIndex;
 }
 
-bool AsmA65k::findAddressingMode(const string mnemonic, AddressingModes am)
+bool AsmA65k::findAddressingMode(const string& mnemonic, AddressingModes am)
 {
     return (std::find(opcodes[mnemonic].addressingModesAllowed.begin(), opcodes[mnemonic].addressingModesAllowed.end(), am)) != opcodes[mnemonic].addressingModesAllowed.end();
 }
 
-void AsmA65k::checkIfAddressingModeIsLegalForThisInstruction(const string mnemonic, const OperandTypes operandType)
+void AsmA65k::checkIfAddressingModeIsLegalForThisInstruction(const string& mnemonic, const OperandTypes operandType)
 {
     AddressingModes addressingMode = getAddressingModeFromOperand(operandType);
 
@@ -275,7 +275,7 @@ void AsmA65k::checkIfAddressingModeIsLegalForThisInstruction(const string mnemon
     throw error;
 }
 
-void AsmA65k::checkIfSizeSpecifierIsAllowed(const string mnemonic, const OpcodeSize opcodeSize)
+void AsmA65k::checkIfSizeSpecifierIsAllowed(const string& mnemonic, const OpcodeSize opcodeSize)
 {
     if ((opcodes[mnemonic].isSizeSpecifierAllowed == false) && (opcodeSize != OS_NONE))
     {
@@ -307,7 +307,7 @@ AsmA65k::OpcodeSize AsmA65k::getOpcodeSizeFromUnsigedInteger(uint64_t value)
     return OS_32BIT;
 }
 
-void AsmA65k::verifyRangeForConstant(const string constant, OpcodeSize opcodeSize)
+void AsmA65k::verifyRangeForConstant(const string& constant, OpcodeSize opcodeSize)
 {
     if (getOpcodeSizeFromUnsigedInteger(convertStringToInteger(constant)) < opcodeSize)
         throwException_SymbolOutOfRange();
@@ -329,7 +329,7 @@ string AsmA65k::detectAndRemoveLabelDefinition(string line)
     return line;
 }
 
-uint8_t AsmA65k::getOpcodeSize(const string modifierCharacter)
+uint8_t AsmA65k::getOpcodeSize(const string& modifierCharacter)
 {
     if (modifierCharacter == "b")
         return OS_8BIT;
@@ -375,7 +375,7 @@ void AsmA65k::addData(const OpcodeSize size, const uint32_t data)
     }
 }
 
-void AsmA65k::addData(const string sizeSpecifier, const uint32_t data)
+void AsmA65k::addData(const string& sizeSpecifier, const uint32_t data)
 {
     if (sizeSpecifier == "b")
     {
@@ -396,7 +396,7 @@ void AsmA65k::addData(const string sizeSpecifier, const uint32_t data)
     throw AsmError(actLineNumber, actLine, "Invalid size specifier");
 }
 
-uint32_t AsmA65k::resolveLabel(const string label, const uint32_t address, const OpcodeSize size, bool isRelative)
+uint32_t AsmA65k::resolveLabel(const string& label, const uint32_t address, const OpcodeSize size, bool isRelative)
 {
     static const regex rx_removeSurroundingWhiteSpace(R"(\s*(\S*)\s*)");
     smatch result;
@@ -450,7 +450,7 @@ void AsmA65k::handleDoubleRegisters(const StringPair sp, InstructionWord instruc
     addData(OS_8BIT, registerSelector);  // 1 byte
 }
 
-void AsmA65k::addRegisterConfigurationByte(const string registerString, InstructionWord instructionWord, const PostfixType postFix)
+void AsmA65k::addRegisterConfigurationByte(const string& registerString, InstructionWord instructionWord, const PostfixType postFix)
 {
     switch (postFix)
     {
@@ -470,7 +470,7 @@ void AsmA65k::addRegisterConfigurationByte(const string registerString, Instruct
     addData(OS_8BIT, registerIndex);     // 1 byte
 }
 
-AsmA65k::PostfixType AsmA65k::getPostFixType(const string operand)
+AsmA65k::PostfixType AsmA65k::getPostFixType(const string& operand)
 {
     static const regex rx_detectPostfixSign(R"((.*\])([\+\-])$)");
     string sign;

@@ -271,95 +271,95 @@ private:
     string actLine;                 // the content of the current source code line being assembled
 
     // AsmA65k.cpp
-    void processLabelDefinition(const string line); // catalogs a new label
+    void processLabelDefinition(const string& line); // catalogs a new label
     void initializeOpcodetable();                   // populate the 'opcodes' map
 
     // AsmA65k-Assembly.cpp
-    void processAsmLine(string line);                                                             // prepares and assembles the line. see also assembleInstruction()
-    void assembleInstruction(const string mnemonic, const string modifier, const string operand); // does the actual assembly -> machine code translation
+    void processAsmLine(const string& line);                                                             // prepares and assembles the line. see also assembleInstruction()
+    void assembleInstruction(const string& mnemonic, const string& modifier, const string& operand); // does the actual assembly -> machine code translation
 
-    OperandTypes detectOperandType(const string operandStr); // given the operand string, detects its type. see enum OperandType
+    OperandTypes detectOperandType(const string& operandStr); // given the operand string, detects its type. see enum OperandType
     AddressingModes getAddressingModeFromOperand(const OperandTypes operandType);
 
-    void handleOperand_Register(const string operand, InstructionWord instructionWord);
+    void handleOperand_Register(const string& operand, InstructionWord instructionWord);
     void handleOperand_Constant(const uint32_t constant, InstructionWord instructionWord);
-    void handleOperand_IndirectRegister(const string operand, InstructionWord instructionWord);
+    void handleOperand_IndirectRegister(const string& operand, InstructionWord instructionWord);
     void handleOperand_IndirectConstant(const uint32_t constant, InstructionWord instructionWord);
-    void handleOperand_IndirectRegisterPlusLabel(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectRegisterPlusConstant(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectConstantPlusRegister(const string operand, InstructionWord instructionWord);
-    void handleOperand_Register_Label(const string operand, InstructionWord instructionWord);
-    void handleOperand_Register_Constant(const string operand, InstructionWord instructionWord);
-    void handleOperand_Register_Register(const string operand, InstructionWord instructionWord);
-    void handleOperand_Register_IndirectRegister(string operand, InstructionWord instructionWord);
-    void handleOperand_Register_IndirectConstantPlusRegister(const string operand, InstructionWord instructionWord);
-    void handleOperand_Register_IndirectLabelPlusRegister(const string operand, InstructionWord instructionWord);
-    void handleOperand_Register_IndirectRegisterPlusLabel(const string operand, InstructionWord instructionWord);
-    void handleOperand_Register_IndirectRegisterPlusConstant(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectRegister_Register(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectRegisterPlusLabel_Register(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectRegisterPlusConstant_Register(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectLabelPlusRegister_Register(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectConstantPlusRegister_Register(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectLabel_Register(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectConstant_Register(const string operand, InstructionWord instructionWord);
-    void handleOperand_Register_IndirectLabel(const string operand, InstructionWord instructionWord);
-    void handleOperand_Register_IndirectConstant(const string operand, InstructionWord instructionWord);
+    void handleOperand_IndirectRegisterPlusLabel(const string& operand, InstructionWord instructionWord);
+    void handleOperand_IndirectRegisterPlusConstant(const string& operand, InstructionWord instructionWord);
+    void handleOperand_IndirectLabelPlusRegister(const string& operand, InstructionWord instructionWord);
+    void handleOperand_IndirectConstantPlusRegister(const string& operand, InstructionWord instructionWord);
+    void handleOperand_Register_Label(const string& operand, InstructionWord instructionWord);
+    void handleOperand_Register_Constant(const string& operand, InstructionWord instructionWord);
+    void handleOperand_Register_Register(const string& operand, InstructionWord instructionWord);
+    void handleOperand_Register_IndirectRegister(const string& operand, InstructionWord instructionWord);
+    void handleOperand_Register_IndirectConstantPlusRegister(const string& operand, InstructionWord instructionWord);
+    void handleOperand_Register_IndirectLabelPlusRegister(const string& operand, InstructionWord instructionWord);
+    void handleOperand_Register_IndirectRegisterPlusLabel(const string& operand, InstructionWord instructionWord);
+    void handleOperand_Register_IndirectRegisterPlusConstant(const string& operand, InstructionWord instructionWord);
+    void handleOperand_IndirectRegister_Register(const string& operand, InstructionWord instructionWord);
+    void handleOperand_IndirectRegisterPlusLabel_Register(const string& operand, InstructionWord instructionWord);
+    void handleOperand_IndirectRegisterPlusConstant_Register(const string& operand, InstructionWord instructionWord);
+    void handleOperand_IndirectLabelPlusRegister_Register(const string& operand, InstructionWord instructionWord);
+    void handleOperand_IndirectConstantPlusRegister_Register(const string& operand, InstructionWord instructionWord);
+    void handleOperand_IndirectLabel_Register(const string& operand, InstructionWord instructionWord);
+    void handleOperand_IndirectConstant_Register(const string& operand, InstructionWord instructionWord);
+    void handleOperand_Register_IndirectLabel(const string& operand, InstructionWord instructionWord);
+    void handleOperand_Register_IndirectConstant(const string& operand, InstructionWord instructionWord);
     //    void handleDoubleRegisters(const StringPair sp, InstructionWord instructionWord, const char postfixChar);
     void handleDoubleRegisters(const StringPair sp, InstructionWord instructionWord, const PostfixType postFix);
-    void handleOperand_Constant_Label(const string operand, InstructionWord instructionWord);
-    void handleOperand_Constant_Constant(const string operand, InstructionWord instructionWord);
-    void handleOperand_Label_Constant(const string operand, InstructionWord instructionWord);
-    void handleOperand_Label_Label(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectRegister_Constant(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectLabel_Constant(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectConstant_Constant(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectRegisterPlusLabel_Constant(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectRegisterPlusConstant_Constant(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectLabelPlusRegister_Constant(const string operand, InstructionWord instructionWord);
-    void handleOperand_IndirectConstantPlusRegister_Constant(const string operand, InstructionWord instructionWord);
+    void handleOperand_Constant_Label(const string& operand, InstructionWord instructionWord);
+    void handleOperand_Constant_Constant(const string& operand, InstructionWord instructionWord);
+    void handleOperand_Label_Constant(const string& operand, InstructionWord instructionWord);
+    void handleOperand_Label_Label(const string& operand, InstructionWord instructionWord);
+    void handleOperand_IndirectRegister_Constant(const string& operand, InstructionWord instructionWord);
+    void handleOperand_IndirectLabel_Constant(const string& operand, InstructionWord instructionWord);
+    void handleOperand_IndirectConstant_Constant(const string& operand, InstructionWord instructionWord);
+    void handleOperand_IndirectRegisterPlusLabel_Constant(const string& operand, InstructionWord instructionWord);
+    void handleOperand_IndirectRegisterPlusConstant_Constant(const string& operand, InstructionWord instructionWord);
+    void handleOperand_IndirectLabelPlusRegister_Constant(const string& operand, InstructionWord instructionWord);
+    void handleOperand_IndirectConstantPlusRegister_Constant(const string& operand, InstructionWord instructionWord);
 
     // AsmA65k-Directives.cpp
-    bool processDirectives(const string line);                                      // the main method for processing & handling the directives
-    int detectDirective(const string line);                                         // detects if there's a directive on the given line
-    void handleDirective_Text(const string line, const int directiveType);          // handles .text "asdf" directives
-    void handleDirective_ByteWordDword(const string line, const int directiveType); // handles data entry directives
-    void handleDirective_SetPC(const string line);                                  // handles .pc = xxx directives
-    void handleDirective_Define(const string line);                                 // handles the .define directive
+    bool processDirectives(const string& line);                                      // the main method for processing & handling the directives
+    int detectDirective(const string& line);                                         // detects if there's a directive on the given line
+    void handleDirective_Text(const string& line, const int directiveType);          // handles .text "asdf" directives
+    void handleDirective_ByteWordDword(const string& line, const int directiveType); // handles data entry directives
+    void handleDirective_SetPC(const string& line);                                  // handles .pc = xxx directives
+    void handleDirective_Define(const string& line);                                 // handles the .define directive
 
     // AsmA65k-Misc.cpp
-    bool isCommentLine(const string line);              // check if a line is made of entirely out of a comment
-    int convertStringToInteger(const string valueStr);  // as the name implies, converts a std::string into an int
-    int findChar(const string text, char c);            // searches for the given character and returns its index or -1
+    bool isCommentLine(const string& line);              // check if a line is made of entirely out of a comment
+    int convertStringToInteger(const string& valueStr);  // as the name implies, converts a std::string into an int
+    int findChar(const string& text, char c);            // searches for the given character and returns its index or -1
     void throwException_ValueOutOfRange();              // throws an exception
     void throwException_InvalidNumberFormat();          // throws an exception
     void checkIntegerRange(const int64_t result);       // checks if the 64 bit value can be fit into 32 bits (that's the max. allowed)
-    void throwException_SyntaxError(const string line); // throws an exception
+    void throwException_SyntaxError(const string& line); // throws an exception
     void throwException_InvalidRegister();              // throws an exception
     void throwException_InvalidOperands();              // throws an exception
     void throwException_InvalidMnemonic();
     void throwException_InternalError(); // throws an exception
     void throwException_SymbolOutOfRange();
-    uint32_t resolveLabel(const string label, const uint32_t address, const OpcodeSize size = OS_32BIT, bool isRelative = false); // returns the address associated with a label
-    string removeSquaredBrackets(const string operand);                                                  // removes the enclosing squared bracked from a string
-    StringPair splitStringByPlusSign(const string operand);                                              // splits a string into a StringPair separated by a '+' character
-    StringPair splitStringByComma(const string operand);                                                 // splits a string into a StringPair separated by a ',' character
-    RegisterType detectRegisterType(const string registerStr);                                           // converts the string into a RegisterType
-    bool findAddressingMode(const string mnemonic, const AddressingModes am);
-    void checkIfAddressingModeIsLegalForThisInstruction(const string mnemonic, const OperandTypes operandType);
-    void checkIfSizeSpecifierIsAllowed(const string mnemonic, const OpcodeSize opcodeSize);
+    uint32_t resolveLabel(const string& label, const uint32_t address, const OpcodeSize size = OS_32BIT, bool isRelative = false); // returns the address associated with a label
+    string removeSquaredBrackets(const string& operand);                                                  // removes the enclosing squared bracked from a string
+    StringPair splitStringByPlusSign(const string& operand);                                              // splits a string into a StringPair separated by a '+' character
+    StringPair splitStringByComma(const string& operand);                                                 // splits a string into a StringPair separated by a ',' character
+    RegisterType detectRegisterType(const string& registerStr);                                           // converts the string into a RegisterType
+    bool findAddressingMode(const string& mnemonic, const AddressingModes am);
+    void checkIfAddressingModeIsLegalForThisInstruction(const string& mnemonic, const OperandTypes operandType);
+    void checkIfSizeSpecifierIsAllowed(const string& mnemonic, const OpcodeSize opcodeSize);
     OpcodeSize getOpcodeSizeFromSignedInteger(const int32_t value);
     OpcodeSize getOpcodeSizeFromUnsigedInteger(const uint64_t value);
-    void verifyRangeForConstant(const string constant, const OpcodeSize opcodeSize);
+    void verifyRangeForConstant(const string& constant, const OpcodeSize opcodeSize);
     void verifyRangeForConstant(const uint32_t constant, OpcodeSize opcodeSize);
     void addData(const OpcodeSize size, const uint32_t data);
-    void addData(const string sizeSpecifier, const uint32_t data);
-    uint8_t getOpcodeSize(const string modifierCharacter); // takes the modifier character (eg.: mov.b -> 'b') and returns its numerical value
+    void addData(const string& sizeSpecifier, const uint32_t data);
+    uint8_t getOpcodeSize(const string& modifierCharacter); // takes the modifier character (eg.: mov.b -> 'b') and returns its numerical value
     void addInstructionWord(const InstructionWord instructionWord);
-    void addRegisterConfigurationByte(const string registerString, InstructionWord instructionWord, const PostfixType postfixType);
+    void addRegisterConfigurationByte(const string& registerString, InstructionWord instructionWord, const PostfixType postfixType);
     string detectAndRemoveLabelDefinition(string line);
-    PostfixType getPostFixType(const string operand);
+    PostfixType getPostFixType(const string& operand);
 
 public:
     void asmlog(const char *fmt, ...)

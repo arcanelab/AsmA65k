@@ -15,7 +15,7 @@
 
 using namespace std;
 
-bool AsmA65k::processDirectives(const string line)
+bool AsmA65k::processDirectives(const string& line)
 {
     const int directiveType = detectDirective(line); // explicit declaration is intentional
     switch (directiveType)
@@ -52,7 +52,7 @@ bool AsmA65k::processDirectives(const string line)
     return true;
 }
 
-int AsmA65k::detectDirective(const string line)
+int AsmA65k::detectDirective(const string& line)
 {
     const static regex rx_detectDirective(R"(^(\s*|.*:\s*)\.([a-z]+).*)", regex_constants::icase);
     smatch directiveCandidate;
@@ -85,7 +85,7 @@ int AsmA65k::detectDirective(const string line)
     throw error;
 }
 
-void AsmA65k::handleDirective_SetPC(const string line)
+void AsmA65k::handleDirective_SetPC(const string& line)
 {
     static const regex rx_matchNumberInSetPCDirectiveLine(R"(\s*.pc\s*=\s*(([$%]?[0-9a-f]+$)|(([$%]?[0-9a-f]+)[\s|;])).*)", regex_constants::icase);
     smatch value;
@@ -103,7 +103,7 @@ void AsmA65k::handleDirective_SetPC(const string line)
     segments.back().address = PC;
 }
 
-void AsmA65k::handleDirective_Text(const string line, const int directiveType)
+void AsmA65k::handleDirective_Text(const string& line, const int directiveType)
 {
     static const regex rx_matchTextInTextDirective(R"(.*\.text\s*\"(.*)\".*)", regex_constants::icase);
     smatch textMatch;
@@ -134,7 +134,7 @@ void AsmA65k::handleDirective_Text(const string line, const int directiveType)
     PC += textLength;
 }
 
-void AsmA65k::handleDirective_ByteWordDword(const string line, const int directiveType)
+void AsmA65k::handleDirective_ByteWordDword(const string& line, const int directiveType)
 { // trim line back to the raw data after the directive
     static const regex rx_matchDataInByteDirective(R"(.*\.(byte|word|dword)\s+(.+)\s*.*)", regex_constants::icase);
     smatch dataMatch;
@@ -211,7 +211,7 @@ void AsmA65k::handleDirective_ByteWordDword(const string line, const int directi
     }           // while
 }
 
-void AsmA65k::handleDirective_Define(const string line)
+void AsmA65k::handleDirective_Define(const string& line)
 {
     const static regex rx_matchDefintionLine(R"(\s*\.def\s+([a-z][a-z_0-9]*)\s*=\s*([^;]+)\s*;?.*)", regex_constants::icase);
     smatch matches;

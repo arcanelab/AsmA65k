@@ -102,7 +102,7 @@ std::vector<Segment> *AsmA65k::assemble(stringstream &source)
     return &segments;
 }
 
-void AsmA65k::processLabelDefinition(const string line)
+void AsmA65k::processLabelDefinition(const string& line)
 {
     const static regex rx_detectLabel(R"(\s*([a-z][a-z_0-9]*):.*)", regex_constants::icase);
     smatch labelMatch;
