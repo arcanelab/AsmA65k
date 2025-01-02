@@ -16,18 +16,18 @@
 class Segment
 {
 public:
-    void addByte(uint8_t byteToBeAdded)
+    void AddByte(uint8_t byteToBeAdded)
     {
         data.push_back(byteToBeAdded);
     }
 
-    void addWord(uint16_t wordToBeAdded)
+    void AddWord(uint16_t wordToBeAdded)
     {
         data.push_back(wordToBeAdded & 0xff);
         data.push_back((wordToBeAdded & 0xff00) >> 8);
     }
 
-    void addDword(uint32_t dwordToBeAdded)
+    void AddDword(uint32_t dwordToBeAdded)
     {
         data.push_back(dwordToBeAdded & 0xff);
         data.push_back((dwordToBeAdded & 0xff00) >> 8);
@@ -35,19 +35,19 @@ public:
         data.push_back((dwordToBeAdded & 0xff000000) >> 24);
     }
 
-    void writeByte(uint32_t address, uint8_t value)
+    void WriteByte(uint32_t address, uint8_t value)
     {
         data[address - this->address] = value;
     }
 
-    void writeWord(uint32_t address, uint16_t value)
+    void WriteWord(uint32_t address, uint16_t value)
     {
         uint32_t index = address - this->address;
         data[index++] = (uint8_t)(value & 0xff);
         data[index] = (uint8_t)((value & 0xff00) >> 8);
     }
 
-    void writeDword(uint32_t address, uint32_t value)
+    void WriteDword(uint32_t address, uint32_t value)
     {
         uint32_t index = address - this->address;
         data[index++] = (uint8_t)(value & 0xff);

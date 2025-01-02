@@ -73,7 +73,7 @@ int main(int argc, const char *argv[])
     std::vector<Segment> *segments;
     try
     {
-        segments = asm65k.assemble(buffer);
+        segments = asm65k.Assemble(buffer);
     }
     catch (AsmError error)
     {

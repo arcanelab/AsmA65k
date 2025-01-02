@@ -15,9 +15,9 @@
 
 using namespace std;
 
-std::vector<Segment> *AsmA65k::assemble(stringstream &source)
+std::vector<Segment> *AsmA65k::Assemble(stringstream &source)
 {
-    initializeOpcodetable();
+    InitializeOpcodetable();
 
     segments.clear();
 
@@ -26,15 +26,15 @@ std::vector<Segment> *AsmA65k::assemble(stringstream &source)
         // convert line to lowercase
         std::transform(actLine.begin(), actLine.end(), actLine.begin(), ::tolower);
 
-        if (isCommentLine(actLine))
+        if (IsCommentLine(actLine))
         {
             actLineNumber++;
             continue;
         }
 
-        processLabelDefinition(actLine);
-        if (!processDirectives(actLine))
-            processAsmLine(actLine);
+        ProcessLabelDefinition(actLine);
+        if (!ProcessDirectives(actLine))
+            ProcessAsmLine(actLine);
         actLineNumber++;
     }
 
@@ -69,29 +69,29 @@ std::vector<Segment> *AsmA65k::assemble(stringstream &source)
                         value -= actLocation.address;
                         value -= 2;
                         actLocation.opcodeSize = OS_16BIT;
-                        if (getOpcodeSizeFromSignedInteger(value) < OS_16BIT)
+                        if (GetOpcodeSizeFromSignedInteger(value) < OS_16BIT)
                         {
-                            throwException_SymbolOutOfRange();
+                            ThrowException_SymbolOutOfRange();
                         }
                     }
-                    else if (getOpcodeSizeFromUnsigedInteger(value) < actLocation.opcodeSize)
+                    else if (GetOpcodeSizeFromUnsigedInteger(value) < actLocation.opcodeSize)
                     {
-                        throwException_SymbolOutOfRange();
+                        ThrowException_SymbolOutOfRange();
                     }
 
                     switch (actLocation.opcodeSize)
                     {
                     case OS_8BIT:
-                        actSegment.writeByte(actLocation.address, (uint8_t)value);
+                        actSegment.WriteByte(actLocation.address, (uint8_t)value);
                         break;
                     case OS_16BIT:
-                        actSegment.writeWord(actLocation.address, (uint16_t)value);
+                        actSegment.WriteWord(actLocation.address, (uint16_t)value);
                         break;
                     case OS_32BIT:
-                        actSegment.writeDword(actLocation.address, (uint32_t)value);
+                        actSegment.WriteDword(actLocation.address, (uint32_t)value);
                         break;
                     default:
-                        throwException_InternalError();
+                        ThrowException_InternalError();
                     }
                     break;
                 }
@@ -102,7 +102,7 @@ std::vector<Segment> *AsmA65k::assemble(stringstream &source)
     return &segments;
 }
 
-void AsmA65k::processLabelDefinition(const string& line)
+void AsmA65k::ProcessLabelDefinition(const string& line)
 {
     const static regex rx_detectLabel(R"(\s*([a-z][a-z_0-9]*):.*)", regex_constants::icase);
     smatch labelMatch;
@@ -124,7 +124,7 @@ void AsmA65k::processLabelDefinition(const string& line)
     }
 }
 
-void AsmA65k::initializeOpcodetable()
+void AsmA65k::InitializeOpcodetable()
 {
     OpcodeAttribute oa;
     oa.isSizeSpecifierAllowed = true;

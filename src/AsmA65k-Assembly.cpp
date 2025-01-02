@@ -15,9 +15,9 @@
 
 using namespace std;
 
-void AsmA65k::processAsmLine(const string& line)
+void AsmA65k::ProcessAsmLine(const string& line)
 {
-    const string processedLine = detectAndRemoveLabelDefinition(line);
+    const string processedLine = DetectAndRemoveLabelDefinition(line);
     if (processedLine.size() == 0)
         return;
 
@@ -26,7 +26,7 @@ void AsmA65k::processAsmLine(const string& line)
     const static regex rx_matchInstructionAndOperands(R"(\s*([a-z]{2,5})\.?([bw]?)\s*(.*))", regex_constants::icase);
     smatch asmMatches;
     if (regex_match(processedLine, asmMatches, rx_matchInstructionAndOperands) == false)
-        throwException_SyntaxError(processedLine);
+        ThrowException_SyntaxError(processedLine);
 
     // assign matches to individual variables
     string mnemonic = asmMatches[1].str();
@@ -44,26 +44,26 @@ void AsmA65k::processAsmLine(const string& line)
     std::transform(modifier.begin(), modifier.end(), modifier.begin(), ::tolower);
     std::transform(operand.begin(), operand.end(), operand.begin(), ::tolower);
 
-    assembleInstruction(mnemonic, modifier, operand);
+    AssembleInstruction(mnemonic, modifier, operand);
 }
 
-void AsmA65k::assembleInstruction(const string& mnemonic, const string& modifier, const string& operand)
+void AsmA65k::AssembleInstruction(const string& mnemonic, const string& modifier, const string& operand)
 {
     InstructionWord instructionWord;
 
-    instructionWord.opcodeSize = getOpcodeSize(modifier);
+    instructionWord.opcodeSize = GetOpcodeSize(modifier);
 
     if (opcodes.find(mnemonic) == opcodes.end())
     {
-        throwException_InvalidMnemonic();
+        ThrowException_InvalidMnemonic();
     }
 
     instructionWord.instructionCode = opcodes[mnemonic].instructionCode;
 
-    checkIfSizeSpecifierIsAllowed(mnemonic, (OpcodeSize)instructionWord.opcodeSize);
+    CheckIfSizeSpecifierIsAllowed(mnemonic, (OpcodeSize)instructionWord.opcodeSize);
 
-    OperandTypes operandType = detectOperandType(operand);
-    checkIfAddressingModeIsLegalForThisInstruction(mnemonic, operandType);
+    OperandTypes operandType = DetectOperandType(operand);
+    CheckIfAddressingModeIsLegalForThisInstruction(mnemonic, operandType);
 
     uint32_t effectiveAddress = 0;
 
@@ -72,135 +72,135 @@ void AsmA65k::assembleInstruction(const string& mnemonic, const string& modifier
     case OT_NONE: // SEI
         instructionWord.addressingMode = AM_IMPLIED;
         instructionWord.registerConfiguration = RC_NOREGISTER;
-        addInstructionWord(instructionWord);
+        AddInstructionWord(instructionWord);
         break;
     case OT_REGISTER: // INC r0
-        handleOperand_Register(operand, instructionWord);
+        HandleOperand_Register(operand, instructionWord);
         break;
     case OT_LABEL: // BEQ label
     {
         const uint8_t instruction = instructionWord.instructionCode;
-        effectiveAddress = resolveLabel(operand, PC + 2, (OpcodeSize)instructionWord.opcodeSize, instruction >= I_BRA && instruction <= I_BGE);
+        effectiveAddress = ResolveLabel(operand, PC + 2, (OpcodeSize)instructionWord.opcodeSize, instruction >= I_BRA && instruction <= I_BGE);
         if (instruction >= I_BRA && instruction <= I_BGE)
             instructionWord.opcodeSize = OS_16BIT;
     }
-        handleOperand_Constant(effectiveAddress, instructionWord);
+        HandleOperand_Constant(effectiveAddress, instructionWord);
         break;
     case OT_CONSTANT:
-        effectiveAddress = convertStringToInteger(operand); // BNE $4000 or PSH $f000
-        handleOperand_Constant(effectiveAddress, instructionWord);
+        effectiveAddress = ConvertStringToInteger(operand); // BNE $4000 or PSH $f000
+        HandleOperand_Constant(effectiveAddress, instructionWord);
         break;
     case OT_INDIRECT_REGISTER: // INC [r0]
-        handleOperand_IndirectRegister(operand, instructionWord);
+        HandleOperand_IndirectRegister(operand, instructionWord);
         break;
     case OT_INDIRECT_LABEL: // INC [label]
-        effectiveAddress = resolveLabel(removeSquaredBrackets(operand), PC + 2);
-        handleOperand_IndirectConstant(effectiveAddress, instructionWord);
+        effectiveAddress = ResolveLabel(RemoveSquaredBrackets(operand), PC + 2);
+        HandleOperand_IndirectConstant(effectiveAddress, instructionWord);
         break;
     case OT_INDIRECT_CONSTANT: // INC.w [$ffff]
-        effectiveAddress = convertStringToInteger(removeSquaredBrackets(operand));
-        handleOperand_IndirectConstant(effectiveAddress, instructionWord);
+        effectiveAddress = ConvertStringToInteger(RemoveSquaredBrackets(operand));
+        HandleOperand_IndirectConstant(effectiveAddress, instructionWord);
         break;
     case OT_INDIRECT_REGISTER_PLUS_LABEL: // INC.b [r0 + label]
-        handleOperand_IndirectRegisterPlusLabel(removeSquaredBrackets(operand), instructionWord);
+        HandleOperand_IndirectRegisterPlusLabel(RemoveSquaredBrackets(operand), instructionWord);
         break;
     case OT_INDIRECT_REGISTER_PLUS_CONSTANT: // INC [r0 + 10]
-        handleOperand_IndirectRegisterPlusConstant(removeSquaredBrackets(operand), instructionWord);
+        HandleOperand_IndirectRegisterPlusConstant(RemoveSquaredBrackets(operand), instructionWord);
         break;
     case OT_INDIRECT_LABEL_PLUS_REGISTER: // INC [label + r0]
-        handleOperand_IndirectLabelPlusRegister(removeSquaredBrackets(operand), instructionWord);
+        HandleOperand_IndirectLabelPlusRegister(RemoveSquaredBrackets(operand), instructionWord);
         break;
     case OT_INDIRECT_CONSTANT_PLUS_REGISTER: // INC [$1000 + r0]
-        handleOperand_IndirectConstantPlusRegister(removeSquaredBrackets(operand), instructionWord);
+        HandleOperand_IndirectConstantPlusRegister(RemoveSquaredBrackets(operand), instructionWord);
         break;
     case OT_REGISTER__LABEL: // MOV r0, label
-        handleOperand_Register_Label(operand, instructionWord);
+        HandleOperand_Register_Label(operand, instructionWord);
         break;
     case OT_REGISTER__CONSTANT: // MOV r0, 1234
-        handleOperand_Register_Constant(operand, instructionWord);
+        HandleOperand_Register_Constant(operand, instructionWord);
         break;
     case OT_REGISTER__REGISTER: // MOV r0, r1
-        handleOperand_Register_Register(operand, instructionWord);
+        HandleOperand_Register_Register(operand, instructionWord);
         break;
     case OT_REGISTER__INDIRECT_REGISTER: // MOV r0, [r1]
-        handleOperand_Register_IndirectRegister(operand, instructionWord);
+        HandleOperand_Register_IndirectRegister(operand, instructionWord);
         break;
     case OT_REGISTER__INDIRECT_CONSTANT_PLUS_REGISTER: // MOV r0, [$f000 + r1]
-        handleOperand_Register_IndirectConstantPlusRegister(operand, instructionWord);
+        HandleOperand_Register_IndirectConstantPlusRegister(operand, instructionWord);
         break;
     case OT_REGISTER__INDIRECT_LABEL_PLUS_REGISTER: // MOV r0, [label + r1]
-        handleOperand_Register_IndirectLabelPlusRegister(operand, instructionWord);
+        HandleOperand_Register_IndirectLabelPlusRegister(operand, instructionWord);
         break;
     case OT_REGISTER__INDIRECT_REGISTER_PLUS_LABEL: // MOV r0, [r1 + label]
-        handleOperand_Register_IndirectRegisterPlusLabel(operand, instructionWord);
+        HandleOperand_Register_IndirectRegisterPlusLabel(operand, instructionWord);
         break;
     case OT_REGISTER__INDIRECT_REGISTER_PLUS_CONSTANT: // MOV r0, [r1 + 10]
-        handleOperand_Register_IndirectRegisterPlusConstant(operand, instructionWord);
+        HandleOperand_Register_IndirectRegisterPlusConstant(operand, instructionWord);
         break;
     case OT_INDIRECT_REGISTER__REGISTER: // MOV [r0], r1
-        handleOperand_IndirectRegister_Register(operand, instructionWord);
+        HandleOperand_IndirectRegister_Register(operand, instructionWord);
         break;
     case OT_INDIRECT_REGISTER_PLUS_LABEL__REGISTER: // MOV [r0 + label], r1
-        handleOperand_IndirectRegisterPlusLabel_Register(operand, instructionWord);
+        HandleOperand_IndirectRegisterPlusLabel_Register(operand, instructionWord);
         break;
     case OT_INDIRECT_REGISTER_PLUS_CONSTANT__REGISTER: // MOV [r0 + 10], r1
-        handleOperand_IndirectRegisterPlusConstant_Register(operand, instructionWord);
+        HandleOperand_IndirectRegisterPlusConstant_Register(operand, instructionWord);
         break;
     case OT_INDIRECT_LABEL_PLUS_REGISTER__REGISTER: // MOV [label + r0], r1
-        handleOperand_IndirectLabelPlusRegister_Register(operand, instructionWord);
+        HandleOperand_IndirectLabelPlusRegister_Register(operand, instructionWord);
         break;
     case OT_INDIRECT_CONSTANT_PLUS_REGISTER__REGISTER: // MOV [1234 + r0], r1
-        handleOperand_IndirectConstantPlusRegister_Register(operand, instructionWord);
+        HandleOperand_IndirectConstantPlusRegister_Register(operand, instructionWord);
         break;
     case OT_INDIRECT_LABEL__REGISTER: // MOV [kacsa], r0
-        handleOperand_IndirectLabel_Register(operand, instructionWord);
+        HandleOperand_IndirectLabel_Register(operand, instructionWord);
         break;
     case OT_INDIRECT_CONSTANT__REGISTER: // MOV [$6660], r0
-        handleOperand_IndirectConstant_Register(operand, instructionWord);
+        HandleOperand_IndirectConstant_Register(operand, instructionWord);
         break;
     case OT_REGISTER__INDIRECT_LABEL: // MOV r0, [kacsa]
-        handleOperand_Register_IndirectLabel(operand, instructionWord);
+        HandleOperand_Register_IndirectLabel(operand, instructionWord);
         break;
     case OT_REGISTER__INDIRECT_CONSTANT: // MOV r0, [$4434]
-        handleOperand_Register_IndirectConstant(operand, instructionWord);
+        HandleOperand_Register_IndirectConstant(operand, instructionWord);
         break;
     case OT_CONSTANT__LABEL:
-        handleOperand_Constant_Label(operand, instructionWord);
+        HandleOperand_Constant_Label(operand, instructionWord);
         break;
     case OT_CONSTANT__CONSTANT: // MOV $1234, $5678
-        handleOperand_Constant_Constant(operand, instructionWord);
+        HandleOperand_Constant_Constant(operand, instructionWord);
         break;
     case OT_LABEL__CONSTANT:
-        handleOperand_Label_Constant(operand, instructionWord);
+        HandleOperand_Label_Constant(operand, instructionWord);
         break;
     case OT_LABEL__LABEL:
-        handleOperand_Label_Label(operand, instructionWord);
+        HandleOperand_Label_Label(operand, instructionWord);
         break;
     case OT_INDIRECT_REGISTER__CONSTANT: // [r0], 64
-        handleOperand_IndirectRegister_Constant(operand, instructionWord);
+        HandleOperand_IndirectRegister_Constant(operand, instructionWord);
         break;
     case OT_INDIRECT_LABEL__CONSTANT: // [names], 64
-        handleOperand_IndirectLabel_Constant(operand, instructionWord);
+        HandleOperand_IndirectLabel_Constant(operand, instructionWord);
         break;
     case OT_INDIRECT_CONSTANT__CONSTANT: // [$1234], 64
-        handleOperand_IndirectConstant_Constant(operand, instructionWord);
+        HandleOperand_IndirectConstant_Constant(operand, instructionWord);
         break;
     case OT_INDIRECT_REGISTER_PLUS_LABEL__CONSTANT: // [r0 + names], 64
-        handleOperand_IndirectRegisterPlusLabel_Constant(operand, instructionWord);
+        HandleOperand_IndirectRegisterPlusLabel_Constant(operand, instructionWord);
         break;
     case OT_INDIRECT_REGISTER_PLUS_CONSTANT__CONSTANT: // [r0 + 1234], 64
-        handleOperand_IndirectRegisterPlusConstant_Constant(operand, instructionWord);
+        HandleOperand_IndirectRegisterPlusConstant_Constant(operand, instructionWord);
         break;
     case OT_INDIRECT_LABEL_PLUS_REGISTER__CONSTANT: // [names + r0], 64
-        handleOperand_IndirectLabelPlusRegister_Constant(operand, instructionWord);
+        HandleOperand_IndirectLabelPlusRegister_Constant(operand, instructionWord);
         break;
-    case OT_INDIRECT_CONSTANT_PLUS_REGISTER__CONSTANT: // [$2344 + r0], 64
-        handleOperand_IndirectConstantPlusRegister_Constant(operand, instructionWord);
+    case OT_INDIRECT_CONSTANT_PLUS_REGISTER__CONSTANT: // [2344 + r0], 64
+        HandleOperand_IndirectConstantPlusRegister_Constant(operand, instructionWord);
         break;
     }
 }
 
-AsmA65k::AddressingModes AsmA65k::getAddressingModeFromOperand(const OperandTypes operandType)
+AsmA65k::AddressingModes AsmA65k::GetAddressingModeFromOperand(const OperandTypes operandType)
 {
     switch (operandType)
     {
@@ -280,258 +280,258 @@ AsmA65k::AddressingModes AsmA65k::getAddressingModeFromOperand(const OperandType
         return AM_INDEXED_CONST;
 
     default:
-        throwException_InvalidOperands();
+        ThrowException_InvalidOperands();
     }
 
-    throwException_InternalError();
+    ThrowException_InternalError();
 
     return AM_IMPLIED; // will never get here
 }
 
-void AsmA65k::handleOperand_Register_IndirectConstant(const string& operand, InstructionWord instructionWord) // MOV r0, [$4434]
+void AsmA65k::HandleOperand_Register_IndirectConstant(const string& operand, InstructionWord instructionWord) // MOV r0, [$4434]
 {
-    StringPair sp = splitStringByComma(operand);
-    sp.right = removeSquaredBrackets(sp.right);
+    StringPair sp = SplitStringByComma(operand);
+    sp.right = RemoveSquaredBrackets(sp.right);
 
     instructionWord.addressingMode = AM_ABSOLUTE_SRC;
-    addRegisterConfigurationByte(sp.left, instructionWord, PF_NONE);
-    addData(OS_32BIT, convertStringToInteger(sp.right));
+    AddRegisterConfigurationByte(sp.left, instructionWord, PF_NONE);
+    AddData(OS_32BIT, ConvertStringToInteger(sp.right));
 }
 
-void AsmA65k::handleOperand_Register_IndirectLabel(const string& operand, InstructionWord instructionWord) // MOV r0, [kacsa]
+void AsmA65k::HandleOperand_Register_IndirectLabel(const string& operand, InstructionWord instructionWord) // MOV r0, [kacsa]
 {
-    StringPair sp = splitStringByComma(operand);
-    sp.right = removeSquaredBrackets(sp.right);
+    StringPair sp = SplitStringByComma(operand);
+    sp.right = RemoveSquaredBrackets(sp.right);
 
     instructionWord.addressingMode = AM_ABSOLUTE_SRC;
-    addRegisterConfigurationByte(sp.left, instructionWord, PF_NONE);
-    addData(OS_32BIT, resolveLabel(sp.right, PC));
+    AddRegisterConfigurationByte(sp.left, instructionWord, PF_NONE);
+    AddData(OS_32BIT, ResolveLabel(sp.right, PC));
 }
 
-void AsmA65k::handleOperand_IndirectConstant_Register(const string& operand, InstructionWord instructionWord) // MOV [$6660], r0
+void AsmA65k::HandleOperand_IndirectConstant_Register(const string& operand, InstructionWord instructionWord) // MOV [$6660], r0
 {
-    StringPair sp = splitStringByComma(operand);
-    sp.left = removeSquaredBrackets(sp.left);
+    StringPair sp = SplitStringByComma(operand);
+    sp.left = RemoveSquaredBrackets(sp.left);
 
     instructionWord.addressingMode = AM_ABSOLUTE_DEST;
-    addRegisterConfigurationByte(sp.right, instructionWord, PF_NONE);
-    addData(OS_32BIT, convertStringToInteger(sp.left));
+    AddRegisterConfigurationByte(sp.right, instructionWord, PF_NONE);
+    AddData(OS_32BIT, ConvertStringToInteger(sp.left));
 }
 
-void AsmA65k::handleOperand_IndirectLabel_Register(const string& operand, InstructionWord instructionWord) // MOV [kacsa], r0
+void AsmA65k::HandleOperand_IndirectLabel_Register(const string& operand, InstructionWord instructionWord) // MOV [kacsa], r0
 {
-    StringPair sp = splitStringByComma(operand);
-    sp.left = removeSquaredBrackets(sp.left);
+    StringPair sp = SplitStringByComma(operand);
+    sp.left = RemoveSquaredBrackets(sp.left);
 
     instructionWord.addressingMode = AM_ABSOLUTE_DEST;
-    addRegisterConfigurationByte(sp.right, instructionWord, PF_NONE);
-    addData(OS_32BIT, resolveLabel(sp.left, PC));
+    AddRegisterConfigurationByte(sp.right, instructionWord, PF_NONE);
+    AddData(OS_32BIT, ResolveLabel(sp.left, PC));
 }
 
-void AsmA65k::handleOperand_IndirectConstantPlusRegister_Register(const string& operand, InstructionWord instructionWord) // MOV [1234 + r0]+, r1
+void AsmA65k::HandleOperand_IndirectConstantPlusRegister_Register(const string& operand, InstructionWord instructionWord) // MOV [1234 + r0]+, r1
 {
-    StringPair sp = splitStringByComma(operand);
-    PostfixType postFix = getPostFixType(sp.left);
-    sp.left = removeSquaredBrackets(sp.left);
-    StringPair indexedOperandPair = splitStringByPlusSign(sp.left);
+    StringPair sp = SplitStringByComma(operand);
+    PostfixType postFix = GetPostFixType(sp.left);
+    sp.left = RemoveSquaredBrackets(sp.left);
+    StringPair indexedOperandPair = SplitStringByPlusSign(sp.left);
 
-    instructionWord.addressingMode = AM_INDEXED_DEST; // this must precede the handleDoubleRegisters() method!
-    handleDoubleRegisters(StringPair(indexedOperandPair.right, sp.right), instructionWord, postFix);
-    addData(OS_32BIT, convertStringToInteger(indexedOperandPair.left));
+    instructionWord.addressingMode = AM_INDEXED_DEST; // this must precede the HandleDoubleRegisters() method!
+    HandleDoubleRegisters(StringPair(indexedOperandPair.right, sp.right), instructionWord, postFix);
+    AddData(OS_32BIT, ConvertStringToInteger(indexedOperandPair.left));
 }
 
-void AsmA65k::handleOperand_IndirectLabelPlusRegister_Register(const string& operand, InstructionWord instructionWord) // MOV [label + r0], r1
+void AsmA65k::HandleOperand_IndirectLabelPlusRegister_Register(const string& operand, InstructionWord instructionWord) // MOV [label + r0], r1
 {
-    StringPair sp = splitStringByComma(operand);
-    PostfixType postFix = getPostFixType(sp.left);
-    sp.left = removeSquaredBrackets(sp.left);
-    StringPair indexedOperandPair = splitStringByPlusSign(sp.left);
+    StringPair sp = SplitStringByComma(operand);
+    PostfixType postFix = GetPostFixType(sp.left);
+    sp.left = RemoveSquaredBrackets(sp.left);
+    StringPair indexedOperandPair = SplitStringByPlusSign(sp.left);
 
     instructionWord.addressingMode = AM_INDEXED_DEST;
-    handleDoubleRegisters(StringPair(indexedOperandPair.right, sp.right), instructionWord, postFix);
-    addData(OS_32BIT, resolveLabel(indexedOperandPair.left, PC));
+    HandleDoubleRegisters(StringPair(indexedOperandPair.right, sp.right), instructionWord, postFix);
+    AddData(OS_32BIT, ResolveLabel(indexedOperandPair.left, PC));
 }
 
-void AsmA65k::handleOperand_IndirectRegisterPlusConstant_Register(const string& operand, InstructionWord instructionWord) // MOV [r0 + 10], r1
+void AsmA65k::HandleOperand_IndirectRegisterPlusConstant_Register(const string& operand, InstructionWord instructionWord) // MOV [r0 + 10], r1
 {
-    StringPair sp = splitStringByComma(operand);
-    PostfixType postFix = getPostFixType(sp.left);
-    sp.left = removeSquaredBrackets(sp.left);
-    StringPair indexedOperandPair = splitStringByPlusSign(sp.left);
+    StringPair sp = SplitStringByComma(operand);
+    PostfixType postFix = GetPostFixType(sp.left);
+    sp.left = RemoveSquaredBrackets(sp.left);
+    StringPair indexedOperandPair = SplitStringByPlusSign(sp.left);
 
     instructionWord.addressingMode = AM_INDEXED_DEST;
-    handleDoubleRegisters(StringPair(indexedOperandPair.left, sp.right), instructionWord, postFix);
-    addData(OS_32BIT, convertStringToInteger(indexedOperandPair.right));
+    HandleDoubleRegisters(StringPair(indexedOperandPair.left, sp.right), instructionWord, postFix);
+    AddData(OS_32BIT, ConvertStringToInteger(indexedOperandPair.right));
 }
 
-void AsmA65k::handleOperand_IndirectRegisterPlusLabel_Register(const string& operand, InstructionWord instructionWord) // MOV [r0 + label], r1
+void AsmA65k::HandleOperand_IndirectRegisterPlusLabel_Register(const string& operand, InstructionWord instructionWord) // MOV [r0 + label], r1
 {
-    StringPair sp = splitStringByComma(operand);
-    PostfixType postFix = getPostFixType(sp.left);
-    sp.left = removeSquaredBrackets(sp.left);
-    StringPair indexedOperandPair = splitStringByPlusSign(sp.left);
+    StringPair sp = SplitStringByComma(operand);
+    PostfixType postFix = GetPostFixType(sp.left);
+    sp.left = RemoveSquaredBrackets(sp.left);
+    StringPair indexedOperandPair = SplitStringByPlusSign(sp.left);
 
     instructionWord.addressingMode = AM_INDEXED_DEST;
-    handleDoubleRegisters(StringPair(indexedOperandPair.left, sp.right), instructionWord, postFix);
-    addData(OS_32BIT, resolveLabel(indexedOperandPair.right, PC));
+    HandleDoubleRegisters(StringPair(indexedOperandPair.left, sp.right), instructionWord, postFix);
+    AddData(OS_32BIT, ResolveLabel(indexedOperandPair.right, PC));
 }
 
-void AsmA65k::handleOperand_IndirectRegister_Register(const string& operand, InstructionWord instructionWord) // MOV [r0], r1
+void AsmA65k::HandleOperand_IndirectRegister_Register(const string& operand, InstructionWord instructionWord) // MOV [r0], r1
 {
-    StringPair sp = splitStringByComma(operand);
+    StringPair sp = SplitStringByComma(operand);
     instructionWord.addressingMode = AM_REGISTER_INDIRECT_DEST;
-    handleDoubleRegisters(StringPair(removeSquaredBrackets(sp.left), sp.right), instructionWord, getPostFixType(sp.left));
+    HandleDoubleRegisters(StringPair(RemoveSquaredBrackets(sp.left), sp.right), instructionWord, GetPostFixType(sp.left));
 }
 
-void AsmA65k::handleOperand_Register_IndirectRegisterPlusConstant(const string& operand, InstructionWord instructionWord) // MOV r0, [r1 + 10]
+void AsmA65k::HandleOperand_Register_IndirectRegisterPlusConstant(const string& operand, InstructionWord instructionWord) // MOV r0, [r1 + 10]
 {
-    StringPair sp = splitStringByComma(operand);
-    PostfixType postFix = getPostFixType(sp.right);
-    sp.right = removeSquaredBrackets(sp.right);
-    StringPair indexedOperandPair = splitStringByPlusSign(sp.right);
+    StringPair sp = SplitStringByComma(operand);
+    PostfixType postFix = GetPostFixType(sp.right);
+    sp.right = RemoveSquaredBrackets(sp.right);
+    StringPair indexedOperandPair = SplitStringByPlusSign(sp.right);
 
     instructionWord.addressingMode = AM_INDEXED_SRC;
-    handleDoubleRegisters(StringPair(sp.left, indexedOperandPair.left), instructionWord, postFix); // T1, T2, T3
-    addData(OS_32BIT, convertStringToInteger(indexedOperandPair.right));                           // T4
+    HandleDoubleRegisters(StringPair(sp.left, indexedOperandPair.left), instructionWord, postFix); // T1, T2, T3
+    AddData(OS_32BIT, ConvertStringToInteger(indexedOperandPair.right));                           // T4
 }
 
-void AsmA65k::handleOperand_Register_IndirectConstantPlusRegister(const string& operand, InstructionWord instructionWord) // MOV r0, [$f000 + r1]
+void AsmA65k::HandleOperand_Register_IndirectConstantPlusRegister(const string& operand, InstructionWord instructionWord) // MOV r0, [$f000 + r1]
 {
-    StringPair sp = splitStringByComma(operand);
-    PostfixType postFix = getPostFixType(sp.right);
-    sp.right = removeSquaredBrackets(sp.right);
-    StringPair indexedOperandPair = splitStringByPlusSign(sp.right);
+    StringPair sp = SplitStringByComma(operand);
+    PostfixType postFix = GetPostFixType(sp.right);
+    sp.right = RemoveSquaredBrackets(sp.right);
+    StringPair indexedOperandPair = SplitStringByPlusSign(sp.right);
 
     instructionWord.addressingMode = AM_INDEXED_SRC;
-    handleDoubleRegisters(StringPair(sp.left, indexedOperandPair.right), instructionWord, postFix); // T1, T2, T3
-    addData(OS_32BIT, convertStringToInteger(indexedOperandPair.left));                             // T4
+    HandleDoubleRegisters(StringPair(sp.left, indexedOperandPair.right), instructionWord, postFix); // T1, T2, T3
+    AddData(OS_32BIT, ConvertStringToInteger(indexedOperandPair.left));                             // T4
 }
 
-void AsmA65k::handleOperand_Register_IndirectRegisterPlusLabel(const string& operand, InstructionWord instructionWord) // MOV r0, [r1 + label]
+void AsmA65k::HandleOperand_Register_IndirectRegisterPlusLabel(const string& operand, InstructionWord instructionWord) // MOV r0, [r1 + label]
 {
-    StringPair sp = splitStringByComma(operand);
-    PostfixType postFix = getPostFixType(sp.right);
-    sp.right = removeSquaredBrackets(sp.right);
-    StringPair indexedOperandPair = splitStringByPlusSign(sp.right);
+    StringPair sp = SplitStringByComma(operand);
+    PostfixType postFix = GetPostFixType(sp.right);
+    sp.right = RemoveSquaredBrackets(sp.right);
+    StringPair indexedOperandPair = SplitStringByPlusSign(sp.right);
 
     instructionWord.addressingMode = AM_INDEXED_SRC;
-    handleDoubleRegisters(StringPair(sp.left, indexedOperandPair.left), instructionWord, postFix);
-    addData(OS_32BIT, resolveLabel(indexedOperandPair.right, PC));
+    HandleDoubleRegisters(StringPair(sp.left, indexedOperandPair.left), instructionWord, postFix);
+    AddData(OS_32BIT, ResolveLabel(indexedOperandPair.right, PC));
 }
 
-void AsmA65k::handleOperand_Register_IndirectLabelPlusRegister(const string& operand, InstructionWord instructionWord) // MOV r0, [csoki + r1]
+void AsmA65k::HandleOperand_Register_IndirectLabelPlusRegister(const string& operand, InstructionWord instructionWord) // MOV r0, [csoki + r1]
 {
-    StringPair sp = splitStringByComma(operand);
-    PostfixType postFix = getPostFixType(sp.right);
-    sp.right = removeSquaredBrackets(sp.right);
-    StringPair indexedOperandPair = splitStringByPlusSign(sp.right);
+    StringPair sp = SplitStringByComma(operand);
+    PostfixType postFix = GetPostFixType(sp.right);
+    sp.right = RemoveSquaredBrackets(sp.right);
+    StringPair indexedOperandPair = SplitStringByPlusSign(sp.right);
 
     instructionWord.addressingMode = AM_INDEXED_SRC;
-    handleDoubleRegisters(StringPair(sp.left, indexedOperandPair.right), instructionWord, postFix);
-    addData(OS_32BIT, resolveLabel(indexedOperandPair.left, PC));
+    HandleDoubleRegisters(StringPair(sp.left, indexedOperandPair.right), instructionWord, postFix);
+    AddData(OS_32BIT, ResolveLabel(indexedOperandPair.left, PC));
 }
 
-void AsmA65k::handleOperand_Register_IndirectRegister(const string& operand, InstructionWord instructionWord) // mov r0, [r1]
+void AsmA65k::HandleOperand_Register_IndirectRegister(const string& operand, InstructionWord instructionWord) // mov r0, [r1]
 {
-    StringPair sp = splitStringByComma(operand);
-    PostfixType postFix = getPostFixType(sp.right);
-    sp.right = removeSquaredBrackets(sp.right);
+    StringPair sp = SplitStringByComma(operand);
+    PostfixType postFix = GetPostFixType(sp.right);
+    sp.right = RemoveSquaredBrackets(sp.right);
 
     instructionWord.addressingMode = AM_REGISTER_INDIRECT_SRC;
-    handleDoubleRegisters(sp, instructionWord, postFix);
+    HandleDoubleRegisters(sp, instructionWord, postFix);
 }
 
-void AsmA65k::handleOperand_Register_Register(const string& operand, InstructionWord instructionWord) // MOV.b r0, r1
+void AsmA65k::HandleOperand_Register_Register(const string& operand, InstructionWord instructionWord) // MOV.b r0, r1
 {
-    StringPair sp = splitStringByComma(operand);
+    StringPair sp = SplitStringByComma(operand);
 
     instructionWord.addressingMode = AM_REGISTER2;
-    handleDoubleRegisters(sp, instructionWord, PF_NONE);
+    HandleDoubleRegisters(sp, instructionWord, PF_NONE);
 }
 
-void AsmA65k::handleOperand_Register_Constant(const string& operand, InstructionWord instructionWord) // MOV.b r0, 1234
+void AsmA65k::HandleOperand_Register_Constant(const string& operand, InstructionWord instructionWord) // MOV.b r0, 1234
 {
-    StringPair sp = splitStringByComma(operand);
+    StringPair sp = SplitStringByComma(operand);
 
     instructionWord.addressingMode = AM_REG_IMMEDIATE;
-    addRegisterConfigurationByte(sp.left, instructionWord, PF_NONE);
-    verifyRangeForConstant(sp.right, (OpcodeSize)instructionWord.opcodeSize);
-    addData((OpcodeSize)instructionWord.opcodeSize, convertStringToInteger(sp.right));
+    AddRegisterConfigurationByte(sp.left, instructionWord, PF_NONE);
+    VerifyRangeForConstant(sp.right, (OpcodeSize)instructionWord.opcodeSize);
+    AddData((OpcodeSize)instructionWord.opcodeSize, ConvertStringToInteger(sp.right));
 }
 
-void AsmA65k::handleOperand_Register_Label(const string& operand, InstructionWord instructionWord) // MOV.b r0, label
+void AsmA65k::HandleOperand_Register_Label(const string& operand, InstructionWord instructionWord) // MOV.b r0, label
 {
-    StringPair sp = splitStringByComma(operand);
+    StringPair sp = SplitStringByComma(operand);
 
     instructionWord.addressingMode = AM_REG_IMMEDIATE;
-    addRegisterConfigurationByte(sp.left, instructionWord, PF_NONE);
+    AddRegisterConfigurationByte(sp.left, instructionWord, PF_NONE);
 
-    uint32_t address = resolveLabel(sp.right, PC, (OpcodeSize)instructionWord.opcodeSize);
-    verifyRangeForConstant(std::to_string(address), (OpcodeSize)instructionWord.opcodeSize);
-    addData((OpcodeSize)instructionWord.opcodeSize, address);
+    uint32_t address = ResolveLabel(sp.right, PC, (OpcodeSize)instructionWord.opcodeSize);
+    VerifyRangeForConstant(std::to_string(address), (OpcodeSize)instructionWord.opcodeSize);
+    AddData((OpcodeSize)instructionWord.opcodeSize, address);
 }
 
-void AsmA65k::handleOperand_IndirectConstantPlusRegister(const string& operand, InstructionWord instructionWord) // INC.b [1233 + r0]+
+void AsmA65k::HandleOperand_IndirectConstantPlusRegister(const string& operand, InstructionWord instructionWord) // INC.b [1233 + r0]+
 {
-    PostfixType postFix = getPostFixType(operand);
-    StringPair sp = splitStringByPlusSign(removeSquaredBrackets(operand));
+    PostfixType postFix = GetPostFixType(operand);
+    StringPair sp = SplitStringByPlusSign(RemoveSquaredBrackets(operand));
 
     // fill in rest of the instruction word
     instructionWord.addressingMode = AM_INDEXED1;
-    addRegisterConfigurationByte(sp.right, instructionWord, postFix);
+    AddRegisterConfigurationByte(sp.right, instructionWord, postFix);
     // add constant after i.w.
-    addData(OS_32BIT, convertStringToInteger(sp.left));
+    AddData(OS_32BIT, ConvertStringToInteger(sp.left));
 }
 
-void AsmA65k::handleOperand_IndirectLabelPlusRegister(const string& operand, InstructionWord instructionWord) // INC.b [label + r0]
+void AsmA65k::HandleOperand_IndirectLabelPlusRegister(const string& operand, InstructionWord instructionWord) // INC.b [label + r0]
 {
-    PostfixType postFix = getPostFixType(operand);
-    StringPair sp = splitStringByPlusSign(removeSquaredBrackets(operand));
+    PostfixType postFix = GetPostFixType(operand);
+    StringPair sp = SplitStringByPlusSign(RemoveSquaredBrackets(operand));
 
     instructionWord.addressingMode = AM_INDEXED1;
-    addRegisterConfigurationByte(sp.right, instructionWord, postFix);
-    addData(OS_32BIT, resolveLabel(sp.left, PC)); // 4 bytes
+    AddRegisterConfigurationByte(sp.right, instructionWord, postFix);
+    AddData(OS_32BIT, ResolveLabel(sp.left, PC)); // 4 bytes
 }
 
-void AsmA65k::handleOperand_IndirectRegisterPlusConstant(const string& operand, InstructionWord instructionWord) // INC.w [r0 + 1234]
+void AsmA65k::HandleOperand_IndirectRegisterPlusConstant(const string& operand, InstructionWord instructionWord) // INC.w [r0 + 1234]
 {
-    PostfixType postFix = getPostFixType(operand);
-    StringPair sp = splitStringByPlusSign(removeSquaredBrackets(operand));
+    PostfixType postFix = GetPostFixType(operand);
+    StringPair sp = SplitStringByPlusSign(RemoveSquaredBrackets(operand));
 
     instructionWord.addressingMode = AM_INDEXED1;
-    addRegisterConfigurationByte(sp.left, instructionWord, postFix);
-    addData(OS_32BIT, convertStringToInteger(sp.right));
+    AddRegisterConfigurationByte(sp.left, instructionWord, postFix);
+    AddData(OS_32BIT, ConvertStringToInteger(sp.right));
 }
 
-void AsmA65k::handleOperand_IndirectRegisterPlusLabel(const string& operand, InstructionWord instructionWord) // INC.w [r0 + label]
+void AsmA65k::HandleOperand_IndirectRegisterPlusLabel(const string& operand, InstructionWord instructionWord) // INC.w [r0 + label]
 {
-    PostfixType postFix = getPostFixType(operand);
-    StringPair sp = splitStringByPlusSign(removeSquaredBrackets(operand));
+    PostfixType postFix = GetPostFixType(operand);
+    StringPair sp = SplitStringByPlusSign(RemoveSquaredBrackets(operand));
 
     instructionWord.addressingMode = AM_INDEXED1;
-    addRegisterConfigurationByte(sp.left, instructionWord, postFix);
-    addData(OS_32BIT, resolveLabel(sp.right, PC)); // 4 bytes
+    AddRegisterConfigurationByte(sp.left, instructionWord, postFix);
+    AddData(OS_32BIT, ResolveLabel(sp.right, PC)); // 4 bytes
 }
 
-void AsmA65k::handleOperand_IndirectConstant(const uint32_t constant, InstructionWord instructionWord) // INC.w [$ffff]
+void AsmA65k::HandleOperand_IndirectConstant(const uint32_t constant, InstructionWord instructionWord) // INC.w [$ffff]
 {
     instructionWord.addressingMode = AM_ABSOLUTE1;
     instructionWord.registerConfiguration = RC_NOREGISTER;
-    addInstructionWord(instructionWord);
-    addData(OS_32BIT, constant);
+    AddInstructionWord(instructionWord);
+    AddData(OS_32BIT, constant);
 }
 
-void AsmA65k::handleOperand_Register(const string& operand, InstructionWord instructionWord) // inc r0
+void AsmA65k::HandleOperand_Register(const string& operand, InstructionWord instructionWord) // inc r0
 {
     instructionWord.addressingMode = AM_REGISTER1;
     instructionWord.registerConfiguration = RC_REGISTER;
-    RegisterType registerIndex = detectRegisterType(operand);
+    RegisterType registerIndex = DetectRegisterType(operand);
 
-    addInstructionWord(instructionWord);
-    addData(OS_8BIT, registerIndex);
+    AddInstructionWord(instructionWord);
+    AddData(OS_8BIT, registerIndex);
 }
 
-void AsmA65k::handleOperand_Constant(const uint32_t effectiveAddress, InstructionWord instructionWord) // bne $4000 or psh $f000
+void AsmA65k::HandleOperand_Constant(const uint32_t effectiveAddress, InstructionWord instructionWord) // bne $4000 or psh $f000
 {
     const uint8_t instruction = instructionWord.instructionCode;
     // if branching instruction, eg.: BNE 363
@@ -542,171 +542,171 @@ void AsmA65k::handleOperand_Constant(const uint32_t effectiveAddress, Instructio
 
         int32_t diff = effectiveAddress - PC - 4;
         if (diff < -32768 || diff > 32767)
-            throwException_SymbolOutOfRange();
+            ThrowException_SymbolOutOfRange();
 
         instructionWord.opcodeSize = OS_16BIT;
-        addInstructionWord(instructionWord);
-        addData(OS_16BIT, diff);
+        AddInstructionWord(instructionWord);
+        AddData(OS_16BIT, diff);
     }
     else
         switch (instruction)
         {
         case I_PUSH: // push $ff
-            verifyRangeForConstant(effectiveAddress, (OpcodeSize)instructionWord.opcodeSize);
+            VerifyRangeForConstant(effectiveAddress, (OpcodeSize)instructionWord.opcodeSize);
             instructionWord.addressingMode = AM_CONST_IMMEDIATE;
             instructionWord.registerConfiguration = RC_NOREGISTER;
-            addInstructionWord(instructionWord);
-            addData((OpcodeSize)instructionWord.opcodeSize, effectiveAddress);
+            AddInstructionWord(instructionWord);
+            AddData((OpcodeSize)instructionWord.opcodeSize, effectiveAddress);
             break;
         case I_JMP: // jmp $43434
         case I_JSR: // jsr $3434
             // these always use 32 bit addresses/constants
             instructionWord.addressingMode = AM_DIRECT;
             instructionWord.registerConfiguration = RC_NOREGISTER;
-            addInstructionWord(instructionWord);
-            addData(OS_32BIT, effectiveAddress);
+            AddInstructionWord(instructionWord);
+            AddData(OS_32BIT, effectiveAddress);
             break;
         }
 }
 
-void AsmA65k::handleOperand_IndirectRegister(const string& operand, InstructionWord instructionWord) // inc [r0]
+void AsmA65k::HandleOperand_IndirectRegister(const string& operand, InstructionWord instructionWord) // inc [r0]
 {
-    PostfixType postFix = getPostFixType(operand);
-    string registerString = removeSquaredBrackets(operand);
+    PostfixType postFix = GetPostFixType(operand);
+    string registerString = RemoveSquaredBrackets(operand);
 
     instructionWord.addressingMode = AM_REGISTER_INDIRECT1;
-    addRegisterConfigurationByte(registerString, instructionWord, postFix);
+    AddRegisterConfigurationByte(registerString, instructionWord, postFix);
 }
 
-void AsmA65k::handleOperand_IndirectRegister_Constant(const string& operand, InstructionWord instructionWord) // [r0], 64
+void AsmA65k::HandleOperand_IndirectRegister_Constant(const string& operand, InstructionWord instructionWord) // [r0], 64
 {
-    StringPair sp = splitStringByComma(operand);
-    PostfixType postFix = getPostFixType(sp.left);
+    StringPair sp = SplitStringByComma(operand);
+    PostfixType postFix = GetPostFixType(sp.left);
 
     instructionWord.addressingMode = AM_REGISTER_INDIRECT_CONST;
-    addRegisterConfigurationByte(removeSquaredBrackets(sp.left), instructionWord, postFix);
-    addData((OpcodeSize)instructionWord.opcodeSize, convertStringToInteger(sp.right));
+    AddRegisterConfigurationByte(RemoveSquaredBrackets(sp.left), instructionWord, postFix);
+    AddData((OpcodeSize)instructionWord.opcodeSize, ConvertStringToInteger(sp.right));
 }
 
-void AsmA65k::handleOperand_IndirectLabel_Constant(const string& operand, InstructionWord instructionWord) // [names], 64
+void AsmA65k::HandleOperand_IndirectLabel_Constant(const string& operand, InstructionWord instructionWord) // [names], 64
 {
-    StringPair sp = splitStringByComma(operand);
+    StringPair sp = SplitStringByComma(operand);
 
     instructionWord.addressingMode = AM_ABSOLUTE_CONST;
     instructionWord.registerConfiguration = RC_NOREGISTER;
-    addInstructionWord(instructionWord);
-    addData(OS_32BIT, resolveLabel(removeSquaredBrackets(sp.left), PC));
-    addData((OpcodeSize)instructionWord.opcodeSize, convertStringToInteger(sp.right));
+    AddInstructionWord(instructionWord);
+    AddData(OS_32BIT, ResolveLabel(RemoveSquaredBrackets(sp.left), PC));
+    AddData((OpcodeSize)instructionWord.opcodeSize, ConvertStringToInteger(sp.right));
 }
 
-void AsmA65k::handleOperand_IndirectConstant_Constant(const string& operand, InstructionWord instructionWord) // [$1234], 64
+void AsmA65k::HandleOperand_IndirectConstant_Constant(const string& operand, InstructionWord instructionWord) // [$1234], 64
 {
-    StringPair sp = splitStringByComma(operand);
+    StringPair sp = SplitStringByComma(operand);
 
     instructionWord.addressingMode = AM_ABSOLUTE_CONST;
     instructionWord.registerConfiguration = RC_REGISTER;
-    addInstructionWord(instructionWord);
-    addData(OS_32BIT, convertStringToInteger(removeSquaredBrackets(sp.left)));
-    addData((OpcodeSize)instructionWord.opcodeSize, convertStringToInteger(sp.right));
+    AddInstructionWord(instructionWord);
+    AddData(OS_32BIT, ConvertStringToInteger(RemoveSquaredBrackets(sp.left)));
+    AddData((OpcodeSize)instructionWord.opcodeSize, ConvertStringToInteger(sp.right));
 }
 
-void AsmA65k::handleOperand_IndirectRegisterPlusLabel_Constant(const string& operand, InstructionWord instructionWord) // [r0 + names], 64
+void AsmA65k::HandleOperand_IndirectRegisterPlusLabel_Constant(const string& operand, InstructionWord instructionWord) // [r0 + names], 64
 {
-    StringPair sp = splitStringByComma(operand);
-    PostfixType postFix = getPostFixType(sp.left);
-    StringPair indirectSp = splitStringByPlusSign(removeSquaredBrackets(sp.left));
+    StringPair sp = SplitStringByComma(operand);
+    PostfixType postFix = GetPostFixType(sp.left);
+    StringPair indirectSp = SplitStringByPlusSign(RemoveSquaredBrackets(sp.left));
 
     instructionWord.addressingMode = AM_INDEXED_CONST;
-    addRegisterConfigurationByte(indirectSp.left, instructionWord, postFix);
-    addData(OS_32BIT, resolveLabel(indirectSp.right, PC));
-    addData((OpcodeSize)instructionWord.opcodeSize, convertStringToInteger(sp.right));
+    AddRegisterConfigurationByte(indirectSp.left, instructionWord, postFix);
+    AddData(OS_32BIT, ResolveLabel(indirectSp.right, PC));
+    AddData((OpcodeSize)instructionWord.opcodeSize, ConvertStringToInteger(sp.right));
 }
 
-void AsmA65k::handleOperand_IndirectRegisterPlusConstant_Constant(const string& operand, InstructionWord instructionWord) // [r0 + 1234], 64
+void AsmA65k::HandleOperand_IndirectRegisterPlusConstant_Constant(const string& operand, InstructionWord instructionWord) // [r0 + 1234], 64
 {
-    StringPair sp = splitStringByComma(operand);
-    PostfixType postFix = getPostFixType(sp.left);
-    StringPair indirectSp = splitStringByPlusSign(removeSquaredBrackets(sp.left));
+    StringPair sp = SplitStringByComma(operand);
+    PostfixType postFix = GetPostFixType(sp.left);
+    StringPair indirectSp = SplitStringByPlusSign(RemoveSquaredBrackets(sp.left));
 
     instructionWord.addressingMode = AM_INDEXED_CONST;
-    addRegisterConfigurationByte(indirectSp.left, instructionWord, postFix);
-    addData(OS_32BIT, convertStringToInteger(indirectSp.right));
-    addData((OpcodeSize)instructionWord.opcodeSize, convertStringToInteger(sp.right));
+    AddRegisterConfigurationByte(indirectSp.left, instructionWord, postFix);
+    AddData(OS_32BIT, ConvertStringToInteger(indirectSp.right));
+    AddData((OpcodeSize)instructionWord.opcodeSize, ConvertStringToInteger(sp.right));
 }
 
-void AsmA65k::handleOperand_IndirectConstantPlusRegister_Constant(const string& operand, InstructionWord instructionWord) // [1234 + r0], 64
+void AsmA65k::HandleOperand_IndirectConstantPlusRegister_Constant(const string& operand, InstructionWord instructionWord) // [1234 + r0], 64
 {
-    StringPair sp = splitStringByComma(operand);
-    PostfixType postFix = getPostFixType(sp.left);
-    StringPair indirectSp = splitStringByPlusSign(removeSquaredBrackets(sp.left));
+    StringPair sp = SplitStringByComma(operand);
+    PostfixType postFix = GetPostFixType(sp.left);
+    StringPair indirectSp = SplitStringByPlusSign(RemoveSquaredBrackets(sp.left));
 
     instructionWord.addressingMode = AM_INDEXED_CONST;
-    addRegisterConfigurationByte(indirectSp.left, instructionWord, postFix);
-    addData(OS_32BIT, convertStringToInteger(indirectSp.right));
-    addData((OpcodeSize)instructionWord.opcodeSize, convertStringToInteger(sp.right));
+    AddRegisterConfigurationByte(indirectSp.left, instructionWord, postFix);
+    AddData(OS_32BIT, ConvertStringToInteger(indirectSp.right));
+    AddData((OpcodeSize)instructionWord.opcodeSize, ConvertStringToInteger(sp.right));
 }
 
-void AsmA65k::handleOperand_IndirectLabelPlusRegister_Constant(const string& operand, InstructionWord instructionWord) // [names + r0], 64
+void AsmA65k::HandleOperand_IndirectLabelPlusRegister_Constant(const string& operand, InstructionWord instructionWord) // [names + r0], 64
 {
-    StringPair sp = splitStringByComma(operand);
-    PostfixType postFix = getPostFixType(sp.left);
-    StringPair indirectSp = splitStringByPlusSign(removeSquaredBrackets(sp.left));
+    StringPair sp = SplitStringByComma(operand);
+    PostfixType postFix = GetPostFixType(sp.left);
+    StringPair indirectSp = SplitStringByPlusSign(RemoveSquaredBrackets(sp.left));
 
     instructionWord.addressingMode = AM_INDEXED_DEST;
-    addRegisterConfigurationByte(indirectSp.right, instructionWord, postFix);
-    addData(OS_32BIT, resolveLabel(indirectSp.left, PC));
-    addData((OpcodeSize)instructionWord.opcodeSize, convertStringToInteger(sp.right));
+    AddRegisterConfigurationByte(indirectSp.right, instructionWord, postFix);
+    AddData(OS_32BIT, ResolveLabel(indirectSp.left, PC));
+    AddData((OpcodeSize)instructionWord.opcodeSize, ConvertStringToInteger(sp.right));
 }
 
 // used only for the syscall instruction
-void AsmA65k::handleOperand_Constant_Label(const string& operand, InstructionWord instructionWord) // sys $1234, label
+void AsmA65k::HandleOperand_Constant_Label(const string& operand, InstructionWord instructionWord) // sys $1234, label
 {
-    StringPair sp = splitStringByComma(operand);
+    StringPair sp = SplitStringByComma(operand);
 
     instructionWord.addressingMode = AM_IMPLIED;
     instructionWord.registerConfiguration = RC_NOREGISTER;
-    addInstructionWord(instructionWord);
-    addData(OS_16BIT, convertStringToInteger(sp.left));
-    addData(OS_32BIT, resolveLabel(sp.right, PC));
+    AddInstructionWord(instructionWord);
+    AddData(OS_16BIT, ConvertStringToInteger(sp.left));
+    AddData(OS_32BIT, ResolveLabel(sp.right, PC));
 }
 
 // used only for the syscall instruction
-void AsmA65k::handleOperand_Constant_Constant(const string& operand, InstructionWord instructionWord) // sys $1234, $5678
+void AsmA65k::HandleOperand_Constant_Constant(const string& operand, InstructionWord instructionWord) // sys $1234, $5678
 {
-    StringPair sp = splitStringByComma(operand);
+    StringPair sp = SplitStringByComma(operand);
 
     instructionWord.addressingMode = AM_IMPLIED;
     instructionWord.registerConfiguration = RC_NOREGISTER;
-    addInstructionWord(instructionWord);
-    addData(OS_16BIT, convertStringToInteger(sp.left));
-    addData(OS_32BIT, convertStringToInteger(sp.right));
+    AddInstructionWord(instructionWord);
+    AddData(OS_16BIT, ConvertStringToInteger(sp.left));
+    AddData(OS_32BIT, ConvertStringToInteger(sp.right));
 }
 
 // used only for the syscall instruction
-void AsmA65k::handleOperand_Label_Label(const string& operand, InstructionWord instructionWord) // sys label, label
+void AsmA65k::HandleOperand_Label_Label(const string& operand, InstructionWord instructionWord) // sys label, label
 {
-    StringPair sp = splitStringByComma(operand);
+    StringPair sp = SplitStringByComma(operand);
 
     instructionWord.addressingMode = AM_IMPLIED;
     instructionWord.registerConfiguration = RC_NOREGISTER;
-    addInstructionWord(instructionWord);
-    addData(OS_16BIT, resolveLabel(sp.left, PC, OS_16BIT));
-    addData(OS_32BIT, resolveLabel(sp.right, PC));
+    AddInstructionWord(instructionWord);
+    AddData(OS_16BIT, ResolveLabel(sp.left, PC, OS_16BIT));
+    AddData(OS_32BIT, ResolveLabel(sp.right, PC));
 }
 
 // used only for the syscall instruction
-void AsmA65k::handleOperand_Label_Constant(const string& operand, InstructionWord instructionWord) // sys label, $1234
+void AsmA65k::HandleOperand_Label_Constant(const string& operand, InstructionWord instructionWord) // sys label, $1234
 {
-    StringPair sp = splitStringByComma(operand);
+    StringPair sp = SplitStringByComma(operand);
 
     instructionWord.addressingMode = AM_SYSCALL;
     instructionWord.registerConfiguration = RC_NOREGISTER;
-    addInstructionWord(instructionWord);
-    addData(OS_16BIT, resolveLabel(sp.left, PC, OS_16BIT));
-    addData((OpcodeSize)instructionWord.opcodeSize, convertStringToInteger(sp.right));
+    AddInstructionWord(instructionWord);
+    AddData(OS_16BIT, ResolveLabel(sp.left, PC, OS_16BIT));
+    AddData((OpcodeSize)instructionWord.opcodeSize, ConvertStringToInteger(sp.right));
 }
 
-AsmA65k::OperandTypes AsmA65k::detectOperandType(const string& operandStr)
+AsmA65k::OperandTypes AsmA65k::DetectOperandType(const string& operandStr)
 {
     const static regex_constants::syntax_option_type icase = regex_constants::icase;
     const static regex rx_matchDoubleOperands(R"((.*)\s*,\s*(.*))", icase);
@@ -791,7 +791,7 @@ AsmA65k::OperandTypes AsmA65k::detectOperandType(const string& operandStr)
     }
     else // single operand
     {
-        // printf("detectOperandType(): single operand detected. operand = '%s'\n", operandStr.c_str());
+        // printf("DetectOperandType(): single operand detected. operand = '%s'\n", operandStr.c_str());
 
         if (regex_match(operandStr, rx_register))
             return OT_REGISTER;
@@ -815,7 +815,7 @@ AsmA65k::OperandTypes AsmA65k::detectOperandType(const string& operandStr)
             return OT_INDIRECT_LABEL;
     }
 
-    throwException_InvalidOperands();
+    ThrowException_InvalidOperands();
 
     return OT_NONE; // fake line to silence warning
 }

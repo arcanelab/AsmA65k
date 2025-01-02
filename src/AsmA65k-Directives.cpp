@@ -15,31 +15,31 @@
 
 using namespace std;
 
-bool AsmA65k::processDirectives(const string& line)
+bool AsmA65k::ProcessDirectives(const string& line)
 {
-    const int directiveType = detectDirective(line); // explicit declaration is intentional
+    const int directiveType = DetectDirective(line); // explicit declaration is intentional
     switch (directiveType)
     {
     case DIRECTIVE_NONE:
         return false;
 
     case DIRECTIVE_SETPC:
-        handleDirective_SetPC(line);
+        HandleDirective_SetPC(line);
         break;
 
     case DIRECTIVE_TEXT:
     case DIRECTIVE_TEXTZ:
-        handleDirective_Text(line, directiveType);
+        HandleDirective_Text(line, directiveType);
         break;
 
     case DIRECTIVE_BYTE:
     case DIRECTIVE_WORD:
     case DIRECTIVE_DWORD:
-        handleDirective_ByteWordDword(line, directiveType);
+        HandleDirective_ByteWordDword(line, directiveType);
         break;
 
     case DIRECTIVE_DEFINE:
-        handleDirective_Define(line);
+        HandleDirective_Define(line);
         break;
 
     default:
@@ -52,7 +52,7 @@ bool AsmA65k::processDirectives(const string& line)
     return true;
 }
 
-int AsmA65k::detectDirective(const string& line)
+int AsmA65k::DetectDirective(const string& line)
 {
     const static regex rx_detectDirective(R"(^(\s*|.*:\s*)\.([a-z]+).*)", regex_constants::icase);
     smatch directiveCandidate;
@@ -85,7 +85,7 @@ int AsmA65k::detectDirective(const string& line)
     throw error;
 }
 
-void AsmA65k::handleDirective_SetPC(const string& line)
+void AsmA65k::HandleDirective_SetPC(const string& line)
 {
     static const regex rx_matchNumberInSetPCDirectiveLine(R"(\s*.pc\s*=\s*(([$%]?[0-9a-f]+$)|(([$%]?[0-9a-f]+)[\s|;])).*)", regex_constants::icase);
     smatch value;
@@ -96,14 +96,14 @@ void AsmA65k::handleDirective_SetPC(const string& line)
         throw error;
     }
 
-    PC = convertStringToInteger(value[1].str());
+    PC = ConvertStringToInteger(value[1].str());
 
     // create a new segment, store it in 'segments' vector
     segments.push_back(Segment());
     segments.back().address = PC;
 }
 
-void AsmA65k::handleDirective_Text(const string& line, const int directiveType)
+void AsmA65k::HandleDirective_Text(const string& line, const int directiveType)
 {
     static const regex rx_matchTextInTextDirective(R"(.*\.text\s*\"(.*)\".*)", regex_constants::icase);
     smatch textMatch;
@@ -134,7 +134,7 @@ void AsmA65k::handleDirective_Text(const string& line, const int directiveType)
     PC += textLength;
 }
 
-void AsmA65k::handleDirective_ByteWordDword(const string& line, const int directiveType)
+void AsmA65k::HandleDirective_ByteWordDword(const string& line, const int directiveType)
 { // trim line back to the raw data after the directive
     static const regex rx_matchDataInByteDirective(R"(.*\.(byte|word|dword)\s+(.+)\s*.*)", regex_constants::icase);
     smatch dataMatch;
@@ -172,34 +172,34 @@ void AsmA65k::handleDirective_ByteWordDword(const string& line, const int direct
         const string token = iter->str();
         // check if the string is a label
         if (token[0] >= 'a' && token[0] <= 'z')
-            value = resolveLabel(token, PC, OS_32BIT);
+            value = ResolveLabel(token, PC, OS_32BIT);
         else
-            value = convertStringToInteger(token);
+            value = ConvertStringToInteger(token);
 
         // handle data size
         switch (directiveType)
         {
         case DIRECTIVE_BYTE:
             if (value < 0 || value > 255)
-                throwException_ValueOutOfRange();
+                ThrowException_ValueOutOfRange();
 
-            segments.back().addByte(value); // store data as byte
+            segments.back().AddByte(value); // store data as byte
             PC++;
             break;
 
         case DIRECTIVE_WORD:
             if (value < 0 || value > 65535)
-                throwException_ValueOutOfRange();
+                ThrowException_ValueOutOfRange();
 
-            segments.back().addWord(value); // store data as word
+            segments.back().AddWord(value); // store data as word
             PC += 2;
             break;
 
         case DIRECTIVE_DWORD:
             if (value < 0)
-                throwException_ValueOutOfRange();
+                ThrowException_ValueOutOfRange();
 
-            segments.back().addDword(value); // store data as dword
+            segments.back().AddDword(value); // store data as dword
             PC += 4;
             break;
 
@@ -211,7 +211,7 @@ void AsmA65k::handleDirective_ByteWordDword(const string& line, const int direct
     }           // while
 }
 
-void AsmA65k::handleDirective_Define(const string& line)
+void AsmA65k::HandleDirective_Define(const string& line)
 {
     const static regex rx_matchDefintionLine(R"(\s*\.def\s+([a-z][a-z_0-9]*)\s*=\s*([^;]+)\s*;?.*)", regex_constants::icase);
     smatch matches;
@@ -232,7 +232,7 @@ void AsmA65k::handleDirective_Define(const string& line)
     string match2 = matches[2].str();
     if (regex_match(match2, valueMatch, rx_matchConstant))
     { // if yes, convert it into decimal and add it into the symbol table
-        labels[label] = convertStringToInteger(valueMatch[1].str());
+        labels[label] = ConvertStringToInteger(valueMatch[1].str());
 
         return;
     }
@@ -261,7 +261,7 @@ void AsmA65k::handleDirective_Define(const string& line)
         string rvalue = expressionOperands[2].str();
 
         // look up symbol (lvalue) and add the decimal value of the rvalue to it, then add the result as a new symbol
-        labels[label] = (uint32_t)labels[lvalue] + (uint32_t)convertStringToInteger(rvalue);
+        labels[label] = (uint32_t)labels[lvalue] + (uint32_t)ConvertStringToInteger(rvalue);
 
         return;
     }
