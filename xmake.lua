@@ -8,9 +8,15 @@ if is_mode("debug") then
     add_defines("DEBUG")
     set_symbols("debug")
     set_optimize("none")
+    if is_plat("windows") then 
+        set_runtimes("MDd")  -- ADD THIS LINE
+    end    
 else 
     set_symbols("hidden")
     set_optimize("fastest")
+    if is_plat("windows") then 
+        set_runtimes("MD")   -- ADD THIS LINE
+    end
 end
 
 -- Platform specific settings
