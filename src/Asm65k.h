@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "Segment.h"
+#include <Segment.h>
 #include <iostream>
 #include <cstdarg>
 #include <vector>

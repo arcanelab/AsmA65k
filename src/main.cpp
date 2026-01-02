@@ -8,7 +8,7 @@
 //  C++11
 //
 
-#include "Asm65k.h"
+#include <Asm65k.h>
 #include <iostream>
 #include <sstream>
 #include <fstream>
